@@ -3,7 +3,7 @@
     "swing": {
       "name": "Kettlebell Swing",
       "target": "Posterior Chain, Hips",
-      "img": "./assets/kb_swing.png",
+      "img": "./assets/kb_swing.png", "frames": ["./assets/kb_swing_bottom.png", "./assets/kb_swing.png", "./assets/kb_swing_top.png"],
       "instructions": [
         "Col\u00f3cate con los pies separados al ancho de los hombros, la kettlebell en el suelo.",
         "Incl\u00ednate desde las caderas y agarra el asa con ambas manos.",
@@ -22,7 +22,7 @@
     "goblet_squat": {
       "name": "Goblet Squat",
       "target": "Quads, Core",
-      "img": "./assets/kb_goblet_squat.png",
+      "img": "./assets/kb_goblet_squat.png", "frames": ["./assets/kb_goblet_squat_top.png", "./assets/kb_goblet_squat.png", "./assets/kb_goblet_squat_bottom.png"],
       "instructions": [
         "Sost\u00e9n la kettlebell a la altura del pecho por los costados (los 'cuernos').",
         "Mant\u00e9n el pecho erguido y los codos pegados al cuerpo.",
@@ -41,7 +41,7 @@
     "clean_and_press": {
       "name": "Clean & Press",
       "target": "Shoulders, Full Body",
-      "img": "./assets/kb_clean_press.png",
+      "img": "./assets/kb_clean_press.png", "frames": ["./assets/kb_clean_press_bottom.png", "./assets/kb_clean_press.png", "./assets/kb_clean_press_top.png"],
       "instructions": [
         "Comienza con un swing a una mano.",
         "En lugar de extender el brazo, tira del codo hacia atr\u00e1s para llevar la pesa a la posici\u00f3n de 'Rack' en el hombro.",
@@ -79,7 +79,7 @@
     "snatch": {
       "name": "Single-Arm Snatch",
       "target": "Power, Shoulders",
-      "img": "./assets/kb_snatch.png",
+      "img": "./assets/kb_snatch.png", "frames": ["./assets/kb_snatch_bottom.png", "./assets/kb_snatch.png", "./assets/kb_snatch_top.png"],
       "instructions": [
         "Comienza con un swing explosivo a una mano.",
         "En lugar de detenerte a la altura del hombro, contin\u00faa la trayectoria hacia arriba.",
@@ -155,7 +155,7 @@
     "turkish_get_up": {
       "name": "Turkish Get-Up",
       "target": "Total Body",
-      "img": "./assets/kb_turkish_get_up.png",
+      "img": "./assets/kb_turkish_get_up.png", "frames": ["./assets/kb_turkish_get_up_bottom.png", "./assets/kb_turkish_get_up.png", "./assets/kb_turkish_get_up_top.png"],
       "instructions": [
         "Acu\u00e9state de espaldas. Empuja una kettlebell hacia arriba con tu brazo derecho y dobla la rodilla derecha.",
         "Imp\u00falsate apoy\u00e1ndote en el codo izquierdo, sin dejar de mirar la pesa.",
