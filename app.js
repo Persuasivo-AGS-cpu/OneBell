@@ -933,21 +933,6 @@ function renderProgress() {
 
 
 
-    // Program Progress Card
-    let programProgressHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Program Progress</h3>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; justify-content: space-between;">' +
-            '<div>' +
-                '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Foundation of Iron</p>' +
-                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">67%<br><span style="color: var(--text-secondary); font-size: 18px;">Complete</span></h2>' +
-            '</div>' +
-            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--success-color) 67%, rgba(50, 215, 75, 0.1) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
-                '<div style="width: 66px; height: 66px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">' +
-                    '<i data-lucide="target" style="color: var(--success-color); width: 24px; height: 24px;"></i>' +
-                '</div>' +
-            '</div>' +
-        '</div></div>';
-
     // Strength Progress
     let strengthHTML = '<div style="margin-bottom: 32px;">' +
         '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Strength Progress</h3>' +
