@@ -1,11 +1,13 @@
-const CACHE_NAME = 'onebell-cache-v12';
+const CACHE_NAME = 'onebell-cache-v13';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap',
-  'https://unpkg.com/lucide@latest'
+  'https://unpkg.com/lucide@latest',
+  './routines.json',
+  './assets/onboarding_hero_40yo.png'
 ];
 
 self.addEventListener('install', event => {

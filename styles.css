@@ -489,11 +489,10 @@ input[type=range]::-webkit-slider-runnable-track {
         color: #161618;
         font-weight: 800;
         background: var(--primary-color);
-        box-shadow: 0 4px 15px rgba(75, 208, 160, 0.2); /* Soft organic life glow */
+        box-shadow: 0 4px 15px rgba(75, 208, 160, 0.2); 
     }
-    }
-    
+
     .nav-item.active {
-        color: var(--accent-color); /* Use accent (orange) for active nav in dark mode for better visibility */
+        color: var(--accent-color); 
     }
 }
