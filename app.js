@@ -215,6 +215,11 @@ let navItems;
 function initUIBlocks() {
     mainContent = document.getElementById('main-content');
     navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            window.setActiveTab(item.dataset.tab);
+        });
+    });
 }
 
 window.renderPage = renderPage;
@@ -277,11 +282,7 @@ window.addEventListener('popstate', (e) => {
     }
 });
 
-navItems.forEach(item => {
-    item.addEventListener('click', () => {
-        window.setActiveTab(item.dataset.tab);
-    });
-});
+
 
 // --- ONBOARDING LOGIC ---
 function renderOnboarding() {
