@@ -433,15 +433,15 @@ input[type=range]::-webkit-slider-runnable-track {
 /* --- Dark Mode Support --- */
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Premium Luxury Dark Petrol Palette for OneBell */
-        --bg-color: #0d1312; /* Deep dark petrol background */
-        --card-bg: #141c1a; /* Elevated dark card */
-        --card-bg-elevated: #1a2523; 
-        --card-bg-hover: #1f2e2b;
+        /* Vibrant Matte Luxury Palette */
+        --bg-color: #161618; /* Matte Graphite / Charcoal */
+        --card-bg: #222224; /* Elevated subtle matte card */
+        --card-bg-elevated: #2C2C2E; 
+        --card-bg-hover: #323235;
         
-        /* Make Brand Colors pop on dark */
-        --primary-color: #6eb2a4; /* Soft readable green but keeping brand essence */
-        --accent-color: #ea632c; 
+        /* Vibrant but Matte Accents (More life, no neon glare) */
+        --primary-color: #4BD0A0; /* Vibrant Mint/Sage */
+        --accent-color: #FF6B35;  /* Bright Terracotta */
         
         /* Text inversions */
         --text-primary: #FFFFFF;
@@ -460,8 +460,8 @@ input[type=range]::-webkit-slider-runnable-track {
     }
     
     .bottom-nav {
-        background: rgba(13, 19, 18, 0.9); /* Dark glassmorphism */
-        border-top: 1px solid rgba(255, 255, 255, 0.03);
+        background: rgba(22, 22, 24, 0.9); /* Dark graphite glassmorphism */
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
     }
     
     /* Extreme Priority over inline component classes so text shines */
@@ -486,9 +486,10 @@ input[type=range]::-webkit-slider-runnable-track {
     }
     
     .btn-primary {
-        color: #0d1312;
+        color: #161618;
         font-weight: 800;
         background: var(--primary-color);
+        box-shadow: 0 4px 15px rgba(75, 208, 160, 0.2); /* Soft organic life glow */
     }
     }
     
