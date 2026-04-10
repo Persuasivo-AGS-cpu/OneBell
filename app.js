@@ -177,10 +177,12 @@ function loadState() {
         const saved = localStorage.getItem('onebell_state');
         if (saved) {
             const parsed = JSON.parse(saved);
-            state.hasCompletedOnboarding = parsed.hasCompletedOnboarding;
-            state.userProfile = parsed.userProfile;
+            if (parsed.userProfile) {
+                state.userProfile = { ...state.userProfile, ...parsed.userProfile };
+            }
+            state.hasCompletedOnboarding = !!parsed.hasCompletedOnboarding;
         }
-    } catch(e) {
+    } catch (e) {
         console.error("Error loading state", e);
     }
 }
@@ -207,8 +209,13 @@ const onboardingData = {
 };
 
 // --- VIEW MANAGEMENT ---
-const mainContent = document.getElementById('main-content');
-const navItems = document.querySelectorAll('.nav-item');
+let mainContent;
+let navItems;
+
+function initUIBlocks() {
+    mainContent = document.getElementById('main-content');
+    navItems = document.querySelectorAll('.nav-item');
+}
 
 window.renderPage = renderPage;
 
@@ -489,24 +496,11 @@ function renderOnboarding() {
 // ----- THE REST OF THE APP -----
 
 function renderHome() {
-    let name = "Athlete";
+    let name = state.userProfile.name || "Athlete";
     let greeting = "Good morning";
-    
-    // Quick stats
-    let quickStatsHTML = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;">' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">12</div>' +
-            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Workouts</div>' +
-        '</div>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">4h 20m</div>' +
-            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Training</div>' +
-        '</div>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">2,480</div>' +
-            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Kcal</div>' +
-        '</div>' +
-    '</div>';
+    const hr = new Date().getHours();
+    if (hr >= 12 && hr < 18) greeting = "Good afternoon";
+    if (hr >= 18) greeting = "Good evening";
 
     // Use loaded AI program or fallback
     let programData = state.currentProgram || {
@@ -1455,6 +1449,9 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
 
 // Kick off app
 function initApp() {
+    initUIBlocks();
+    renderPage(); // Render immediate skeleton or onboarding welcome
+    
     fetch('./routines.json?v=' + new Date().getTime())
         .then(res => res.json())
         .then(data => {
@@ -1462,7 +1459,7 @@ function initApp() {
             if (state.hasCompletedOnboarding && !state.currentProgram) {
                 state.currentProgram = window.generateAlgorithmicProgram(state.userProfile, data.exercises);
             }
-            renderPage();
+            renderPage(); // Re-render with data
         })
         .catch(err => {
             console.error("No se pudo cargar la DB:", err);
