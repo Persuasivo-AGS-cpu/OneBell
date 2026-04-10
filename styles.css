@@ -229,7 +229,7 @@ main#main-content {
 .onboarding-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     padding: var(--spacing-xxl) var(--spacing-md) var(--spacing-xl) var(--spacing-md);
     padding-top: calc(var(--spacing-xxl) + env(safe-area-inset-top, 20px));
     animation: fadeIn 0.4s ease forwards;
@@ -433,11 +433,11 @@ input[type=range]::-webkit-slider-runnable-track {
 /* --- Dark Mode Support --- */
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Vibrant Matte Luxury Palette */
-        --bg-color: #161618; /* Matte Graphite / Charcoal */
-        --card-bg: #222224; /* Elevated subtle matte card */
-        --card-bg-elevated: #2C2C2E; 
-        --card-bg-hover: #323235;
+        /* Vibrant Matte Luxury Palette - Deep Dark Edition */
+        --bg-color: #0A0F0E; /* Much darker petrol/graphite for zero glare */
+        --card-bg: #111A18; /* Deep matte card */
+        --card-bg-elevated: #162421; 
+        --card-bg-hover: #192A26;
         
         /* Vibrant but Matte Accents (More life, no neon glare) */
         --primary-color: #4BD0A0; /* Vibrant Mint/Sage */

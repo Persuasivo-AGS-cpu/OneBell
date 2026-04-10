@@ -212,6 +212,33 @@ const onboardingData = {
 let mainContent;
 let navItems;
 
+window.showNotification = function(msg) {
+    let toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.top = 'env(safe-area-inset-top, 20px)';
+    toast.style.left = '50%';
+    toast.style.width = '90%';
+    toast.style.transform = 'translateX(-50%) translateY(-100px)';
+    toast.style.background = 'var(--primary-color)';
+    toast.style.color = '#161618';
+    toast.style.padding = '16px 24px';
+    toast.style.borderRadius = '20px';
+    toast.style.fontWeight = '700';
+    toast.style.fontSize = '15px';
+    toast.style.textAlign = 'center';
+    toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+    toast.style.zIndex = '9999';
+    toast.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(-100px)';
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+};
+
 function initUIBlocks() {
     mainContent = document.getElementById('main-content');
     navItems = document.querySelectorAll('.nav-item');
@@ -227,12 +254,14 @@ window.renderPage = renderPage;
 function renderPage() {
     if (!state.hasCompletedOnboarding) {
         document.getElementById('bottom-nav').style.display = 'none';
+        mainContent.style.paddingBottom = '0';
         renderOnboarding();
         lucide.createIcons();
         return;
     }
 
     document.getElementById('bottom-nav').style.display = 'flex';
+    mainContent.style.paddingBottom = 'var(--nav-height)';
     
     switch (state.currentTab) {
         case 'home': renderHome(); break;
@@ -594,7 +623,7 @@ function renderHome() {
                 '<h1 style="font-size: 28px; font-weight: 800; margin-top: 4px; letter-spacing: -0.5px; color: var(--primary-color);">Ready to train?</h1>' +
             '</div>' +
             '<div style="display: flex; gap: 12px;">' +
-                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05); position: relative;">' +
+                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05); position: relative;" onclick="window.showNotification(`Time to rest! Make sure you drink water.`)">' +
                     '<i data-lucide="bell" style="color: var(--primary-color); width: 22px; height: 22px; stroke-width: 2;"></i>' +
                     '<div style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; border: 2px solid var(--card-bg);"></div>' +
                 '</div>' +
@@ -1402,8 +1431,8 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
                 '<i data-lucide="check-circle" style="width: 24px; height: 24px; stroke-width: 2.5;"></i> ' + (blockIndex + 1 === totalBlocks ? 'FINISH WORKOUT' : 'COMPLETE SET') +
             '</button>' +
             '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">' +
-                '<button onclick="' + (blockIndex > 0 ? ('window.renderWorkoutPlayer(' + (blockIndex - 1) + ')') : 'renderPage()') + '" style="background: transparent; border: none; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; cursor: pointer; padding: 8px 0;"><i data-lucide="chevron-left" style="width: 20px; height: 20px;"></i> Previous</button>' +
-                '<button onclick="window.renderWorkoutPlayer(' + (blockIndex + 1) + ')" style="background: transparent; border: none; color: #FFF; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; cursor: pointer; padding: 8px 0;">Next <i data-lucide="chevron-right" style="width: 20px; height: 20px;"></i></button>' +
+                '<button onclick="' + (blockIndex > 0 ? ('window.renderWorkoutPlayer(' + (blockIndex - 1) + ')') : 'renderPage()') + '" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700; cursor: pointer; padding: 18px 20px; min-width: 48%;"><i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i> Previous</button>' +
+                '<button onclick="window.renderWorkoutPlayer(' + (blockIndex + 1) + ')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #FFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700; cursor: pointer; padding: 18px 20px; min-width: 48%;">Next <i data-lucide="chevron-right" style="width: 24px; height: 24px;"></i></button>' +
             '</div>' +
         '</div>' +
         '<style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }</style>' +
