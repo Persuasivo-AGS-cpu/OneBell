@@ -165,6 +165,13 @@ window.logWorkout = function(workout) {
     saveState();
 };
 
+window.finishWorkoutSession = function() {
+    if (state.currentProgram && state.currentProgram.workouts && state.currentProgram.workouts.length > 0) {
+        window.logWorkout(state.currentProgram.workouts[0]);
+    }
+    window.renderPage();
+};
+
 function saveState() {
     localStorage.setItem('onebell_state', JSON.stringify({
         hasCompletedOnboarding: state.hasCompletedOnboarding,
@@ -1390,7 +1397,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
     '</div>';
 
     // Distraction-free, immersive full-screen container (Deep Petrol Green)
-    mainContent.innerHTML = infoModalHTML + quitModalHTML + '<div class="page hide-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg-color); color: #FFF; overflow-y: auto;">' +
+    mainContent.innerHTML = infoModalHTML + quitModalHTML + '<div class="page hide-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: #0A0F0E; color: #FFF; overflow-y: auto;">' +
         
         // Top Header
         '<header style="display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-lg) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md);">' +
@@ -1427,7 +1434,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
         // Bottom Controls
         '<div style="padding: 0 var(--spacing-md) calc(var(--spacing-xl) + env(safe-area-inset-bottom, 20px)) var(--spacing-md); margin-top: auto;">' +
             '<button class="btn btn-accent" style="width: 100%; border-radius: 16px; font-size: 18px; font-weight: 800; padding: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 30px rgba(234, 99, 44, 0.4); margin-bottom: 24px;" onclick="' + 
-                (blockIndex + 1 === totalBlocks ? 'window.logWorkout(state.currentProgram.workouts[0]); window.renderPage();' : ('window.renderWorkoutPlayer(' + (blockIndex + 1) + ')')) + '">' +
+                (blockIndex + 1 === totalBlocks ? 'window.finishWorkoutSession()' : ('window.renderWorkoutPlayer(' + (blockIndex + 1) + ')')) + '">' +
                 '<i data-lucide="check-circle" style="width: 24px; height: 24px; stroke-width: 2.5;"></i> ' + (blockIndex + 1 === totalBlocks ? 'FINISH WORKOUT' : 'COMPLETE SET') +
             '</button>' +
             '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">' +
