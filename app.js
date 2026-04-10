@@ -1370,7 +1370,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
     let mistakesHTML = ex.mistakes ? ex.mistakes.map(m => '<li style="margin-bottom:8px;">' + m + '</li>').join('') : '<li>Perder la tensión del core.</li>';
 
     let infoModalHTML = '<div id="info-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px);">' +
-        '<div style="background: var(--card-bg); border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">' +
+        '<div style="background: #111A18; border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">' +
             '<button onclick="document.getElementById(&apos;info-modal&apos;).style.display=&apos;none&apos;" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s;"><i data-lucide="x" style="width:18px;height:18px;"></i></button>' +
             '<h3 style="color: var(--accent-color); font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; margin-bottom: 8px;">Instrucciones</h3>' +
             '<h2 style="color: #FFF; font-size: 26px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px;">' + ex.name + '</h2>' +
@@ -1385,7 +1385,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
     '</div>';
 
     let quitModalHTML = '<div id="quit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px);">' +
-        '<div style="background: var(--card-bg); border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 320px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">' +
+        '<div style="background: #111A18; border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 320px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">' +
             '<div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(234, 99, 44, 0.1); color: var(--accent-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;"><i data-lucide="alert-triangle" style="width: 28px; height: 28px;"></i></div>' +
             '<h2 style="color: #FFF; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">¿Terminar sesión?</h2>' +
             '<p style="color: rgba(255,255,255,0.7); font-size: 15px; line-height: 1.5; margin-bottom: 32px;">Tu progreso actual no se guardará si abandonas la rutina ahora.</p>' +
