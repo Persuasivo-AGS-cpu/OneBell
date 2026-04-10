@@ -1030,8 +1030,8 @@ function renderProfile() {
                 }).join('') +
             '</svg>' +
             '<div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--text-tertiary); font-weight: 700;">' +
-                '<span>' + new Date(hist[0].date).toLocaleDateString(\'en-US\', {month: \'short\', day: \'numeric\'}) + '</span>' +
-                '<span>' + new Date(hist[hist.length-1].date).toLocaleDateString(\'en-US\', {month: \'short\', day: \'numeric\'}) + '</span>' +
+                '<span>' + new Date(hist[0].date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + '</span>' +
+                '<span>' + new Date(hist[hist.length-1].date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + '</span>' +
             '</div>' +
         '</div>';
     } else {
@@ -1044,7 +1044,7 @@ function renderProfile() {
         let i = hist.length - 1 - offset;
         let d = new Date(log.date);
         return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(31,63,58,0.05);">' +
-            '<span style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">' + d.toLocaleDateString(\'en-US\', {month: \'short\', day: \'numeric\'}) + '</span>' +
+            '<span style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">' + d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + '</span>' +
             '<div style="display: flex; align-items: center; gap: 16px;">' +
                 '<span style="font-size: 16px; font-weight: 800; color: var(--primary-color);">' + log.weight + ' kg</span>' +
                 '<i data-lucide="trash-2" onclick="window.deleteWeightLog(' + i + ')" style="width: 16px; height: 16px; color: #ff453a; cursor: pointer;"></i>' +
