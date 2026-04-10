@@ -436,8 +436,11 @@ input[type=range]::-webkit-slider-runnable-track {
         /* Colors adapted for Dark Mode */
         --bg-color: #121212; /* Deep dark background */
         --card-bg: #1E1E1E; /* Elevated dark card */
-        --card-bg-elevated: #2A2A2A; 
+        --card-bg-elevated: #282828; 
         --card-bg-hover: #333333;
+        
+        /* Make Brand Colors pop on dark */
+        --primary-color: #6EB2A4; /* Was #1F3F3A, now soft readable green */
         
         /* Text inversions */
         --text-primary: #FFFFFF;
@@ -455,9 +458,26 @@ input[type=range]::-webkit-slider-runnable-track {
         border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
     
-    /* Ensure primary color text (which is normally green) reads well on dark */
-    .text-primary, h1, h2, h3, h4, h5 {
-        color: var(--text-primary);
+    /* Ensure text readability overriding defaults */
+    .onboarding-title, .text-primary, h1, h2, h3, h4, h5 {
+        color: var(--text-primary) !important;
+    }
+    
+    .onboarding-subtitle, .option-card-content p {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* Fix Option Cards in Dark Mode */
+    .option-card.selected {
+        background: rgba(234, 99, 44, 0.1); 
+        border-color: var(--accent-color);
+    }
+    
+    .btn-primary {
+        color: #121212;
+        font-weight: 800;
+        background: var(--primary-color);
+    }
     }
     
     .nav-item.active {
