@@ -915,35 +915,71 @@ window.getBMIColor = function(bmi) {
     return "#ff453a";
 };
 
-window.promptSetTargetWeight = function() {
-    const w = prompt("Introduce tu peso meta (kg):", state.userProfile.targetWeight || "");
-    if(w && !isNaN(parseFloat(w))) {
-        state.userProfile.targetWeight = parseFloat(w).toFixed(1);
-        saveState();
-        renderPage();
+window.showModal = function(title, text, inputType, inputValue, confirmText, onConfirm) {
+    let modalId = 'custom-modal-' + Date.now();
+    let modalHTML = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); width: 90%; max-width: 400px; padding: 24px; box-shadow: var(--shadow-lg); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.05);">' +
+            '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">' + title + '</h3>' +
+            '<p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">' + text + '</p>' +
+            (inputType ? '<input type="' + inputType + '" id="' + modalId + '-input" value="' + (inputValue || '') + '" style="width: 100%; padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.1); background: var(--bg-color); color: var(--text-primary); font-size: 18px; font-weight: 700; margin-bottom: 24px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor=\'var(--primary-color)\'" onblur="this.style.borderColor=\'rgba(255,255,255,0.1)\'">' : '') +
+            '<div style="display: flex; gap: 12px; justify-content: flex-end;">' +
+                '<button onclick="document.getElementById(\'' + modalId + '\').remove()" style="padding: 12px 20px; border-radius: var(--border-radius-sm); border: none; background: transparent; color: var(--text-tertiary); font-weight: 700; font-size: 15px; cursor: pointer;">Cancelar</button>' +
+                '<button id="' + modalId + '-confirm" style="padding: 12px 24px; border-radius: var(--border-radius-sm); border: none; background: var(--accent-color); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);">' + confirmText + '</button>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modalEl = document.getElementById(modalId);
+    
+    setTimeout(() => {
+        modalEl.style.opacity = '1';
+        modalEl.children[0].style.transform = 'translateY(0)';
+    }, 10);
+    
+    if (inputType) {
+        document.getElementById(modalId + '-input').focus();
     }
+    
+    document.getElementById(modalId + '-confirm').addEventListener('click', () => {
+        let val = inputType ? document.getElementById(modalId + '-input').value : null;
+        if (onConfirm(val) !== false) {
+            modalEl.remove();
+        }
+    });
+};
+
+window.promptSetTargetWeight = function() {
+    window.showModal('Fijar Meta de Peso', 'Introduce tu peso meta (kg):', 'number', state.userProfile.targetWeight || '', 'Guardar', (w) => {
+        if(w && !isNaN(parseFloat(w))) {
+            state.userProfile.targetWeight = parseFloat(w).toFixed(1);
+            saveState();
+            renderPage();
+        }
+    });
 };
 
 window.deleteWeightLog = function(index) {
-    if(confirm("¿Seguro que deseas borrar este registro histórico?")) {
+    window.showModal('Eliminar Registro', '¿Seguro que deseas borrar este registro histórico?', null, null, 'Eliminar', () => {
         state.userProfile.weightHistory.splice(index, 1);
         if(state.userProfile.weightHistory.length > 0) {
             state.userProfile.bodyWeight = state.userProfile.weightHistory[state.userProfile.weightHistory.length - 1].weight;
         }
         saveState();
         renderPage();
-    }
+    });
 };
 
 window.promptUpdateWeight = function() {
-    const w = prompt("Introduce tu nuevo peso en KG:", state.userProfile.bodyWeight || "");
-    if(w && !isNaN(parseFloat(w))) {
-        state.userProfile.bodyWeight = parseFloat(w).toFixed(1);
-        if(!state.userProfile.weightHistory) { state.userProfile.weightHistory = []; }
-        state.userProfile.weightHistory.push({ date: new Date().toISOString(), weight: parseFloat(w) });
-        saveState();
-        renderPage();
-    }
+    window.showModal('Registrar Peso', 'Introduce tu nuevo peso en KG:', 'number', state.userProfile.bodyWeight || '', 'Registrar', (w) => {
+        if(w && !isNaN(parseFloat(w))) {
+            state.userProfile.bodyWeight = parseFloat(w).toFixed(1);
+            if(!state.userProfile.weightHistory) { state.userProfile.weightHistory = []; }
+            state.userProfile.weightHistory.push({ date: new Date().toISOString(), weight: parseFloat(w) });
+            saveState();
+            renderPage();
+        }
+    });
 };
 
 function renderProfile() {
