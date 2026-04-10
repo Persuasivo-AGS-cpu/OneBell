@@ -154,21 +154,40 @@ window.getProgramWeek = function() {
 window.logWorkout = function(workout) {
     if (!state.userProfile.workoutHistory) state.userProfile.workoutHistory = [];
     
+    let duration = workout.actualDuration || workout.duration || 20;
+    
+    // MET-based calculation: MET * 3.5 * weight(kg) / 200 = kcal/min
+    let weightKg = parseFloat(state.userProfile.bodyWeight) || 75;
+    // (Assuming bodyWeight is stored in kg since no option in onboarding converts it yet, but just in case)
+    let met = 7.5; // Average MET for Kettlebell Training
+    let calculatedKcal = Math.round(((met * 3.5 * weightKg) / 200) * duration);
+    
     state.userProfile.workoutHistory.push({
         id: Date.now(),
         date: new Date().toISOString(),
         name: workout.title || "Daily Workout",
-        duration: workout.duration || 20,
-        kcal: Math.floor((workout.duration || 20) * 10.5) // Approx burn
+        duration: duration,
+        kcal: calculatedKcal
     });
     
     saveState();
 };
 
 window.finishWorkoutSession = function() {
-    if (state.currentProgram && state.currentProgram.workouts && state.currentProgram.workouts.length > 0) {
-        window.logWorkout(state.currentProgram.workouts[0]);
+    let durationMinutes = 20; // fallback
+    if (window.workoutSessionStartTime) {
+        const diffMs = Date.now() - window.workoutSessionStartTime;
+        durationMinutes = Math.max(1, Math.round(diffMs / 60000));
+        window.workoutSessionStartTime = null; // reset
     }
+
+    if (state.currentProgram && state.currentProgram.workouts && state.currentProgram.workouts.length > 0) {
+        let workout = state.currentProgram.workouts[0];
+        workout.actualDuration = durationMinutes;
+        window.logWorkout(workout);
+    }
+    
+    window.showNotification("¡Rutina Completada! Progreso y Kcal registrados.");
     window.renderPage();
 };
 
@@ -1351,6 +1370,9 @@ window.resetApp = function() {
 };
 
 window.renderWorkoutPlayer = function(blockIndex = 0) {
+    if (blockIndex === 0 && !window.workoutSessionStartTime) {
+        window.workoutSessionStartTime = Date.now();
+    }
     document.getElementById('bottom-nav').style.display = 'none';
 
     let todaysWorkout = state.currentProgram?.workouts?.[0] || { blocks: [{ exercise: "swing", reps: "3x15", rest: "30s" }] };
@@ -1391,7 +1413,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
             '<p style="color: rgba(255,255,255,0.7); font-size: 15px; line-height: 1.5; margin-bottom: 32px;">Tu progreso actual no se guardará si abandonas la rutina ahora.</p>' +
             '<div style="display: flex; gap: 12px; width: 100%;">' +
                 '<button onclick="document.getElementById(&apos;quit-modal&apos;).style.display=&apos;none&apos;" style="flex: 1; background: rgba(255,255,255,0.1); color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background 0.2s;">Cancelar</button>' +
-                '<button onclick="window.renderPage()" style="flex: 1; background: #ff453a; color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(255,69,58,0.3);">Terminar</button>' +
+                '<button onclick="window.workoutSessionStartTime = null; window.renderPage();" style="flex: 1; background: #ff453a; color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(255,69,58,0.3);">Salir</button>' +
             '</div>' +
         '</div>' +
     '</div>';
