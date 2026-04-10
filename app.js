@@ -80,8 +80,89 @@ const state = {
         duration: null,
         age: '',
         height: '',
-        bodyWeight: ''
+        bodyWeight: '',
+        workoutHistory: [],
+        programStartDate: null,
+        longestStreak: 0,
+        targetWeight: null,
+        weightHistory: []
     }
+};
+
+// --- DATA HELPERS ---
+window.getStats = function() {
+    const history = state.userProfile.workoutHistory || [];
+    const workouts = history.length;
+    let totalMinutes = 0;
+    let totalKcal = 0;
+    
+    history.forEach(session => {
+        totalMinutes += (session.duration || 20);
+        totalKcal += (session.kcal || 200);
+    });
+    
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    
+    return {
+        count: workouts,
+        time: `${h}h ${m}m`,
+        kcal: totalKcal.toLocaleString()
+    };
+};
+
+window.getStreak = function() {
+    const history = state.userProfile.workoutHistory || [];
+    if (history.length === 0) return { current: 0, longest: state.userProfile.longestStreak || 0 };
+    
+    // Simple streak calculation (daily)
+    const sortedDates = history.map(h => new Date(h.date).setHours(0,0,0,0))
+                               .filter((v, i, a) => a.indexOf(v) === i) // unique days
+                               .sort((a, b) => b - a); // newest first
+                               
+    let currentStreak = 0;
+    const today = new Date().setHours(0,0,0,0);
+    const yesterday = today - 86400000;
+    
+    if (sortedDates[0] === today || sortedDates[0] === yesterday) {
+        currentStreak = 1;
+        for (let i = 0; i < sortedDates.length - 1; i++) {
+            if (sortedDates[i] - sortedDates[i+1] === 86400000) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+    }
+    
+    if (currentStreak > (state.userProfile.longestStreak || 0)) {
+        state.userProfile.longestStreak = currentStreak;
+        saveState();
+    }
+    
+    return { current: currentStreak, longest: state.userProfile.longestStreak || 0 };
+};
+
+window.getProgramWeek = function() {
+    if (!state.userProfile.programStartDate) return 1;
+    const start = new Date(state.userProfile.programStartDate);
+    const diff = new Date() - start;
+    const week = Math.ceil(diff / (1000 * 60 * 60 * 24 * 7)) || 1;
+    return Math.min(12, week);
+};
+
+window.logWorkout = function(workout) {
+    if (!state.userProfile.workoutHistory) state.userProfile.workoutHistory = [];
+    
+    state.userProfile.workoutHistory.push({
+        id: Date.now(),
+        date: new Date().toISOString(),
+        name: workout.title || "Daily Workout",
+        duration: workout.duration || 20,
+        kcal: Math.floor((workout.duration || 20) * 10.5) // Approx burn
+    });
+    
+    saveState();
 };
 
 function saveState() {
@@ -312,6 +393,7 @@ function renderOnboarding() {
                     
                     document.getElementById('btn-finish-onboarding').addEventListener('click', () => {
                         state.hasCompletedOnboarding = true;
+                        state.userProfile.programStartDate = new Date().toISOString();
                         saveState();
                         renderPage();
                     });
@@ -473,17 +555,38 @@ function renderHome() {
         }).join('') +
         '</div></div>';
 
-    // Circular Progress
+    // Dynamic Stats
+    const stats = window.getStats();
+    const currentWeek = window.getProgramWeek();
+    const totalProgramWorkouts = (state.userProfile.daysPerWeek || 3) * 12;
+    const programProgressPct = Math.min(100, Math.round((stats.count / totalProgramWorkouts) * 100));
+
+    let quickStatsHTML = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;">' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.count + '</div>' +
+            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Workouts</div>' +
+        '</div>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.time + '</div>' +
+            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Time</div>' +
+        '</div>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.kcal + '</div>' +
+            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Kcal</div>' +
+        '</div>' +
+    '</div>';
+
+    // Circular Progress dynamic
     let progressHTML = '<div style="margin-bottom: 32px;">' +
         '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Program progress</h3>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; justify-content: space-between;">' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between;">' +
             '<div>' +
-                '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Foundation of Iron</p>' +
-                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">Week 3<br><span style="color: var(--text-secondary); font-size: 18px;">of 12</span></h2>' +
+                '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Week ' + currentWeek + ' of 12</p>' +
+                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">' + programProgressPct + '%<br><span style="color: var(--text-secondary); font-size: 18px;">Complete</span></h2>' +
             '</div>' +
-            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent-color) 67%, rgba(31,63,58,0.08) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
+            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent-color) ' + programProgressPct + '%, rgba(255,255,255,0.03) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
                 '<div style="width: 66px; height: 66px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">' +
-                    '<span style="font-size: 18px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px;">67%</span>' +
+                    '<span style="font-size: 18px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px;">' + programProgressPct + '%</span>' +
                 '</div>' +
             '</div>' +
         '</div>' +
@@ -496,11 +599,11 @@ function renderHome() {
                 '<h1 style="font-size: 28px; font-weight: 800; margin-top: 4px; letter-spacing: -0.5px; color: var(--primary-color);">Ready to train?</h1>' +
             '</div>' +
             '<div style="display: flex; gap: 12px;">' +
-                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); position: relative;">' +
+                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05); position: relative;">' +
                     '<i data-lucide="bell" style="color: var(--primary-color); width: 22px; height: 22px; stroke-width: 2;"></i>' +
                     '<div style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; border: 2px solid var(--card-bg);"></div>' +
                 '</div>' +
-                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);" onclick="window.setActiveTab(`profile`)">' +
+                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05);" onclick="window.setActiveTab(`profile`)">' +
                     '<i data-lucide="user" style="color: var(--primary-color); width: 22px; height: 22px; stroke-width: 2;"></i>' +
                 '</div>' +
             '</div>' +
@@ -512,41 +615,36 @@ function renderHome() {
 }
 
 function renderProgram() {
-    // Header
+    const currentWeek = window.getProgramWeek();
+    const history = state.userProfile.workoutHistory || [];
+    const workoutsPerWeek = state.userProfile.daysPerWeek || 3;
+    
+    // Header dynamic
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">The OneBell Method</h2>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Dynamic OneBell Method</h2>' +
         '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Your Program</h1>' +
     '</header>';
 
-    // Phase Card
-    let phaseCardHTML = '<div style="background: var(--card-bg-elevated); border-radius: var(--border-radius-lg); padding: 24px; margin-bottom: 32px; border: 1px solid rgba(31,63,58,0.05);">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">Week 3 &mdash; Foundation Phase</h3>' +
-        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">Building kettlebell technique and strength base.</p>' +
+    // Phase Card dynamic
+    let phase = currentWeek <= 4 ? "Foundation Phase" : (currentWeek <= 8 ? "Strength Phase" : "Power Phase");
+    let phaseCardHTML = '<div style="background: var(--card-bg-elevated); border-radius: var(--border-radius-lg); padding: 24px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.03);">' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">Week ' + currentWeek + ' &mdash; ' + phase + '</h3>' +
+        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">' + (currentWeek <= 4 ? "Building kettlebell technique." : "Increasing mechanical load.") + '</p>' +
     '</div>';
 
-    // Weekly Calendar
-    const days = [
-        { label: 'M', state: 'completed' },
-        { label: 'T', state: 'rest' },
-        { label: 'W', state: 'today' },
-        { label: 'T', state: 'upcoming' },
-        { label: 'F', state: 'upcoming' },
-        { label: 'S', state: 'rest' },
-        { label: 'S', state: 'rest' }
-    ];
+    // Weekly Calendar dynamic (Simplified logic for Beta)
+    const weekDays = ['M','T','W','T','F','S','S'];
     let calendarHTML = '<div style="margin-bottom: 32px;">' +
         '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-        days.map(d => {
-            let bg, color, border;
-            if (d.state === 'completed') { bg = 'var(--success-color)'; color = '#FFF'; border = 'none'; }
-            else if (d.state === 'today') { bg = 'var(--primary-color)'; color = '#FFF'; border = 'none'; }
-            else if (d.state === 'upcoming') { bg = 'var(--card-bg)'; color = 'var(--primary-color)'; border = '2px solid rgba(31,63,58,0.1)'; }
-            else { bg = 'transparent'; color = 'var(--text-tertiary)'; border = 'none'; }
+        weekDays.map((d, index) => {
+            let bg = 'transparent', color = 'var(--text-tertiary)', border = 'none';
+            // Mock state for days
+            if (index < 2) { bg = 'var(--primary-color)'; color = '#FFF'; } 
             
             return '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">' +
-                '<span style="font-size: 12px; font-weight: 700; color: var(--text-tertiary);">' + d.label + '</span>' +
+                '<span style="font-size: 12px; font-weight: 700; color: var(--text-tertiary);">' + d + '</span>' +
                 '<div style="width: 36px; height: 36px; border-radius: 50%; background: ' + bg + '; border: ' + border + '; display: flex; align-items: center; justify-content: center; color: ' + color + ';">' +
-                    (d.state === 'completed' ? '<i data-lucide="check" style="width: 18px; height: 18px; stroke-width: 3;"></i>' : (d.state === 'today' ? '<i data-lucide="dumbbell" style="width: 18px; height: 18px;"></i>' : '<span style="font-weight: 700; font-size: 14px;"></span>')) +
+                    '<span style="font-weight: 700; font-size: 14px;"></span>' +
                 '</div>' +
             '</div>';
         }).join('') +
@@ -566,7 +664,7 @@ function renderProgram() {
                 '<li>Goblet Squat</li><li>Kettlebell Swing</li><li>Russian Twist</li><li>Plank</li>' +
             '</ul>' +
         '</div>' +
-        '<button class="btn btn-accent" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.renderWorkoutPlayer()">' +
+        '<button class="btn btn-accent" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.renderWorkoutPlayer(0)">' +
             '<i data-lucide="play" fill="currentColor" style="width: 20px; height: 20px;"></i> START WORKOUT' +
         '</button>' +
     '</div>';
@@ -586,27 +684,35 @@ function renderProgram() {
             '</div>' +
         '</div>';
 
-    // Program Progress Card
-    let progressHTML = '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">' +
+    // Program Progress Card dynamic
+    const totalProg = (workoutsPerWeek * 12);
+    const progPct = Math.min(100, Math.round((history.length / totalProg) * 100));
+    let progressHTML = '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">' +
             '<div>' +
                 '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Foundation of Iron</p>' +
-                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">Week 3<br><span style="color: var(--text-secondary); font-size: 18px;">of 12</span></h2>' +
+                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">Week ' + currentWeek + '<br><span style="color: var(--text-secondary); font-size: 18px;">of 12</span></h2>' +
             '</div>' +
-            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent-color) 25%, rgba(31,63,58,0.08) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
+            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent-color) ' + progPct + '%, rgba(255,255,255,0.03) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
                 '<div style="width: 66px; height: 66px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">' +
-                    '<span style="font-size: 18px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px;">25%</span>' +
+                    '<span style="font-size: 18px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px;">' + progPct + '%</span>' +
                 '</div>' +
             '</div>' +
         '</div>';
 
-    // Workout History
-    let historyHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">History</h3>' +
-        '<div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">' +
-            '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); opacity: 0.8;">' +
-                '<div style="width: 48px; height: 48px; border-radius: var(--border-radius-sm); background: rgba(50, 215, 75, 0.1); display: flex; align-items: center; justify-content: center; color: var(--success-color); font-weight: 800; font-size: 16px;">MON</div>' +
-                '<div style="flex: 1;"><h4 style="font-size: 16px; font-weight: 700; color: var(--primary-color);">Foundational Strength</h4><p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 4px;">Strength &bull; 18 min</p></div>' +
-                '<i data-lucide="check-circle" style="color: var(--success-color); width: 22px; height: 22px;"></i>' +
-            '</div>' +
+    // Workout History dynamic
+    let historyEntries = history.slice(-3).reverse().map(h => {
+        const d = new Date(h.date);
+        const dayName = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+        return '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03); margin-bottom: 8px;">' +
+                '<div style="width: 48px; height: 48px; border-radius: var(--border-radius-sm); background: rgba(75, 208, 160, 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-weight: 800; font-size: 14px;">' + dayName + '</div>' +
+                '<div style="flex: 1;"><h4 style="font-size: 16px; font-weight: 700; color: var(--primary-color);">' + h.name + '</h4><p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 4px;">' + h.duration + ' min &bull; ' + h.kcal + ' kcal</p></div>' +
+                '<i data-lucide="check-circle" style="color: var(--primary-color); width: 22px; height: 22px;"></i>' +
+            '</div>';
+    }).join("");
+
+    let historyHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Recent History</h3>' +
+        '<div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">' +
+            (historyEntries || '<p style="color: var(--text-tertiary); font-style: italic;">No workouts logged yet.</p>') +
         '</div>';
 
     mainContent.innerHTML = '<div class="page" style="padding-top: calc(var(--spacing-xl) + env(safe-area-inset-top, 20px)); padding-bottom: calc(var(--nav-height) + 20px);">' +
@@ -751,38 +857,59 @@ function renderExercises() {
 }
 
 function renderProgress() {
+    const currentWeek = window.getProgramWeek();
+    const stats = window.getStats();
+    const streak = window.getStreak();
+    const totalProgWorkouts = (state.userProfile.daysPerWeek || 3) * 12;
+    const progPct = Math.min(100, Math.round((state.userProfile.workoutHistory.length / totalProgWorkouts) * 100));
+
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Week 3 of 12</h2>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Week ' + currentWeek + ' of 12</h2>' +
         '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Your Progress</h1>' +
     '</header>';
 
-    let streakCardHTML = '<div style="background: linear-gradient(145deg, var(--accent-color) 0%, #c44f1c 100%); border-radius: var(--border-radius-lg); padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(234, 99, 44, 0.2); margin-bottom: 24px; color: #FFF; display: flex; align-items: center; justify-content: space-between;">' +
+    let streakCardHTML = '<div style="background: linear-gradient(145deg, var(--accent-color) 0%, #FF8C61 100%); border-radius: var(--border-radius-lg); padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2); margin-bottom: 24px; color: #FFF; display: flex; align-items: center; justify-content: space-between;">' +
         '<div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: #FFF; opacity: 0.1; filter: blur(30px); border-radius: 50%;"></div>' +
         '<div style="position: relative; z-index: 2;">' +
             '<h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: rgba(255,255,255,0.8);">Current Streak</h3>' +
             '<div style="display: flex; align-items: baseline; gap: 8px;">' +
-                '<h2 style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px;">5</h2>' +
+                '<h2 style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px;">' + streak.current + '</h2>' +
                 '<span style="font-size: 18px; font-weight: 700;">days</span>' +
             '</div>' +
-            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Longest streak: 8 days</p>' +
+            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Longest streak: ' + streak.longest + ' days</p>' +
         '</div>' +
         '<i data-lucide="flame" fill="currentColor" style="width: 48px; height: 48px; color: #FFF; opacity: 0.9; position: relative; z-index: 2;"></i>' +
     '</div>';
 
     let statsHTML = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;">' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">12</div>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.count + '</div>' +
             '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Workouts</div>' +
         '</div>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">4h 20m</div>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.time + '</div>' +
             '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Training</div>' +
         '</div>' +
-        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">2,480</div>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
+            '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.kcal + '</div>' +
             '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Kcal</div>' +
         '</div>' +
     '</div>';
+
+    // Program Progress Card dynamic
+    let programProgressHTML = '<div style="margin-bottom: 32px;">' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Program Progress</h3>' +
+        '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between;">' +
+            '<div>' +
+                '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Foundation of Iron</p>' +
+                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">' + progPct + '%<br><span style="color: var(--text-secondary); font-size: 18px;">Complete</span></h2>' +
+            '</div>' +
+            '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--primary-color) ' + progPct + '%, rgba(75, 208, 160, 0.1) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
+                '<div style="width: 66px; height: 66px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">' +
+                    '<i data-lucide="target" style="color: var(--primary-color); width: 24px; height: 24px;"></i>' +
+                '</div>' +
+            '</div>' +
+        '</div></div>';
 
     // Activity bar chart
     const chartBars = [
@@ -1290,8 +1417,9 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
 
         // Bottom Controls
         '<div style="padding: 0 var(--spacing-md) calc(var(--spacing-xl) + env(safe-area-inset-bottom, 20px)) var(--spacing-md); margin-top: auto;">' +
-            '<button class="btn btn-accent" style="width: 100%; border-radius: 16px; font-size: 18px; font-weight: 800; padding: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 30px rgba(234, 99, 44, 0.4); margin-bottom: 24px;" onclick="window.renderWorkoutPlayer(' + (blockIndex + 1) + ')">' +
-                '<i data-lucide="check-circle" style="width: 24px; height: 24px; stroke-width: 2.5;"></i> COMPLETE SET' +
+            '<button class="btn btn-accent" style="width: 100%; border-radius: 16px; font-size: 18px; font-weight: 800; padding: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 30px rgba(234, 99, 44, 0.4); margin-bottom: 24px;" onclick="' + 
+                (blockIndex + 1 === totalBlocks ? 'window.logWorkout(state.currentProgram.workouts[0]); window.renderPage();' : ('window.renderWorkoutPlayer(' + (blockIndex + 1) + ')')) + '">' +
+                '<i data-lucide="check-circle" style="width: 24px; height: 24px; stroke-width: 2.5;"></i> ' + (blockIndex + 1 === totalBlocks ? 'FINISH WORKOUT' : 'COMPLETE SET') +
             '</button>' +
             '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">' +
                 '<button onclick="' + (blockIndex > 0 ? ('window.renderWorkoutPlayer(' + (blockIndex - 1) + ')') : 'renderPage()') + '" style="background: transparent; border: none; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; cursor: pointer; padding: 8px 0;"><i data-lucide="chevron-left" style="width: 20px; height: 20px;"></i> Previous</button>' +
