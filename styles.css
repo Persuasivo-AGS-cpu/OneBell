@@ -548,3 +548,32 @@ input[type=range]::-webkit-slider-runnable-track {
     z-index: 10;
 }
 
+
+/* Stop Motion Vault */
+.stop-motion-container {
+    width: 100%;
+    height: 300px;
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+}
+.frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+}
+.frame-1 { animation: play-frames 1.5s infinite; animation-delay: 0.0s; }
+.frame-2 { animation: play-frames 1.5s infinite; animation-delay: 0.5s; }
+.frame-3 { animation: play-frames 1.5s infinite; animation-delay: 1.0s; }
+.frame-4 { animation: play-frames 2.0s infinite; animation-delay: 1.5s; } /* In case of 4 frames */
+
+@keyframes play-frames {
+    0%, 33.33% { opacity: 1; }
+    33.34%, 100% { opacity: 0; }
+}
+/* For 4 frames logic inside html inline styles if needed, but standard is 3 frames */
+

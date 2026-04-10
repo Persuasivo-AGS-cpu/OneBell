@@ -776,26 +776,58 @@ window.renderExerciseDetail = function(id) {
     // Hide bottom nav for immersive detail view
     document.getElementById('bottom-nav').style.display = 'none';
     
-    // Stub exercise data
-    const ex = {
-        name: id || 'Kettlebell Swing',
-        difficulty: 'Beginner',
-        target: 'Full Body, Hamstrings, Glutes',
-        weight: '16kg - 24kg',
-        visual: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop',
-        instructions: [
-            'Stand with feet shoulder-width apart, kettlebell on the floor in front of you.',
-            'Hinge at the hips and grasp the kettlebell handle with both hands.',
-            'Hike the kettlebell back between your legs like a football.',
-            'Drive your hips forward explosively to swing the kettlebell up to chest height.',
-            'Let the kettlebell fall back between your legs and repeat.'
-        ],
-        mistakes: [
-            'Squatting instead of hinging at the hips.',
-            'Using the arms to lift the kettlebell instead of hip drive.',
-            'Overextending the lower back at the top of the swing.'
-        ]
-    };
+    // Fetch exercise data from routinesDB, fallback to stub if not found
+    let ex = null;
+    if (state.routinesDB && state.routinesDB.exercises && state.routinesDB.exercises[id]) {
+        ex = state.routinesDB.exercises[id];
+    } else {
+        // Fallback stub for safety
+        ex = {
+            name: id || 'Kettlebell Swing',
+            difficulty: 'Beginner',
+            target: 'Full Body',
+            weight: '16kg - 24kg',
+            img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop',
+            instructions: ['Stand with feet shoulder-width apart...'],
+            mistakes: ['Squatting instead of hinging...']
+        };
+    }
+
+    // Default values if missing
+    let target = ex.target || 'Full Body';
+    let weight = ex.weight || '16kg - 24kg';
+    let difficulty = ex.level || ex.difficulty || 'Beginner';
+    
+    let instructionsHtml = (ex.instructions || []).map(step => '<li style="margin-bottom: 12px; padding-left: 8px;">' + step + '</li>').join('');
+    let mistakesHtml = (ex.mistakes || []).map(mistake => '<li style="margin-bottom: 12px; padding-left: 8px;">' + mistake + '</li>').join('');
+
+    // Visual HTML logic: stop-motion via frames, or single image
+    let visualHtml = '';
+    if (ex.frames && ex.frames.length > 0) {
+        let frameDuration = 1.8; // 1.8 seconds total
+        let step = frameDuration / ex.frames.length;
+        
+        let framesHtml = ex.frames.map((frameSrc, index) => {
+            let delay = (index * step).toFixed(2);
+            return '<img src="' + frameSrc + '" class="frame" style="animation: play-frames ' + frameDuration + 's infinite; animation-delay: ' + delay + 's;" alt="' + ex.name + ' frame">';
+        }).join('');
+        
+        visualHtml = '<div class="stop-motion-container">' +
+            framesHtml +
+            '<div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 24px; background: linear-gradient(to top, rgba(31,63,58,0.9), transparent); z-index: 2;">' +
+                '<span style="background: var(--accent-color); color: #FFF; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">' + difficulty + '</span>' +
+                '<h1 style="color: #FFF; font-size: 32px; font-weight: 800; margin-top: 8px; letter-spacing: -0.5px; position: relative;">' + ex.name + '</h1>' +
+            '</div>' +
+        '</div>';
+    } else {
+        let visualBg = ex.img || ex.visual || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop';
+        visualHtml = '<div style="width: 100%; height: 300px; background: url(&apos;' + visualBg + '&apos;) center/cover no-repeat; position: relative;">' +
+            '<div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 24px; background: linear-gradient(to top, rgba(31,63,58,0.9), transparent);">' +
+                '<span style="background: var(--accent-color); color: #FFF; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">' + difficulty + '</span>' +
+                '<h1 style="color: #FFF; font-size: 32px; font-weight: 800; margin-top: 8px; letter-spacing: -0.5px;">' + ex.name + '</h1>' +
+            '</div>' +
+        '</div>';
+    }
 
     let html = '<div class="page no-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg-color); overflow-y: auto; padding: 0;">' +
         // Header with back button
@@ -806,23 +838,18 @@ window.renderExerciseDetail = function(id) {
         '</header>' +
 
         // Large Visual
-        '<div style="width: 100%; height: 300px; background: url(&apos;' + ex.visual + '&apos;) center/cover no-repeat; position: relative;">' +
-            '<div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 24px; background: linear-gradient(to top, rgba(31,63,58,0.9), transparent);">' +
-                '<span style="background: var(--accent-color); color: #FFF; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">' + ex.difficulty + '</span>' +
-                '<h1 style="color: #FFF; font-size: 32px; font-weight: 800; margin-top: 8px; letter-spacing: -0.5px;">' + ex.name + '</h1>' +
-            '</div>' +
-        '</div>' +
+        visualHtml +
 
         // Quick Metadata
         '<div style="padding: 24px var(--spacing-md);">' +
             '<div style="display: flex; gap: 12px; margin-bottom: 32px; overflow-x: auto;" class="hide-scrollbar">' +
                 '<div style="background: var(--card-bg); padding: 12px 16px; border-radius: var(--border-radius-md); border: 1px solid rgba(31,63,58,0.05); box-shadow: var(--shadow-sm); flex-shrink: 0;">' +
                     '<h4 style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Target</h4>' +
-                    '<p style="font-size: 14px; font-weight: 700; color: var(--primary-color); margin-top: 4px;">' + ex.target + '</p>' +
+                    '<p style="font-size: 14px; font-weight: 700; color: var(--primary-color); margin-top: 4px;">' + target + '</p>' +
                 '</div>' +
                 '<div style="background: var(--card-bg); padding: 12px 16px; border-radius: var(--border-radius-md); border: 1px solid rgba(31,63,58,0.05); box-shadow: var(--shadow-sm); flex-shrink: 0;">' +
                     '<h4 style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Weight</h4>' +
-                    '<p style="font-size: 14px; font-weight: 700; color: var(--primary-color); margin-top: 4px;">' + ex.weight + '</p>' +
+                    '<p style="font-size: 14px; font-weight: 700; color: var(--primary-color); margin-top: 4px;">' + weight + '</p>' +
                 '</div>' +
             '</div>' +
 
@@ -830,7 +857,7 @@ window.renderExerciseDetail = function(id) {
             '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Technique</h3>' +
             '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); margin-bottom: 32px;">' +
                 '<ol style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 15px; font-weight: 500; line-height: 1.6;">' +
-                    ex.instructions.map(step => '<li style="margin-bottom: 12px; padding-left: 8px;">' + step + '</li>').join('') +
+                    instructionsHtml +
                 '</ol>' +
             '</div>' +
 
@@ -838,7 +865,7 @@ window.renderExerciseDetail = function(id) {
             '<h3 style="font-size: 20px; font-weight: 800; color: var(--danger-color); margin-bottom: 16px;">Common Mistakes</h3>' +
             '<div style="background: rgba(234, 99, 44, 0.05); border-radius: var(--border-radius-lg); padding: 20px; border: 1px solid rgba(234, 99, 44, 0.1); margin-bottom: 40px;">' +
                 '<ul style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 15px; font-weight: 500; line-height: 1.6;">' +
-                    ex.mistakes.map(mistake => '<li style="margin-bottom: 12px; padding-left: 8px;">' + mistake + '</li>').join('') +
+                    mistakesHtml +
                 '</ul>' +
             '</div>' +
         '</div>' +
@@ -859,12 +886,16 @@ function renderExercises() {
     const filters = ['Beginner', 'Intermediate', 'Advanced', 'Strength', 'Power', 'Core', 'Conditioning'];
     let exercisesList = [];
     if (state.routinesDB && state.routinesDB.exercises) {
-        exercisesList = Object.values(state.routinesDB.exercises).map(ex => ({
-            name: ex.name,
-            level: ex.level || 'Beginner',
-            focus: ex.focus || 'Strength',
-            img: ex.img || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop'
-        }));
+        exercisesList = Object.keys(state.routinesDB.exercises).map(key => {
+            let ex = state.routinesDB.exercises[key];
+            return {
+                id: key,
+                name: ex.name,
+                level: ex.level || 'Beginner',
+                focus: ex.focus || 'Strength',
+                img: ex.img || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop'
+            };
+        });
     }
 
     if(window.activeFilter !== 'All') {
@@ -889,7 +920,7 @@ function renderExercises() {
         // Exercise Grid
         '<div style="display: flex; flex-direction: column; gap: 16px;">' +
             exercisesList.map(ex => 
-                '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; padding: 12px; gap: 16px; cursor: pointer;" onclick="window.renderExerciseDetail(&apos;' + ex.name + '&apos;)">' +
+                '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; padding: 12px; gap: 16px; cursor: pointer;" onclick="window.renderExerciseDetail(&apos;' + ex.id + '&apos;)">' +
                     '<div style="width: 80px; height: 80px; border-radius: var(--border-radius-sm); background: url(&apos;' + ex.img + '&apos;) center/cover no-repeat;"></div>' +
                     '<div style="flex: 1;">' +
                         '<h3 style="font-size: 17px; font-weight: 800; color: var(--primary-color); margin-bottom: 4px;">' + ex.name + '</h3>' +
