@@ -1256,7 +1256,7 @@ function renderProfile() {
                 '<div>' +
                     '<h3 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">Tu Peso Actual</h3>' +
                     '<div style="display: flex; align-items: baseline; gap: 8px;">' +
-                        '<h1 style="font-size: 48px; font-weight: 900; letter-spacing: -2px; margin: 0; line-height: 1;">' + (w || '--') + '</h1>' +
+                        '<h1 style="font-size: 48px; font-weight: 900; letter-spacing: -2px; margin: 0; line-height: 1; color: #FFF;">' + (w || '--') + '</h1>' +
                         '<span style="font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.8);">kg</span>' +
                     '</div>' +
                 '</div>' +
