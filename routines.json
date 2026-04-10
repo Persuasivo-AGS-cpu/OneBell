@@ -60,7 +60,7 @@
     "russian_twist": {
       "name": "Russian Twist",
       "target": "Core, Obliques",
-      "img": "./assets/kb_russian_twist.png",
+      "img": "./assets/kb_russian_twist.png", "frames": ["./assets/kb_russian_twist_left.png", "./assets/kb_russian_twist.png", "./assets/kb_russian_twist_right.png"],
       "instructions": [
         "Si\u00e9ntate en el suelo con las rodillas dobladas y los pies elevados unos cent\u00edmetros.",
         "Sost\u00e9n la kettlebell por el asa o por la bola frente a ti.",
@@ -98,7 +98,7 @@
     "double_swing": {
       "name": "Double KB Swing",
       "target": "Power, Hamstrings",
-      "img": "./assets/kb_double_swing.png",
+      "img": "./assets/kb_double_swing.png", "frames": ["./assets/kb_double_swing_bottom.png", "./assets/kb_double_swing.png", "./assets/kb_double_swing_top.png"],
       "instructions": [
         "Coloca dos kettlebells frente a ti con una postura ligeramente m\u00e1s ancha.",
         "Agarra ambas pesas y col\u00f3calas en un \u00e1ngulo ligeramente ladeado.",
@@ -117,7 +117,7 @@
     "double_clean": {
       "name": "Double Clean",
       "target": "Power, Back",
-      "img": "./assets/kb_double_clean.png",
+      "img": "./assets/kb_double_clean.png", "frames": ["./assets/kb_double_clean_bottom.png", "./assets/kb_double_clean.png", "./assets/kb_double_clean_top.png"],
       "instructions": [
         "Comienza con un swing de dos kettlebells.",
         "Mant\u00e9n los brazos cerca de tus costados, pegando los codos.",
@@ -136,7 +136,7 @@
     "double_front_squat": {
       "name": "Double Front Squat",
       "target": "Quads, Core",
-      "img": "./assets/kb_double_front_squat.png",
+      "img": "./assets/kb_double_front_squat.png", "frames": ["./assets/kb_double_front_squat_bottom.png", "./assets/kb_double_front_squat.png", "./assets/kb_double_front_squat_top.png"],
       "instructions": [
         "Inicia desde una posici\u00f3n de 'Rack' dual (dos pesas apoyadas en el pecho/hombros).",
         "Mant\u00e9n el pecho en alto para soportar la carga frontal.",
@@ -174,7 +174,7 @@
     "halo": {
       "name": "KB Halos",
       "target": "Shoulder Mobility",
-      "img": "./assets/kb_halo.png",
+      "img": "./assets/kb_halo.png", "frames": ["./assets/kb_halo_left.png", "./assets/kb_halo.png", "./assets/kb_halo_right.png"],
       "instructions": [
         "Sujeta la kettlebell al rev\u00e9s (de la bola) frente a tu pecho, agarrando los 'cuernos'.",
         "Mueve la pesa describiendo un c\u00edrculo estrecho alrededor de tu cabeza.",
@@ -193,7 +193,7 @@
     "plank": {
       "name": "Hardstyle Plank",
       "target": "Core Tension",
-      "img": "./assets/kb_plank.png",
+      "img": "./assets/kb_plank.png", "frames": ["./assets/kb_plank_shake_1.png", "./assets/kb_plank.png", "./assets/kb_plank_shake_2.png"],
       "instructions": [
         "Ponte en posici\u00f3n de plancha sobre tus antebrazos o manos en el suelo.",
         "Coloca tus manos al nivel de los hombros y alarga el cuello.",
@@ -212,7 +212,7 @@
     "high_pull": {
       "name": "High Pull",
       "target": "Traps, Power",
-      "img": "./assets/kb_high_pull.png",
+      "img": "./assets/kb_high_pull.png", "frames": ["./assets/kb_high_pull_bottom.png", "./assets/kb_high_pull_mid.png", "./assets/kb_high_pull.png"],
       "instructions": [
         "Realiza un inicio id\u00e9ntico al swing a una mano.",
         "Cuando la pesa alcance el punto ciego frente a la cadera, flexiona y tira del codo horizontalmente hacia afuera y hacia atr\u00e1s.",
@@ -231,7 +231,7 @@
     "push_press": {
       "name": "Push Press",
       "target": "Shoulders, Power",
-      "img": "./assets/kb_push_press.png",
+      "img": "./assets/kb_push_press.png", "frames": ["./assets/kb_push_press_dip.png", "./assets/kb_push_press.png", "./assets/kb_push_press_top.png"],
       "instructions": [
         "Con la kettlebell en posici\u00f3n rack a un brazo, separa los pies a la altura de los hombros.",
         "Realiza una leve y r\u00e1pida flexi\u00f3n de rodillas (el 'dip').",
@@ -250,7 +250,7 @@
     "jerk": {
       "name": "Single-Arm Jerk",
       "target": "Shoulders, Power",
-      "img": "./assets/kb_jerk.png",
+      "img": "./assets/kb_jerk.png", "frames": ["./assets/kb_jerk_dip.png", "./assets/kb_jerk.png", "./assets/kb_jerk_catch.png"],
       "instructions": [
         "Desde la posici\u00f3n de rack, efect\u00faa el primer 'dip' para generar potencia hacia arriba e impulsa la pesa.",
         "Mientras la pesa sube libre, realiza una SEGUNDA flexi\u00f3n r\u00e1pida de rodillas (segundo 'dip' o descenso) para 'meterte' debajo de ella.",
@@ -269,7 +269,7 @@
     "sumo_deadlift": {
       "name": "Sumo Deadlift",
       "target": "Glutes, Hips",
-      "img": "./assets/kb_sumo_deadlift.png",
+      "img": "./assets/kb_sumo_deadlift.png", "frames": ["./assets/kb_sumo_deadlift_bottom.png", "./assets/kb_sumo_deadlift.png", "./assets/kb_sumo_deadlift_top.png"],
       "instructions": [
         "Adopta una postura muy ancha con los pies apuntando ligeramente hacia afuera.",
         "La kettlebell descansa justo debajo de ti, en el centro.",
@@ -288,7 +288,7 @@
     "suitcase_deadlift": {
       "name": "Suitcase Deadlift",
       "target": "Core, Grip",
-      "img": "./assets/kb_suitcase_deadlift.png",
+      "img": "./assets/kb_suitcase_deadlift.png", "frames": ["./assets/kb_suitcase_deadlift_bottom.png", "./assets/kb_suitcase_deadlift.png", "./assets/kb_suitcase_deadlift_top.png"],
       "instructions": [
         "Coloca una kettlebell a un lado de tu pie derecho.",
         "Manten una postura recta y separa los pies al ancho de cadera.",
@@ -307,7 +307,7 @@
     "rdl": {
       "name": "Romanian Deadlift",
       "target": "Hamstrings",
-      "img": "./assets/kb_rdl.png",
+      "img": "./assets/kb_rdl.png", "frames": ["./assets/kb_rdl_bottom.png", "./assets/kb_rdl.png", "./assets/kb_rdl_top.png"],
       "instructions": [
         "Empeza de pie sujetando una/dos kettlebell frente a los muslos, con rodillas apenas semi-flexionadas.",
         "Mientras mantienes la columna alineada, empuja la cadera hacia atr\u00e1s lentamente.",
@@ -326,7 +326,7 @@
     "goblet_lunge": {
       "name": "Goblet Reverse Lunge",
       "target": "Legs, Balance",
-      "img": "./assets/kb_goblet_lunge.png",
+      "img": "./assets/kb_goblet_lunge.png", "frames": ["./assets/kb_goblet_lunge_standing.png", "./assets/kb_goblet_lunge.png", "./assets/kb_goblet_lunge_bottom.png"],
       "instructions": [
         "Sujeta tu kettlebell estilo copa pegada frente a tu estern\u00f3n.",
         "Da un paso controlado hacia atr\u00e1s con una de tus piernas.",
@@ -345,7 +345,7 @@
     "rack_lunge": {
       "name": "Rack Position Lunge",
       "target": "Legs, Core",
-      "img": "./assets/kb_rack_lunge.png",
+      "img": "./assets/kb_rack_lunge.png", "frames": ["./assets/kb_rack_lunge_standing.png", "./assets/kb_rack_lunge.png", "./assets/kb_rack_lunge_bottom.png"],
       "instructions": [
         "Inicia con la kettlebell amarrada en posici\u00f3n rack sobre uno de tus brazos/hombros.",
         "La asimetr\u00eda del peso pondr\u00e1 a prueba vitalmente tu pared abdominal lateral.",
@@ -364,7 +364,7 @@
     "overhead_squat": {
       "name": "Overhead Squat",
       "target": "Mobility, Core",
-      "img": "./assets/kb_overhead_squat.png",
+      "img": "./assets/kb_overhead_squat.png", "frames": ["./assets/kb_overhead_squat_top.png", "./assets/kb_overhead_squat.png", "./assets/kb_overhead_squat_bottom.png"],
       "instructions": [
         "Eleva una kettlebell en estricto press hasta tener el brazo completamente estirado al cielo.",
         "Manteniendo la fijaci\u00f3n visual sutil, abre las piernas poco m\u00e1s que hombros.",
@@ -383,7 +383,7 @@
     "bottom_up_press": {
       "name": "Bottom-Up Press",
       "target": "Grip, Stability",
-      "img": "./assets/kb_bottom_up_press.png",
+      "img": "./assets/kb_bottom_up_press.png", "frames": ["./assets/kb_bottom_up_press_bottom.png", "./assets/kb_bottom_up_press.png", "./assets/kb_bottom_up_press_top.png"],
       "instructions": [
         "Coge el cuerpo o el asa haciendo que la gran masa esf\u00e9rica de la kettlebell mire apuntando directo hacia arriba (bottom-up).",
         "Este estado en extremo inestable demandar\u00e1 grip aplastante y hombros inmaculados.",
@@ -400,7 +400,7 @@
     "half_get_up": {
       "name": "Half Get-Up",
       "target": "Core, Shoulders",
-      "img": "./assets/kb_half_get_up.png",
+      "img": "./assets/kb_half_get_up.png", "frames": ["./assets/kb_half_get_up_bottom.png", "./assets/kb_half_get_up.png", "./assets/kb_half_get_up_top.png"],
       "instructions": [
         "Versi\u00f3n corta del levantamiento turco, para aislamiento focal de cinturilla escapular y tronco.",
         "Concluida la fase acostada hasta postrar la mano libre tras elevar cadera sobre el suelo.",
@@ -417,7 +417,7 @@
     "windmill": {
       "name": "Kettlebell Windmill",
       "target": "Obliques, Shoulders",
-      "img": "./assets/kb_windmill.png",
+      "img": "./assets/kb_windmill.png", "frames": ["./assets/kb_windmill_standing.png", "./assets/kb_windmill.png", "./assets/kb_windmill_bottom.png"],
       "instructions": [
         "Manteniendo la pesa alzada cenital o baja, alinea ambos pies angulados unos grados en igual direcci\u00f3n opuesta.",
         "El peso es empujado por sobre el eje cadera posterior, permiti\u00e9ndote bajar contorsionando oblicuamente.",
@@ -435,7 +435,7 @@
     "bent_over_row": {
       "name": "Bent-Over Row",
       "target": "Back, Biceps",
-      "img": "./assets/kb_bent_over_row.png",
+      "img": "./assets/kb_bent_over_row.png", "frames": ["./assets/kb_bent_over_row_bottom.png", "./assets/kb_bent_over_row.png", "./assets/kb_bent_over_row_top.png"],
       "instructions": [
         "Pies espaciados parejos, rodilla suave flex y torso de gran plomada paralela hacia frente (inclinaci\u00f3n mayor agresiva).",
         "Permite que la/las kettlebells queden pesando abajo inertes sostenidas por los brazos largos.",
@@ -453,7 +453,7 @@
     "renegade_row": {
       "name": "Renegade Row",
       "target": "Back, Core",
-      "img": "./assets/kb_renegade_row.png",
+      "img": "./assets/kb_renegade_row.png", "frames": ["./assets/kb_renegade_row_bottom.png", "./assets/kb_renegade_row.png", "./assets/kb_renegade_row_top.png"],
       "instructions": [
         "Posici\u00f3n sublime plank-alta asentando ambas palmas de lleno apoyadas en el asa del acero.",
         "Estabiliza una ampl\u00edsima apertura inferior (pies).",
@@ -471,7 +471,7 @@
     "figure_8": {
       "name": "Figure 8",
       "target": "Core, Coordination",
-      "img": "./assets/kb_figure_8.png",
+      "img": "./assets/kb_figure_8.png", "frames": ["./assets/kb_figure_8_left.png", "./assets/kb_figure_8.png", "./assets/kb_figure_8_right.png"],
       "instructions": [
         "Semisentadilla atl\u00e9tica abierta, peso suspendido inercialmente basculando con m\u00ednima amplitud.",
         "Circunda suavemente la campana col\u00e1ndose entre tus codos posteriores pasando de mano al atraparla por bajo pierna.",
@@ -487,7 +487,7 @@
     "farmers_carry": {
       "name": "Farmer's Carry",
       "target": "Grip, Traps",
-      "img": "./assets/kb_farmers_carry.png",
+      "img": "./assets/kb_farmers_carry.png", "frames": ["./assets/kb_farmers_carry_left.png", "./assets/kb_farmers_carry.png", "./assets/kb_farmers_carry_right.png"],
       "instructions": [
         "Levanta sendas piezas sim\u00e9tricas de hierro utilizando perfecto esquema sentadilla base por flancos.",
         "Adopta extrema arrogancia y pecho altivo en total plomada.",
@@ -503,7 +503,7 @@
     "rack_walk": {
       "name": "Rack Walk",
       "target": "Core, Breathing",
-      "img": "./assets/kb_rack_walk.png",
+      "img": "./assets/kb_rack_walk.png", "frames": ["./assets/kb_rack_walk_left.png", "./assets/kb_rack_walk.png", "./assets/kb_rack_walk_right.png"],
       "instructions": [
         "Rebasa tu volumen montando doble (o sencilla) kettlebell amparadas fuertemente sobre el cu\u00f1o pectoral en Rack inamovible.",
         "Marcha manteniendo est\u00e1tica compresi\u00f3n respiratoria para soportar carga asfixiante.",
@@ -519,7 +519,7 @@
     "overhead_walk": {
       "name": "Overhead Walk",
       "target": "Shoulder Stability",
-      "img": "./assets/kb_overhead_walk.png",
+      "img": "./assets/kb_overhead_walk.png", "frames": ["./assets/kb_overhead_walk_left.png", "./assets/kb_overhead_walk.png", "./assets/kb_overhead_walk_right.png"],
       "instructions": [
         "Bloqueo de codo, nudillos empujando techo y latidos cardiacos tensos.",
         "Transporta paso a pasito masa sostenida combatiendo micro-inestabilidades din\u00e1micas de la campana superior rotante.",
