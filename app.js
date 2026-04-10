@@ -1196,9 +1196,25 @@ function renderProfile() {
     }
 
     let projectionStr = "";
-    if (hist.length > 1 && paceRate > 0) {
-        let proj8 = (w - (paceRate * 8)).toFixed(1);
-        projectionStr = `En 8 semanas podrías pesar ~${proj8} kg si mantienes este ritmo (${paceRate} kg/sem).`;
+    let absPace = Math.abs(parseFloat(paceRate));
+    if (hist.length > 1 && absPace > 0) {
+        if (targetW) {
+            let kgToGo = Math.abs(w - targetW);
+            let paceDir = parseFloat(paceRate); // positive = losing weight, negative = gaining
+            let goingRightDirection = (targetW < w && paceDir > 0) || (targetW > w && paceDir < 0);
+            
+            if (goingRightDirection) {
+                let weeksToGoal = (kgToGo / absPace).toFixed(1);
+                projectionStr = `¡Excelente! A este ritmo (${absPace} kg/sem), alcanzarás tu meta de ${targetW} kg en ~${weeksToGoal} semanas.`;
+            } else {
+                 let proj4 = Math.max(1, (w - (paceDir * 4))).toFixed(1);
+                 projectionStr = `A este ritmo, en 4 semanas podrías pesar ~${proj4} kg.`;
+            }
+        } else {
+            let paceDir = parseFloat(paceRate);
+            let proj4 = Math.max(1, (w - (paceDir * 4))).toFixed(1);
+            projectionStr = `A este ritmo (${absPace} kg/sem), en 4 semanas podrías pesar ~${proj4} kg.`;
+        }
     }
 
     let chartHTML = "";
