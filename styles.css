@@ -433,38 +433,50 @@ input[type=range]::-webkit-slider-runnable-track {
 /* --- Dark Mode Support --- */
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Colors adapted for Dark Mode */
-        --bg-color: #121212; /* Deep dark background */
-        --card-bg: #1E1E1E; /* Elevated dark card */
-        --card-bg-elevated: #282828; 
-        --card-bg-hover: #333333;
+        /* Premium Luxury Dark Petrol Palette for OneBell */
+        --bg-color: #0d1312; /* Deep dark petrol background */
+        --card-bg: #141c1a; /* Elevated dark card */
+        --card-bg-elevated: #1a2523; 
+        --card-bg-hover: #1f2e2b;
         
         /* Make Brand Colors pop on dark */
-        --primary-color: #6EB2A4; /* Was #1F3F3A, now soft readable green */
+        --primary-color: #6eb2a4; /* Soft readable green but keeping brand essence */
+        --accent-color: #ea632c; 
         
         /* Text inversions */
         --text-primary: #FFFFFF;
-        --text-secondary: #E0E0E0;
-        --text-tertiary: #A0A0A0;
+        --text-secondary: #90a19e;
+        --text-tertiary: #697a77;
         
         /* Softer shadows for dark mode */
-        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
-        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.6);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.7);
+    }
+    
+    body {
+        background: var(--bg-color);
+        color: var(--text-secondary);
     }
     
     .bottom-nav {
-        background: rgba(30, 30, 30, 0.85); /* Dark glassmorphism */
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(13, 19, 18, 0.9); /* Dark glassmorphism */
+        border-top: 1px solid rgba(255, 255, 255, 0.03);
     }
     
-    /* Ensure text readability overriding defaults */
-    .onboarding-title, .text-primary, h1, h2, h3, h4, h5 {
+    /* Extreme Priority over inline component classes so text shines */
+    h1, h2, h3, h4, h5,
+    .onboarding-title, .text-primary, .option-card-content h3 {
         color: var(--text-primary) !important;
     }
     
     .onboarding-subtitle, .option-card-content p {
         color: var(--text-secondary) !important;
+    }
+    
+    .option-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.05); /* Slight edge for depth */
     }
     
     /* Fix Option Cards in Dark Mode */
@@ -474,7 +486,7 @@ input[type=range]::-webkit-slider-runnable-track {
     }
     
     .btn-primary {
-        color: #121212;
+        color: #0d1312;
         font-weight: 800;
         background: var(--primary-color);
     }
