@@ -813,9 +813,9 @@ function renderProgram() {
             '</div>';
     }).join("");
 
-    let historyHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Recent History</h3>' +
+    let historyHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Entrenamientos Completados</h3>' +
         '<div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">' +
-            (historyEntries || '<p style="color: var(--text-tertiary); font-style: italic;">No workouts logged yet.</p>') +
+            (historyEntries.length > 0 ? historyEntries : '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; border: 1px dashed rgba(31,63,58,0.2);"><p style="color: var(--text-tertiary); font-size: 14px; font-weight: 600;">Aún no hay ejercicios registrados.</p></div>') +
         '</div>';
 
     mainContent.innerHTML = '<div class="page" style="padding-top: calc(var(--spacing-xl) + env(safe-area-inset-top, 20px)); padding-bottom: calc(var(--nav-height) + 20px);">' +
@@ -1056,7 +1056,7 @@ function renderProgress() {
         dateObj.setDate(dateObj.getDate() - (todayIndex - index));
         let dateStr = dateObj.toDateString();
         let isActive = historyDates.includes(dateStr);
-        let pct = isActive ? '100%' : '10%';
+        let pct = isActive ? '100%' : '5px';
         return { day: dStr, h: pct, active: isActive };
     });
 
@@ -1100,7 +1100,7 @@ function renderProgress() {
     if (stats.count >= 1) rawAchievements.push({icon: "check-circle", color: "#32d74b", bg: "rgba(50, 215, 75, 0.15)", title: "Primer Paso", desc: "Completaste tu primer entrenamiento."});
     if (stats.count >= 5) rawAchievements.push({icon: "award", color: "#DAA520", bg: "rgba(255, 215, 0, 0.15)", title: "5 Entrenamientos", desc: "La constancia es la clave."});
     if (streak.longest >= 3) rawAchievements.push({icon: "flame", color: "var(--accent-color)", bg: "rgba(234, 99, 44, 0.15)", title: "Racha de 3 Días", desc: "¡Estás imparable!"});
-    if (rawAchievements.length === 0) rawAchievements.push({icon: "lock", color: "var(--text-tertiary)", bg: "rgba(255,255,255,0.05)", title: "Aún no hay logros", desc: "Completa rutinas para desbloquear."});
+    if (rawAchievements.length === 0) rawAchievements.push({icon: "lock", color: "var(--text-tertiary)", bg: "rgba(255,255,255,0.05)", title: "Aún no hay logros", desc: "Logra 5 workouts para desbloquear tu primer logro."});
 
     let achievementsHTML = '<div style="margin-bottom: 32px;">' +
         '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Logros</h3>' +
