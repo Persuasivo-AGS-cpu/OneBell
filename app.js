@@ -797,7 +797,7 @@ window.renderExerciseDetail = function(id) {
         ]
     };
 
-    let html = '<div class="page no-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg-color); overflow-y: auto;">' +
+    let html = '<div class="page no-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg-color); overflow-y: auto; padding: 0;">' +
         // Header with back button
         '<header style="display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-lg) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md); background: var(--card-bg); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(31,63,58,0.05);">' +
             '<button onclick="document.getElementById(&apos;bottom-nav&apos;).style.display=&apos;flex&apos;; window.setActiveTab(&apos;exercises&apos;)" style="background: transparent; border: none; display: flex; align-items: center; justify-content: center; color: var(--primary-color); cursor: pointer;"><i data-lucide="arrow-left" style="width: 24px; height: 24px;"></i></button>' +
