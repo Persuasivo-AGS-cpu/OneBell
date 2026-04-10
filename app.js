@@ -1422,6 +1422,7 @@ function renderProfile() {
         '</div>' +
 
         '<button class="btn" onclick="window.resetApp()" style="margin-top: 32px; font-weight: 700; color: var(--accent-color); background: rgba(234, 99, 44, 0.1);">Rebuild Algorithmic Program</button>' +
+        '<button class="btn" onclick="window.loadDemoData()" style="margin-top: 16px; font-weight: 700; color: var(--success-color); background: rgba(50, 215, 75, 0.1);">Cargar Datos Muestra (Demo)</button>' +
         '<button class="btn" onclick="document.getElementById(&apos;reset-modal&apos;).style.display=&apos;flex&apos;" style="margin-top: 16px; font-weight: 700; color: #ff453a; background: rgba(255, 69, 58, 0.1);">Borrar Datos y Reiniciar App</button>' +
         '<div id="reset-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px);">' +
             '<div style="background: var(--card-bg); border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 320px; text-align: center; position: relative; border: 1px solid rgba(31,63,58,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.1);">' +
@@ -1437,6 +1438,43 @@ function renderProfile() {
     '</div>';
     lucide.createIcons();
 }
+
+window.loadDemoData = function() {
+    let baseDate = new Date();
+    state.userProfile.workoutHistory = [];
+    state.userProfile.weightHistory = [];
+    
+    // Inject 5 historical weight entries
+    let currentW = parseFloat(state.userProfile.bodyWeight) || 80;
+    for (let i = 4; i >= 0; i--) {
+        let d = new Date();
+        d.setDate(baseDate.getDate() - (i * 7)); // one per week
+        state.userProfile.weightHistory.push({
+            date: d.toISOString(),
+            weight: currentW + (i * 0.5) // Lost 0.5kg per week
+        });
+    }
+    
+    // Inject workouts (3 days ago, yesterday, today)
+    let d1 = new Date(); d1.setDate(baseDate.getDate() - 3);
+    let d2 = new Date(); d2.setDate(baseDate.getDate() - 1);
+    let d3 = new Date(); // today
+    
+    state.userProfile.workoutHistory.push({ id: 1, date: d1.toISOString(), name: "Fuerza Base", duration: 30, kcal: 320 });
+    state.userProfile.workoutHistory.push({ id: 2, date: d2.toISOString(), name: "Metabólico", duration: 20, kcal: 280 });
+    state.userProfile.workoutHistory.push({ id: 3, date: d3.toISOString(), name: "Full Body Prying", duration: 45, kcal: 450 });
+    
+    // Inject older workouts to reach the "5 workouts" achievement
+    let d4 = new Date(); d4.setDate(baseDate.getDate() - 10);
+    let d5 = new Date(); d5.setDate(baseDate.getDate() - 12);
+    state.userProfile.workoutHistory.push({ id: 4, date: d4.toISOString(), name: "Condición", duration: 25, kcal: 250 });
+    state.userProfile.workoutHistory.push({ id: 5, date: d5.toISOString(), name: "Intro a pesas", duration: 20, kcal: 200 });
+
+    state.userProfile.longestStreak = 3;
+    
+    saveState();
+    window.renderPage();
+};
 
 window.hardResetAppExecute = async function() {
     localStorage.clear();
