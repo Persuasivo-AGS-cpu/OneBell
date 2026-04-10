@@ -1,4 +1,4 @@
-const CACHE_NAME = 'onebell-cache-v19';
+const CACHE_NAME = 'onebell-cache-v20';
 const urlsToCache = [
   './',
   './index.html',

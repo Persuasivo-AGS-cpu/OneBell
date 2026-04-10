@@ -546,22 +546,22 @@
           "blocks": [
             {
               "exercise": "halo",
-              "reps": "3x10",
+              "reps": "3 x 10-15",
               "rest": "30s"
             },
             {
               "exercise": "goblet_squat",
-              "reps": "4x12",
+              "reps": "3 x 12 (Pesado)",
               "rest": "45s"
             },
             {
               "exercise": "swing",
-              "reps": "5x15",
+              "reps": "4 x 15 (Controlado)",
               "rest": "30s"
             },
             {
-              "exercise": "russian_twist",
-              "reps": "3x20",
+              "exercise": "farmers_carry",
+              "reps": "3 x 40 Pasos",
               "rest": "40s"
             }
           ]
@@ -580,17 +580,22 @@
           "blocks": [
             {
               "exercise": "clean_and_press",
-              "reps": "5x5",
+              "reps": "4 x 5-8 (RIR-1)",
+              "rest": "90s"
+            },
+            {
+              "exercise": "bent_over_row",
+              "reps": "3 x 8-10 (RIR-2)",
               "rest": "90s"
             },
             {
               "exercise": "goblet_squat",
-              "reps": "4x8",
+              "reps": "3 x 8 (Lento)",
               "rest": "60s"
             },
             {
               "exercise": "turkish_get_up",
-              "reps": "3x1",
+              "reps": "3 x 1/Lado",
               "rest": "60s"
             }
           ]
@@ -609,18 +614,23 @@
           "blocks": [
             {
               "exercise": "double_clean",
-              "reps": "5x5",
+              "reps": "5 x 5 (Explosivo)",
               "rest": "120s"
             },
             {
               "exercise": "double_front_squat",
-              "reps": "5x5",
+              "reps": "4 x 5-8 (RIR-1)",
               "rest": "120s"
             },
             {
               "exercise": "clean_and_press",
-              "reps": "3x8",
+              "reps": "3 x 5 (RIR-2)",
               "rest": "90s"
+            },
+            {
+              "exercise": "renegade_row",
+              "reps": "3 x 6-8 (Estricto)",
+              "rest": "120s"
             }
           ]
         }
