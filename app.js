@@ -1186,7 +1186,7 @@ function renderProfile() {
     let paceText = "Registra 2+ fechas";
     if(hist.length > 1) {
         let msDiff = new Date(hist[hist.length-1].date) - new Date(hist[0].date);
-        let weeks = (msDiff / (1000 * 60 * 60 * 24 * 7)) || 1;
+        let weeks = Math.max(1, msDiff / (1000 * 60 * 60 * 24 * 7));
         paceRate = (lost / weeks).toFixed(2);
         if(paceRate < 0) paceText = "Subiendo";
         else if(paceRate < 0.25) paceText = "Lento";
