@@ -25,24 +25,48 @@ window.generateAlgorithmicProgram = function(profile, exerciseDB) {
 
         let blocks = blockKeys.map((key) => {
             let ex = exerciseDB[key];
-            let sets = isStrength ? "4" : "5";
-            let reps = isStrength ? "6" : "15";
-            let rest = isStrength ? "90s" : "30s";
             
-            if(ex.focus === 'Conditioning') {
-                reps = "30s";
+            let baseSets = targetLevel === 'Beginner' ? 3 : (targetLevel === 'Intermediate' ? 4 : 5);
+            
+            let repsStandard, restStandard;
+            if (isStrength) {
+                repsStandard = targetLevel === 'Beginner' ? "6" : (targetLevel === 'Intermediate' ? "8" : "10");
+                restStandard = targetLevel === 'Beginner' ? "120s" : (targetLevel === 'Intermediate' ? "90s" : "60s");
+            } else { // Metabolic / Conditioning
+                repsStandard = targetLevel === 'Beginner' ? "12" : (targetLevel === 'Intermediate' ? "15" : "20");
+                restStandard = targetLevel === 'Beginner' ? "60s" : (targetLevel === 'Intermediate' ? "45s" : "30s");
+            }
+
+            let focus = ex.focus || "Strength";
+            let formattedReps = `${baseSets}x${repsStandard}`;
+            let rest = restStandard;
+
+            if(focus === 'Conditioning') {
+                let dur = targetLevel === 'Beginner' ? "30s" : (targetLevel === 'Intermediate' ? "45s" : "60s");
+                formattedReps = `${baseSets} x ${dur}`;
                 rest = "30s";
-            } else if(ex.focus === 'Core') {
-                reps = "20";
+            } else if(focus === 'Core') {
+                let repsCore = targetLevel === 'Beginner' ? "10" : (targetLevel === 'Intermediate' ? "15" : "20");
+                formattedReps = `${baseSets} x ${repsCore}`;
                 rest = "30s";
-            } else if (ex.focus === 'Power') {
-                reps = "5";
+            } else if (focus === 'Power') {
+                formattedReps = `${baseSets}x5`;
                 rest = "120s";
+            }
+
+            // Target naming checks for distance / isometric
+            let n = ex.name.toLowerCase();
+            if (n.includes('walk') || n.includes('carry') || n.includes('farmers')) {
+                let dist = targetLevel === 'Beginner' ? "15m" : (targetLevel === 'Intermediate' ? "20m" : "30m");
+                formattedReps = `${baseSets} x ${dist}`; 
+            } else if (n.includes('plank') || n.includes('hold') || n.includes('prying')) {
+                let dur = targetLevel === 'Beginner' ? "20s" : (targetLevel === 'Intermediate' ? "30s" : "45s");
+                formattedReps = `${baseSets} x ${dur}`;
             }
 
             return {
                 exercise: key,
-                reps: `${sets}x${reps}`,
+                reps: formattedReps,
                 rest: rest
             };
         });
@@ -436,12 +460,13 @@ function renderOnboarding() {
         '</div>';
         
         // Simulate AI fetch and compile
-        fetch('./routines.json')
+        fetch('./routines.json?v=' + new Date().getTime())
             .then(res => res.json())
             .then(data => {
                 state.routinesDB = data;
                 // Basic matching logic based on profile (fallback to iron clad)
                 state.currentProgram = window.generateAlgorithmicProgram(state.userProfile, data.exercises);
+                saveState();
                 
                 setTimeout(() => {
                     mainContent.innerHTML = '<div class="onboarding-container" style="justify-content: center; align-items: center; text-align: center; background: var(--bg-color);">' +
@@ -552,11 +577,11 @@ function renderOnboarding() {
 // ----- THE REST OF THE APP -----
 
 function renderHome() {
-    let name = state.userProfile.name || "Athlete";
-    let greeting = "Good morning";
+    let name = state.userProfile.name || "Atleta";
+    let greeting = "Buenos días";
     const hr = new Date().getHours();
-    if (hr >= 12 && hr < 18) greeting = "Good afternoon";
-    if (hr >= 18) greeting = "Good evening";
+    if (hr >= 12 && hr < 18) greeting = "Buenas tardes";
+    if (hr >= 18) greeting = "Buenas noches";
 
     // Use loaded AI program or fallback
     let programData = state.currentProgram || {
@@ -570,7 +595,7 @@ function renderHome() {
 
     let heroCardHTML = '<div class="workout-card" style="background: linear-gradient(145deg, ' + (programData.theme_color || 'var(--primary-color)') + ' 0%, #10211e 100%); border-radius: var(--border-radius-xl); padding: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 32px;">' +
         '<div style="position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: var(--accent-color); opacity: 0.15; filter: blur(40px); border-radius: 50%; pointer-events: none;"></div>' +
-        '<h3 style="font-size: 13px; font-weight: 800; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; position: relative;">Today&apos;s Workout</h3>' +
+        '<h3 style="font-size: 13px; font-weight: 800; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; position: relative;">Entrenamiento de Hoy</h3>' +
         '<h2 style="font-size: 28px; font-weight: 800; line-height: 1.1; color: #FFF; position: relative; margin-bottom: 12px; letter-spacing: -0.5px;">' + todaysWorkout.title + '</h2>' +
         '<div style="display: flex; gap: 8px; margin-bottom: 24px; position: relative;">' +
             '<span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #FFF;">' + todaysWorkout.duration + ' min</span>' +
@@ -584,18 +609,18 @@ function renderHome() {
                 }).join('') +
             '</ul>' +
         '</div>' +
-        '<button class="btn btn-accent" id="btn-start-workout" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.renderWorkoutPlayer(0)">' +
-            '<i data-lucide="play" fill="currentColor" style="width: 20px; height: 20px;"></i> START WORKOUT' +
+        '<button class="btn btn-accent" id="btn-start-workout" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.startWorkoutFlow()">' +
+            '<i data-lucide="play" fill="currentColor" style="width: 20px; height: 20px;"></i> INICIAR ENTRENAMIENTO' +
         '</button>' +
     '</div>';
 
     // Horizontal exercises dynamic map
     let horizontalCardsHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Movement Prep</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Resumen de Rutina</h3>' +
         '<div class="hide-scrollbar" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">' +
         todaysWorkout.blocks.map(b => {
             let ex = exercisesDB && exercisesDB[b.exercise] ? exercisesDB[b.exercise] : { name: b.exercise, img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400' };
-            return '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); overflow: hidden; min-width: 140px; flex-shrink: 0; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); scroll-snap-align: start;">' +
+            return '<div role="button" tabindex="0" onclick="window.showInfoModal(\'' + b.exercise + '\')" style="cursor: pointer; background: var(--card-bg); border-radius: var(--border-radius-md); overflow: hidden; min-width: 140px; flex-shrink: 0; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); scroll-snap-align: start; transition: transform 0.2s;">' +
                 '<div style="width: 100%; height: 100px; background: url(' + ex.img + ') center/cover;"></div>' +
                 '<div style="padding: 12px;">' +
                     '<h4 style="font-size: 14px; font-weight: 700; color: var(--primary-color); line-height: 1.2; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 34px;">' + ex.name + '</h4>' +
@@ -649,11 +674,11 @@ function renderHome() {
                 '<h1 style="font-size: 28px; font-weight: 800; margin-top: 4px; letter-spacing: -0.5px; color: var(--primary-color);">Ready to train?</h1>' +
             '</div>' +
             '<div style="display: flex; gap: 12px;">' +
-                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05); position: relative;" onclick="window.showNotification(`Time to rest! Make sure you drink water.`)">' +
+                '<div role="button" tabindex="0" style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05); position: relative;" onclick="window.showNotification(`Time to rest! Make sure you drink water.`)">' +
                     '<i data-lucide="bell" style="color: var(--primary-color); width: 22px; height: 22px; stroke-width: 2;"></i>' +
                     '<div style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; border: 2px solid var(--card-bg);"></div>' +
                 '</div>' +
-                '<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05);" onclick="window.setActiveTab(`profile`)">' +
+                '<div role="button" tabindex="0" style="width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05);" onclick="window.setActiveTab(`profile`)">' +
                     '<i data-lucide="user" style="color: var(--primary-color); width: 22px; height: 22px; stroke-width: 2;"></i>' +
                 '</div>' +
             '</div>' +
@@ -671,28 +696,53 @@ function renderProgram() {
     
     // Header dynamic
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Dynamic OneBell Method</h2>' +
-        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Your Program</h1>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Método Dinámico OneBell</h2>' +
+        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Tu Programa</h1>' +
     '</header>';
 
     // Phase Card dynamic
-    let phase = currentWeek <= 4 ? "Foundation Phase" : (currentWeek <= 8 ? "Strength Phase" : "Power Phase");
+    let phase = currentWeek <= 4 ? "Fase de Fundamentos" : (currentWeek <= 8 ? "Fase de Fuerza" : "Fase de Poder");
     let phaseCardHTML = '<div style="background: var(--card-bg-elevated); border-radius: var(--border-radius-lg); padding: 24px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.03);">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">Week ' + currentWeek + ' &mdash; ' + phase + '</h3>' +
-        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">' + (currentWeek <= 4 ? "Building kettlebell technique." : "Increasing mechanical load.") + '</p>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">Semana ' + currentWeek + ' &mdash; ' + phase + '</h3>' +
+        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">' + (currentWeek <= 4 ? "Construyendo técnica de kettlebell." : "Aumentando carga mecánica.") + '</p>' +
     '</div>';
 
-    // Weekly Calendar dynamic (Simplified logic for Beta)
-    const weekDays = ['M','T','W','T','F','S','S'];
+    // Fetch real state
+    let programData = state.currentProgram || {
+        program_name: "Foundation of Iron", theme_color: "var(--primary-color)",
+        workouts: [{ title: "Kettlebell Full Body", duration: 18, focus: "Fat burn", blocks: [
+            { exercise: "goblet_squat", reps: "3x10" }, { exercise: "swing", reps: "3x15" }
+        ]}]
+    };
+    let todaysWorkout = programData.workouts[0];
+    let exercisesDB = state.routinesDB ? state.routinesDB.exercises : null;
+
+    // Weekly Calendar dynamic
+    const weekDays = ['L','M','M','J','V','S','D'];
+    let d = new Date();
+    let todayIndex = (d.getDay() + 6) % 7; 
+    let historyDates = history.map(h => new Date(h.date).toDateString());
+    
     let calendarHTML = '<div style="margin-bottom: 32px;">' +
         '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-        weekDays.map((d, index) => {
+        weekDays.map((dStr, index) => {
             let bg = 'transparent', color = 'var(--text-tertiary)', border = 'none';
-            // Mock state for days
-            if (index < 2) { bg = 'var(--primary-color)'; color = '#FFF'; } 
+            // Find Date object for this day of current week
+            let dateObj = new Date();
+            dateObj.setDate(dateObj.getDate() - (todayIndex - index));
+            let dateStr = dateObj.toDateString();
+            
+            let isCompleted = historyDates.includes(dateStr);
+            let isToday = index === todayIndex;
+            
+            if (isCompleted) {
+                 bg = 'var(--primary-color)'; color = '#FFF';
+            } else if (isToday) {
+                 border = '2px solid var(--accent-color)'; color = 'var(--primary-color)';
+            }
             
             return '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">' +
-                '<span style="font-size: 12px; font-weight: 700; color: var(--text-tertiary);">' + d + '</span>' +
+                '<span style="font-size: 12px; font-weight: 700; color: ' + (isToday ? 'var(--accent-color)' : 'var(--text-tertiary)') + ';">' + dStr + '</span>' +
                 '<div style="width: 36px; height: 36px; border-radius: 50%; background: ' + bg + '; border: ' + border + '; display: flex; align-items: center; justify-content: center; color: ' + color + ';">' +
                     '<span style="font-weight: 700; font-size: 14px;"></span>' +
                 '</div>' +
@@ -700,22 +750,25 @@ function renderProgram() {
         }).join('') +
     '</div></div>';
 
-    // Today Workout Card
-    let todayWorkoutHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Today</h3>' +
-        '<div class="workout-card" style="background: linear-gradient(145deg, var(--primary-color) 0%, #10211e 100%); border-radius: var(--border-radius-xl); padding: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 32px;">' +
+    // Today Workout Card (Dynamic)
+    let todayWorkoutHTML = '<h3 style="font-size: 20px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Hoy</h3>' +
+        '<div class="workout-card" style="background: linear-gradient(145deg, ' + (programData.theme_color || 'var(--primary-color)') + ' 0%, #10211e 100%); border-radius: var(--border-radius-xl); padding: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 32px;">' +
         '<div style="position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: var(--accent-color); opacity: 0.15; filter: blur(40px); border-radius: 50%; pointer-events: none;"></div>' +
-        '<h2 style="font-size: 28px; font-weight: 800; line-height: 1.1; color: #FFF; position: relative; margin-bottom: 12px; letter-spacing: -0.5px;">Kettlebell Full Body</h2>' +
+        '<h2 style="font-size: 28px; font-weight: 800; line-height: 1.1; color: #FFF; position: relative; margin-bottom: 12px; letter-spacing: -0.5px;">' + todaysWorkout.title + '</h2>' +
         '<div style="display: flex; gap: 8px; margin-bottom: 24px; position: relative;">' +
-            '<span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #FFF;">18 min</span>' +
-            '<span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #FFF;">Fat burn</span>' +
+            '<span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #FFF;">' + todaysWorkout.duration + ' min</span>' +
+            '<span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #FFF;">' + todaysWorkout.focus + '</span>' +
         '</div>' +
         '<div style="background: rgba(0,0,0,0.2); border-radius: var(--border-radius-md); padding: 16px; margin-bottom: 24px; position: relative;">' +
             '<ul style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 600; line-height: 1.6;">' +
-                '<li>Goblet Squat</li><li>Kettlebell Swing</li><li>Russian Twist</li><li>Plank</li>' +
+                todaysWorkout.blocks.map(b => {
+                    let exName = exercisesDB && exercisesDB[b.exercise] ? exercisesDB[b.exercise].name : b.exercise;
+                    return '<li>' + exName + ' (' + b.reps + ')</li>';
+                }).join('') +
             '</ul>' +
         '</div>' +
-        '<button class="btn btn-accent" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.renderWorkoutPlayer(0)">' +
-            '<i data-lucide="play" fill="currentColor" style="width: 20px; height: 20px;"></i> START WORKOUT' +
+        '<button class="btn btn-accent" style="width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; box-shadow: 0 4px 15px rgba(234, 99, 44, 0.4);" onclick="window.startWorkoutFlow()">' +
+            '<i data-lucide="play" fill="currentColor" style="width: 20px; height: 20px;"></i> INICIAR ENTRENAMIENTO' +
         '</button>' +
     '</div>';
 
@@ -884,6 +937,7 @@ window.setExerciseFilter = function(filter) {
 
 function renderExercises() {
     const filters = ['Beginner', 'Intermediate', 'Advanced', 'Strength', 'Power', 'Core', 'Conditioning'];
+    const filterMap = { 'All': 'Todos', 'Beginner': 'Principiante', 'Intermediate': 'Intermedio', 'Advanced': 'Avanzado', 'Strength': 'Fuerza', 'Power': 'Poder', 'Core': 'Core', 'Conditioning': 'Cardio' };
     let exercisesList = [];
     if (state.routinesDB && state.routinesDB.exercises) {
         exercisesList = Object.keys(state.routinesDB.exercises).map(key => {
@@ -904,28 +958,28 @@ function renderExercises() {
 
     let html = '<div class="page" style="padding-top: calc(var(--spacing-xl) + env(safe-area-inset-top, 20px)); padding-bottom: calc(var(--nav-height) + 20px);">' +
         '<header style="margin-bottom: 24px;">' +
-            '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Exercises</h1>' +
+            '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Ejercicios</h1>' +
             '<div style="margin-top: 16px; background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(31,63,58,0.08); box-shadow: var(--shadow-sm);">' +
                 '<i data-lucide="search" style="color: var(--text-tertiary); width: 22px;"></i>' +
-                '<input type="text" placeholder="Search movements..." style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; width: 100%; outline: none; font-weight: 500;">' +
+                '<input type="text" placeholder="Buscar movimientos..." style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; width: 100%; outline: none; font-weight: 500;">' +
             '</div>' +
         '</header>' +
 
         // Filter Chips
         '<div class="hide-scrollbar" style="display: flex; gap: 12px; overflow-x: auto; margin-bottom: 32px; padding-bottom: 4px;">' +
-            '<div onclick="window.setExerciseFilter(\'All\')" style="background: ' + (window.activeFilter === 'All' ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === 'All' ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">All</div>' +
-            filters.map(f => '<div onclick="window.setExerciseFilter(\'' + f + '\')" style="background: ' + (window.activeFilter === f ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === f ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(31,63,58,0.05); box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">' + f + '</div>').join('') +
+            '<div role="button" tabindex="0" onclick="window.setExerciseFilter(\'All\')" style="background: ' + (window.activeFilter === 'All' ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === 'All' ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">Todos</div>' +
+            filters.map(f => '<div role="button" tabindex="0" onclick="window.setExerciseFilter(\'' + f + '\')" style="background: ' + (window.activeFilter === f ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === f ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(31,63,58,0.05); box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">' + filterMap[f] + '</div>').join('') +
         '</div>' +
 
         // Exercise Grid
         '<div style="display: flex; flex-direction: column; gap: 16px;">' +
             exercisesList.map(ex => 
-                '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; padding: 12px; gap: 16px; cursor: pointer;" onclick="window.renderExerciseDetail(&apos;' + ex.id + '&apos;)">' +
+                '<div role="button" tabindex="0" style="background: var(--card-bg); border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05); display: flex; align-items: center; padding: 12px; gap: 16px; cursor: pointer;" onclick="window.renderExerciseDetail(&apos;' + ex.id + '&apos;)">' +
                     '<div style="width: 80px; height: 80px; border-radius: var(--border-radius-sm); background: url(&apos;' + ex.img + '&apos;) center/cover no-repeat;"></div>' +
                     '<div style="flex: 1;">' +
                         '<h3 style="font-size: 17px; font-weight: 800; color: var(--primary-color); margin-bottom: 4px;">' + ex.name + '</h3>' +
-                        '<span style="font-size: 12px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(31,63,58,0.2); padding-right: 6px; margin-right: 6px;">' + ex.level + '</span>' +
-                        '<span style="font-size: 12px; font-weight: 800; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px;">' + ex.focus + '</span>' +
+                        '<span style="font-size: 12px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(31,63,58,0.2); padding-right: 6px; margin-right: 6px;">' + filterMap[ex.level] + '</span>' +
+                        '<span style="font-size: 12px; font-weight: 800; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px;">' + filterMap[ex.focus] + '</span>' +
                     '</div>' +
                     '<i data-lucide="chevron-right" style="color: var(--text-tertiary); width: 20px; height: 20px;"></i>' +
                 '</div>'
@@ -942,22 +996,22 @@ function renderProgress() {
     const stats = window.getStats();
     const streak = window.getStreak();
     const totalProgWorkouts = (state.userProfile.daysPerWeek || 3) * 12;
-    const progPct = Math.min(100, Math.round((state.userProfile.workoutHistory.length / totalProgWorkouts) * 100));
+    const progPct = Math.min(100, Math.round((stats.count / totalProgWorkouts) * 100));
 
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Week ' + currentWeek + ' of 12</h2>' +
-        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Your Progress</h1>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Semana ' + currentWeek + ' de 12</h2>' +
+        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Tu Progreso</h1>' +
     '</header>';
 
     let streakCardHTML = '<div style="background: linear-gradient(145deg, var(--accent-color) 0%, #FF8C61 100%); border-radius: var(--border-radius-lg); padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2); margin-bottom: 24px; color: #FFF; display: flex; align-items: center; justify-content: space-between;">' +
         '<div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: #FFF; opacity: 0.1; filter: blur(30px); border-radius: 50%;"></div>' +
         '<div style="position: relative; z-index: 2;">' +
-            '<h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: rgba(255,255,255,0.8);">Current Streak</h3>' +
+            '<h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: rgba(255,255,255,0.8);">Racha Actual</h3>' +
             '<div style="display: flex; align-items: baseline; gap: 8px;">' +
                 '<h2 style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px;">' + streak.current + '</h2>' +
-                '<span style="font-size: 18px; font-weight: 700;">days</span>' +
+                '<span style="font-size: 18px; font-weight: 700;">días</span>' +
             '</div>' +
-            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Longest streak: ' + streak.longest + ' days</p>' +
+            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Racha más larga: ' + streak.longest + ' días</p>' +
         '</div>' +
         '<i data-lucide="flame" fill="currentColor" style="width: 48px; height: 48px; color: #FFF; opacity: 0.9; position: relative; z-index: 2;"></i>' +
     '</div>';
@@ -965,11 +1019,11 @@ function renderProgress() {
     let statsHTML = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;">' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
             '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.count + '</div>' +
-            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Workouts</div>' +
+            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Entrenamientos</div>' +
         '</div>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
             '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.time + '</div>' +
-            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Training</div>' +
+            '<div style="font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Tiempo</div>' +
         '</div>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03);">' +
             '<div style="font-size: 20px; font-weight: 800; color: var(--primary-color);">' + stats.kcal + '</div>' +
@@ -977,13 +1031,12 @@ function renderProgress() {
         '</div>' +
     '</div>';
 
-    // Program Progress Card dynamic
     let programProgressHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Program Progress</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Avance del Programa</h3>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between;">' +
             '<div>' +
                 '<p style="font-size: 13px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Foundation of Iron</p>' +
-                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">' + progPct + '%<br><span style="color: var(--text-secondary); font-size: 18px;">Complete</span></h2>' +
+                '<h2 style="font-size: 24px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">' + progPct + '%<br><span style="color: var(--text-secondary); font-size: 18px;">Completado</span></h2>' +
             '</div>' +
             '<div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--primary-color) ' + progPct + '%, rgba(75, 208, 160, 0.1) 0); display: flex; align-items: center; justify-content: center; position: relative;">' +
                 '<div style="width: 66px; height: 66px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">' +
@@ -992,18 +1045,23 @@ function renderProgress() {
             '</div>' +
         '</div></div>';
 
-    // Activity bar chart
-    const chartBars = [
-        { day: 'M', h: '60%', active: true },
-        { day: 'T', h: '0%', active: false },
-        { day: 'W', h: '85%', active: true },
-        { day: 'T', h: '40%', active: true },
-        { day: 'F', h: '70%', active: true },
-        { day: 'S', h: '0%', active: false },
-        { day: 'S', h: '0%', active: false }
-    ];
+    // Activity bar chart dynamic
+    const weekDays = ['L','M','M','J','V','S','D'];
+    let d = new Date();
+    let todayIndex = (d.getDay() + 6) % 7; 
+    let historyDates = (state.userProfile.workoutHistory || []).map(h => new Date(h.date).toDateString());
+    
+    const chartBars = weekDays.map((dStr, index) => {
+        let dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() - (todayIndex - index));
+        let dateStr = dateObj.toDateString();
+        let isActive = historyDates.includes(dateStr);
+        let pct = isActive ? '100%' : '10%';
+        return { day: dStr, h: pct, active: isActive };
+    });
+
     let chartHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Weekly Activity</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Actividad Semanal</h3>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
             '<div style="display: flex; justify-content: space-between; align-items: flex-end; height: 120px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(31,63,58,0.05);">' +
                 chartBars.map(b => '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; height: 100%;">' +
@@ -1017,59 +1075,46 @@ function renderProgress() {
             '</div>' +
         '</div></div>';
 
-
-
     // Strength Progress
     let strengthHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Strength Progress</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Progreso de Fuerza</h3>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">' +
-                '<h4 style="font-size: 16px; font-weight: 800; color: var(--primary-color);">Goblet Squat</h4>' +
-                '<span style="background: rgba(50, 215, 75, 0.1); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="trending-up" style="width: 12px; height: 12px; stroke-width: 3;"></i> +4 reps</span>' +
+                '<h4 style="font-size: 16px; font-weight: 800; color: var(--primary-color);">Goblet Squat (Estimado)</h4>' +
+                '<span style="background: rgba(50, 215, 75, 0.1); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="trending-up" style="width: 12px; height: 12px; stroke-width: 3;"></i> + Volumen</span>' +
             '</div>' +
             '<div style="display: flex; flex-direction: column; gap: 12px;">' +
                 '<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px dashed rgba(31,63,58,0.08);">' +
-                    '<span style="font-size: 14px; font-weight: 600; color: var(--text-tertiary);">Week 1</span>' +
-                    '<span style="font-size: 15px; font-weight: 700; color: var(--text-secondary);">3 &times; 10</span>' +
+                    '<span style="font-size: 14px; font-weight: 600; color: var(--text-tertiary);">Semana 1</span>' +
+                    '<span style="font-size: 15px; font-weight: 700; color: var(--text-secondary);">3 &times; 6</span>' +
                 '</div>' +
                 '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-                    '<span style="font-size: 14px; font-weight: 600; color: var(--primary-color);">Week 3</span>' +
-                    '<span style="font-size: 15px; font-weight: 800; color: var(--primary-color);">3 &times; 14</span>' +
+                    '<span style="font-size: 14px; font-weight: 600; color: var(--primary-color);">Semana ' + currentWeek + '</span>' +
+                    '<span style="font-size: 15px; font-weight: 800; color: var(--primary-color);">4 &times; 8</span>' +
                 '</div>' +
             '</div>' +
         '</div></div>';
 
-    // Achievements
+    // Achievements Dynamic
+    let rawAchievements = [];
+    if (stats.count >= 1) rawAchievements.push({icon: "check-circle", color: "#32d74b", bg: "rgba(50, 215, 75, 0.15)", title: "Primer Paso", desc: "Completaste tu primer entrenamiento."});
+    if (stats.count >= 5) rawAchievements.push({icon: "award", color: "#DAA520", bg: "rgba(255, 215, 0, 0.15)", title: "5 Entrenamientos", desc: "La constancia es la clave."});
+    if (streak.longest >= 3) rawAchievements.push({icon: "flame", color: "var(--accent-color)", bg: "rgba(234, 99, 44, 0.15)", title: "Racha de 3 Días", desc: "¡Estás imparable!"});
+    if (rawAchievements.length === 0) rawAchievements.push({icon: "lock", color: "var(--text-tertiary)", bg: "rgba(255,255,255,0.05)", title: "Aún no hay logros", desc: "Completa rutinas para desbloquear."});
+
     let achievementsHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Achievements</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Logros</h3>' +
         '<div style="display: flex; flex-direction: column; gap: 12px;">' +
+            rawAchievements.map(ac => 
             '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-                '<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 215, 0, 0.15); display: flex; align-items: center; justify-content: center; color: #DAA520;">' +
-                    '<i data-lucide="award" style="width: 24px; height: 24px;"></i>' +
+                '<div style="width: 48px; height: 48px; border-radius: 50%; background: ' + ac.bg + '; display: flex; align-items: center; justify-content: center; color: ' + ac.color + ';">' +
+                    '<i data-lucide="' + ac.icon + '" style="width: 24px; height: 24px;"></i>' +
                 '</div>' +
                 '<div style="flex: 1;">' +
-                    '<h4 style="font-size: 15px; font-weight: 700; color: var(--primary-color);">First 5 Workouts</h4>' +
-                    '<p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px;">Completed Week 1 successfully.</p>' +
+                    '<h4 style="font-size: 15px; font-weight: 700; color: var(--primary-color);">' + ac.title + '</h4>' +
+                    '<p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px;">' + ac.desc + '</p>' +
                 '</div>' +
-            '</div>' +
-            '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-                '<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 215, 0, 0.15); display: flex; align-items: center; justify-content: center; color: #DAA520;">' +
-                    '<i data-lucide="star" style="width: 24px; height: 24px;" fill="currentColor"></i>' +
-                '</div>' +
-                '<div style="flex: 1;">' +
-                    '<h4 style="font-size: 15px; font-weight: 700; color: var(--primary-color);">10 Workouts Completed</h4>' +
-                    '<p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px;">Consistency is key.</p>' +
-                '</div>' +
-            '</div>' +
-            '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-                '<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(234, 99, 44, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-color);">' +
-                    '<i data-lucide="flame" style="width: 24px; height: 24px;" fill="currentColor"></i>' +
-                '</div>' +
-                '<div style="flex: 1;">' +
-                    '<h4 style="font-size: 15px; font-weight: 700; color: var(--primary-color);">5 Day Streak</h4>' +
-                    '<p style="font-size: 13px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px;">You&apos;re on fire!</p>' +
-                '</div>' +
-            '</div>' +
+            '</div>').join('') +
         '</div>' +
     '</div>';
 
@@ -1292,7 +1337,7 @@ function renderProfile() {
             '<span style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">' + d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + '</span>' +
             '<div style="display: flex; align-items: center; gap: 16px;">' +
                 '<span style="font-size: 16px; font-weight: 800; color: var(--primary-color);">' + log.weight + ' kg</span>' +
-                '<i data-lucide="trash-2" onclick="window.deleteWeightLog(' + i + ')" style="width: 16px; height: 16px; color: #ff453a; cursor: pointer;"></i>' +
+                '<i role="button" tabindex="0" aria-label="Erase log" data-lucide="trash-2" onclick="window.deleteWeightLog(' + i + ')" style="width: 16px; height: 16px; color: #ff453a; cursor: pointer;"></i>' +
             '</div>' +
         '</div>';
     }).join("");
@@ -1307,7 +1352,7 @@ function renderProfile() {
                         '<span style="font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.8);">kg</span>' +
                     '</div>' +
                 '</div>' +
-                '<div style="text-align: right; cursor: pointer;" onclick="window.promptSetTargetWeight()">' +
+                '<div role="button" tabindex="0" style="text-align: right; cursor: pointer;" onclick="window.promptSetTargetWeight()">' +
                     '<h3 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">Tu Meta <i data-lucide="edit-3" style="width: 12px; display: inline-block;"></i></h3>' +
                     '<h2 style="font-size: 20px; font-weight: 800; color: #FFF; margin: 0;">' + (targetW ? targetW + ' kg' : 'Fijar Meta') + '</h2>' +
                 '</div>' +
@@ -1370,7 +1415,7 @@ function renderProfile() {
             '</div>' +
             '<div style="padding: 20px; border-top: 1px solid rgba(31,63,58,0.05); display: flex; justify-content: space-between; align-items: center;">' +
                 '<span style="font-weight: 600; color: var(--primary-color); font-size: 16px;">I own 2 Kettlebells</span>' +
-                '<div style="position: relative; width: 50px; height: 30px; background: ' + (state.userProfile.hasDoubleKettlebells ? 'var(--primary-color)' : 'rgba(31,63,58,0.2)') + '; border-radius: 15px; cursor: pointer; transition: background 0.3s;" onclick="window.toggleDoubleBells()">' +
+                '<div role="button" tabindex="0" aria-label="Toggle Equipment" style="position: relative; width: 50px; height: 30px; background: ' + (state.userProfile.hasDoubleKettlebells ? 'var(--primary-color)' : 'rgba(31,63,58,0.2)') + '; border-radius: 15px; cursor: pointer; transition: background 0.3s;" onclick="window.toggleDoubleBells()">' +
                     '<div style="position: absolute; top: 3px; left: ' + (state.userProfile.hasDoubleKettlebells ? '23px' : '3px') + '; width: 24px; height: 24px; background: #FFF; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: left 0.3s;"></div>' +
                 '</div>' +
             '</div>' +
@@ -1411,9 +1456,118 @@ window.toggleDoubleBells = function() {
 
 window.resetApp = function() {
     state.hasCompletedOnboarding = false;
+    state.currentProgram = null; 
     onboardingStep = 0;
     saveState();
     renderPage();
+};
+
+window.playBeep = function(freq, type, duration, vol) {
+    let ctx = new (window.AudioContext || window.webkitAudioContext)();
+    let osc = ctx.createOscillator();
+    let gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+};
+
+window.startWorkoutFlow = function() {
+    let focus = state.currentProgram?.workouts?.[0]?.focus || "Strength";
+    let routineKey = "balanced";
+    if(focus.toLowerCase().includes("power")) routineKey = "power";
+    if(focus.toLowerCase().includes("metabolic") || focus.toLowerCase().includes("conditioning")) routineKey = "conditioning";
+    if(focus.toLowerCase().includes("strength") && state.currentProgram?.workouts?.[0]?.title?.toLowerCase().includes("lower")) routineKey = "lower_body";
+    if(focus.toLowerCase().includes("strength") && state.currentProgram?.workouts?.[0]?.title?.toLowerCase().includes("upper")) routineKey = "upper_body";
+    
+    if (state.routinesDB && state.routinesDB.warmup_routines) {
+        window.renderWarmupPlayer(routineKey, 0);
+    } else {
+        window.renderWorkoutPlayer(0);
+    }
+};
+
+window.warmupTimerInterval = null;
+
+window.renderWarmupPlayer = function(routineKey, stepIndex = 0) {
+    if (window.warmupTimerInterval) clearInterval(window.warmupTimerInterval);
+    document.getElementById('bottom-nav').style.display = 'none';
+
+    let routine = state.routinesDB.warmup_routines[routineKey] || state.routinesDB.warmup_routines["balanced"];
+    if (stepIndex >= routine.length) {
+        // Warmup finished, proceed to workout
+        window.renderWorkoutPlayer(0);
+        return;
+    }
+
+    let step = routine[stepIndex];
+    let ex = state.routinesDB.warmup_library[step.id];
+
+    let playerHTML = '<div class="page" style="padding: 0; display: flex; flex-direction: column; background: var(--bg-color); height: 100vh; overflow: hidden; justify-content: space-between;">' +
+        // Header
+        '<div style="padding: calc(var(--spacing-md) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md); display: flex; justify-content: space-between; align-items: center; z-index: 10; background: linear-gradient(180deg, var(--bg-color) 0%, rgba(13,17,16,0) 100%); position: absolute; top: 0; left: 0; right: 0;">' +
+            '<button class="icon-btn" onclick="window.renderWorkoutPlayer(0)" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: var(--text-primary); padding: 12px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;">Saltar</button>' +
+            '<div style="background: rgba(234, 99, 44, 0.15); color: var(--accent-color); font-size: 14px; font-weight: 800; padding: 10px 16px; border-radius: 24px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">' +
+                '<i data-lucide="flame" style="width: 16px; height: 16px;"></i> Paso ' + (stepIndex + 1) + '/' + routine.length +
+            '</div>' +
+        '</div>' +
+
+        // Media
+        '<div style="flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center; overflow: hidden;">' +
+            '<img src="' + ex.img + '" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;" />' +
+            '<div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(0deg, var(--bg-color) 0%, rgba(13,17,16,0) 100%); pointer-events: none;"></div>' +
+            
+            // Animated Timer Overlay
+            '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center;">' +
+                '<div class="warmup-timer-ring" style="width: 160px; height: 160px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); box-shadow: 0 0 40px rgba(234,99,44,0.3); position: relative;">' +
+                   '<svg width="160" height="160" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);"><circle cx="80" cy="80" r="76" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"></circle><circle id="warmup-timer-circle" cx="80" cy="80" r="76" stroke="var(--accent-color)" stroke-width="8" fill="none" stroke-dasharray="477.5" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s linear; stroke-linecap: round;"></circle></svg>' +
+                   '<span id="warmup-timer-text" style="font-size: 48px; font-weight: 900; color: #FFF; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">' + step.duration + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+
+        // Controls
+        '<div style="padding: var(--spacing-xl) var(--spacing-md) calc(var(--spacing-lg) + env(safe-area-inset-bottom, 20px)); background: var(--bg-color); z-index: 10; position: relative;">' +
+            '<h2 style="font-size: 28px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px;">' + ex.name + '</h2>' +
+            '<p style="font-size: 15px; color: var(--text-secondary); max-width: 90%; margin-bottom: 24px; line-height: 1.5; font-weight: 500;">' + ex.instruction + '</p>' +
+            '<div style="display: flex; gap: 12px;">' +
+                '<button class="btn btn-secondary" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex - 1 < 0 ? 0 : stepIndex - 1) + ')" style="flex: 1; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center;"><i data-lucide="skip-back" style="width: 20px;"></i> Atrás</button>' +
+                '<button class="btn btn-accent" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex + 1) + ')" style="flex: 2; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center; box-shadow: 0 4px 20px rgba(234, 99, 44, 0.4);">Siguiente <i data-lucide="skip-forward" style="width: 20px;"></i></button>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+
+    mainContent.innerHTML = playerHTML;
+    lucide.createIcons();
+
+    // Timer Logic
+    let timeLeft = step.duration;
+    let circle = document.getElementById("warmup-timer-circle");
+    let textNode = document.getElementById("warmup-timer-text");
+    let initialDash = 477.5; // 2 * PI * 76
+
+    window.warmupTimerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) {
+            textNode.innerText = timeLeft;
+            circle.style.strokeDashoffset = initialDash - (timeLeft / step.duration) * initialDash;
+            
+            // Audio beeps
+            if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                window.playBeep(440, 'sine', 0.1, 0.3);
+            }
+        } else {
+            clearInterval(window.warmupTimerInterval);
+            window.playBeep(880, 'sine', 0.5, 0.5); // End long beep
+            setTimeout(() => {
+                window.renderWarmupPlayer(routineKey, stepIndex + 1);
+            }, 600);
+        }
+    }, 1000);
 };
 
 window.renderWorkoutPlayer = function(blockIndex = 0) {

@@ -1,4 +1,126 @@
 {
+  "warmup_library": {
+    "neck_shoulder_rolls": {
+      "name": "Neck & Shoulder Rolls",
+      "instruction": "Libera tensión rotando suavemente el cuello y los hombros hacia atrás.",
+      "img": "./assets/warmup_neck_shoulder_rolls.png"
+    },
+    "arm_circles": {
+      "name": "Arm Circles",
+      "instruction": "Rotaciones amplias con los brazos para lubricar la articulación del hombro.",
+      "img": "./assets/warmup_arm_circles.png"
+    },
+    "hip_circles": {
+      "name": "Hip Circles",
+      "instruction": "Manos en la cadera, realiza círculos amplios para aflojar la zona lumbar y pélvica.",
+      "img": "./assets/warmup_hip_circles.png"
+    },
+    "prying_squat": {
+      "name": "Prying Squat",
+      "instruction": "Sentadilla profunda, usa los codos para empujar las rodillas hacia afuera suavemente.",
+      "img": "./assets/warmup_prying_squat.png"
+    },
+    "inchworms": {
+      "name": "Walkouts / Inchworms",
+      "instruction": "Camina con las manos hasta posición de plancha, estirando los isquiotibiales.",
+      "img": "./assets/warmup_inchworms.png"
+    },
+    "glute_bridges": {
+      "name": "Glute Bridges",
+      "instruction": "Tumbado bocarriba, eleva la cadera contrayendo fuertemente los glúteos.",
+      "img": "./assets/warmup_glute_bridges.png"
+    },
+    "dynamic_lunges": {
+      "name": "Spiderman Lunges",
+      "instruction": "Zancada profunda, bajando la cadera hacia el piso para abrir la ingle.",
+      "img": "./assets/warmup_dynamic_lunges.png"
+    },
+    "jumping_jacks": {
+      "name": "Jumping Jacks",
+      "instruction": "Aumenta la frecuencia cardíaca con saltos y apertura de brazos.",
+      "img": "./assets/warmup_jumping_jacks.png"
+    },
+    "high_knees": {
+      "name": "High Knees",
+      "instruction": "Correr en el sitio subiendo las rodillas lo más alto posible.",
+      "img": "./assets/warmup_high_knees.png"
+    },
+    "tspine_rotations": {
+      "name": "T-Spine Rotations",
+      "instruction": "En cuatro puntos, abre el pecho y lleva un brazo hacia el techo.",
+      "img": "./assets/warmup_tspine_rotations.png"
+    },
+    "downward_dog": {
+      "name": "Downward Dog",
+      "instruction": "Cadera arriba, estira la espalda y la cadena posterior de las piernas.",
+      "img": "./assets/warmup_downward_dog.png"
+    },
+    "shoulder_taps": {
+      "name": "Shoulder Taps",
+      "instruction": "En plancha alta, sin mover la cadera, toca el hombro opuesto.",
+      "img": "./assets/warmup_shoulder_taps.png"
+    },
+    "cossack_squat": {
+      "name": "Cossack Squat",
+      "instruction": "Zancada lateral profunda manteniendo una pierna extendida.",
+      "img": "./assets/warmup_cossack_squat.png"
+    },
+    "good_mornings": {
+      "name": "Good Mornings",
+      "instruction": "Bisagra de cadera con la espalda recta para activar femorales.",
+      "img": "./assets/warmup_good_mornings.png"
+    }
+  },
+  "warmup_routines": {
+    "balanced": [
+      { "id": "neck_shoulder_rolls", "duration": 30 },
+      { "id": "arm_circles", "duration": 30 },
+      { "id": "good_mornings", "duration": 30 },
+      { "id": "inchworms", "duration": 40 },
+      { "id": "downward_dog", "duration": 30 },
+      { "id": "jumping_jacks", "duration": 30 }
+    ],
+    "lower_body": [
+      { "id": "hip_circles", "duration": 30 },
+      { "id": "good_mornings", "duration": 30 },
+      { "id": "cossack_squat", "duration": 40 },
+      { "id": "prying_squat", "duration": 45 },
+      { "id": "glute_bridges", "duration": 40 },
+      { "id": "dynamic_lunges", "duration": 45 }
+    ],
+    "upper_body": [
+      { "id": "neck_shoulder_rolls", "duration": 30 },
+      { "id": "arm_circles", "duration": 30 },
+      { "id": "tspine_rotations", "duration": 40 },
+      { "id": "inchworms", "duration": 40 },
+      { "id": "downward_dog", "duration": 30 },
+      { "id": "shoulder_taps", "duration": 30 }
+    ],
+    "core": [
+      { "id": "arm_circles", "duration": 30 },
+      { "id": "good_mornings", "duration": 30 },
+      { "id": "inchworms", "duration": 40 },
+      { "id": "shoulder_taps", "duration": 40 },
+      { "id": "downward_dog", "duration": 30 },
+      { "id": "glute_bridges", "duration": 40 }
+    ],
+    "conditioning": [
+      { "id": "arm_circles", "duration": 30 },
+      { "id": "hip_circles", "duration": 30 },
+      { "id": "dynamic_lunges", "duration": 40 },
+      { "id": "high_knees", "duration": 30 },
+      { "id": "jumping_jacks", "duration": 30 },
+      { "id": "shoulder_taps", "duration": 30 }
+    ],
+    "power": [
+      { "id": "good_mornings", "duration": 30 },
+      { "id": "tspine_rotations", "duration": 40 },
+      { "id": "cossack_squat", "duration": 40 },
+      { "id": "prying_squat", "duration": 30 },
+      { "id": "jumping_jacks", "duration": 30 },
+      { "id": "high_knees", "duration": 30 }
+    ]
+  },
   "exercises": {
     "swing": {
       "name": "Kettlebell Swing",
@@ -174,7 +296,7 @@
     "halo": {
       "name": "KB Halos",
       "target": "Shoulder Mobility",
-      "img": "./assets/kb_halo.png", "frames": ["./assets/kb_halo_left.png", "./assets/kb_halo.png", "./assets/kb_halo_right.png"],
+      "img": "./assets/kb_halo_front_v2.png", "frames": ["./assets/kb_halo_front_v2.png", "./assets/kb_halo_side_v2.png", "./assets/kb_halo_back_v2.png"],
       "instructions": [
         "Sujeta la kettlebell al rev\u00e9s (de la bola) frente a tu pecho, agarrando los 'cuernos'.",
         "Mueve la pesa describiendo un c\u00edrculo estrecho alrededor de tu cabeza.",
