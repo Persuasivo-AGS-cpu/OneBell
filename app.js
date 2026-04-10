@@ -199,7 +199,7 @@ navItems.forEach(item => {
 function renderOnboarding() {
     if (onboardingStep === 0) {
         // Step 1 - Welcome
-        mainContent.innerHTML = '<div class="onboarding-container" style="justify-content: flex-end; padding-bottom: 40px; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, var(--bg-color) 90%), url(./assets/onboarding_hero_40yo_1775773829935.png) center center/cover no-repeat; position: relative;">' +
+        mainContent.innerHTML = '<div class="onboarding-container" style="justify-content: flex-end; padding-bottom: 40px; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, var(--bg-color) 90%), url(./assets/onboarding_hero_40yo.png) center center/cover no-repeat; position: relative;">' +
             '<div style="position: relative; z-index: 2; text-align: center;">' +
                 '<h1 class="onboarding-title" style="font-size: 42px;">One kettlebell.<br><span class="accent">Real strength.</span></h1>' +
                 '<p class="onboarding-subtitle" style="font-size: 18px; margin-top: 16px;">Train with a smart 12-week kettlebell program designed around one kettlebell.</p>' +
