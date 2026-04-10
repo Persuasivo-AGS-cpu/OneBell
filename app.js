@@ -226,8 +226,8 @@ window.showNotification = function(msg) {
     toast.style.left = '50%';
     toast.style.width = '90%';
     toast.style.transform = 'translateX(-50%) translateY(-100px)';
-    toast.style.background = 'var(--primary-color)';
-    toast.style.color = '#161618';
+    toast.style.background = '#111A18'; // Forced dark modern color
+    toast.style.color = '#FFF'; // High contrast white
     toast.style.padding = '16px 24px';
     toast.style.borderRadius = '20px';
     toast.style.fontWeight = '700';
@@ -1396,8 +1396,11 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
         '</div>' +
     '</div>';
 
+    // Remove nav padding from main content to avoid scroll overflow
+    mainContent.style.paddingBottom = '0';
+
     // Distraction-free, immersive full-screen container (Deep Petrol Green)
-    mainContent.innerHTML = infoModalHTML + quitModalHTML + '<div class="page hide-scrollbar" style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: #0A0F0E; color: #FFF; overflow-y: auto;">' +
+    mainContent.innerHTML = infoModalHTML + quitModalHTML + '<div class="page hide-scrollbar" style="height: 100%; display: flex; flex-direction: column; background: #0A0F0E; color: #FFF; overflow-y: auto;">' +
         
         // Top Header
         '<header style="display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-lg) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md);">' +
