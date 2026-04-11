@@ -743,15 +743,15 @@ function renderProgram() {
     
     // Header dynamic
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Método Dinámico OneBell</h2>' +
-        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Tu Programa</h1>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Dynamic Method</h2>' +
+        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px; color: var(--primary-color);">Your Program</h1>' +
     '</header>';
 
     // Phase Card dynamic
-    let phase = currentWeek <= 4 ? "Fase de Fundamentos" : (currentWeek <= 8 ? "Fase de Fuerza" : "Fase de Poder");
-    let phaseCardHTML = '<div style="background: var(--card-bg-elevated); border-radius: var(--border-radius-lg); padding: 24px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.03);">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">Semana ' + currentWeek + ' &mdash; ' + phase + '</h3>' +
-        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">' + (currentWeek <= 4 ? "Construyendo técnica de kettlebell." : "Aumentando carga mecánica.") + '</p>' +
+    let phase = currentWeek <= 4 ? "Foundation Phase" : (currentWeek <= 8 ? "Strength Phase" : "Power Phase");
+    let programFocusHTML = '<div style="background: var(--card-bg-elevated); border-radius: var(--border-radius-lg); padding: 24px; margin-bottom: 32px; border: 1px solid rgba(31,63,58,0.05);">' +
+        '<h3 style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; color: var(--primary-color);">Week ' + currentWeek + ' &mdash; ' + phase + '</h3>' +
+        '<p style="font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;">' + (currentWeek <= 4 ? "Building kettlebell technique." : "Increasing mechanical load.") + '</p>' +
     '</div>';
 
     // Fetch real state
@@ -774,7 +774,6 @@ function renderProgram() {
         '<div style="display: flex; justify-content: space-between; align-items: center;">' +
         weekDays.map((dStr, index) => {
             let bg = 'transparent', color = 'var(--text-tertiary)', border = 'none';
-            // Find Date object for this day of current week
             let dateObj = new Date();
             dateObj.setDate(dateObj.getDate() - (todayIndex - index));
             let dateStr = dateObj.toDateString();
@@ -791,7 +790,7 @@ function renderProgram() {
             return '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">' +
                 '<span style="font-size: 12px; font-weight: 700; color: ' + (isToday ? 'var(--accent-color)' : 'var(--text-tertiary)') + ';">' + dStr + '</span>' +
                 '<div style="width: 36px; height: 36px; border-radius: 50%; background: ' + bg + '; border: ' + border + '; display: flex; align-items: center; justify-content: center; color: ' + color + ';">' +
-                    '<span style="font-weight: 700; font-size: 14px;"></span>' +
+                    '<span style="font-weight: 700; font-size: 14px;">' + dateObj.getDate() + '</span>' +
                 '</div>' +
             '</div>';
         }).join('') +
@@ -866,7 +865,7 @@ function renderProgram() {
         '</div>';
 
     mainContent.innerHTML = '<div class="page" style="padding-top: calc(var(--spacing-xl) + env(safe-area-inset-top, 20px)); padding-bottom: calc(var(--nav-height) + 20px);">' +
-        headerHTML + phaseCardHTML + calendarHTML + todayWorkoutHTML + upcomingHTML + progressHTML + historyHTML +
+        headerHTML + programFocusHTML + calendarHTML + todayWorkoutHTML + upcomingHTML + progressHTML + historyHTML +
     '</div>';
     
     lucide.createIcons();
@@ -965,7 +964,7 @@ window.setExerciseFilter = function(filter) {
 
 function renderExercises() {
     const filters = ['Beginner', 'Intermediate', 'Advanced', 'Strength', 'Power', 'Core', 'Conditioning'];
-    const filterMap = { 'All': 'Todos', 'Beginner': 'Principiante', 'Intermediate': 'Intermedio', 'Advanced': 'Avanzado', 'Strength': 'Fuerza', 'Power': 'Poder', 'Core': 'Core', 'Conditioning': 'Cardio' };
+    const filterMap = { 'All': 'All', 'Beginner': 'Beginner', 'Intermediate': 'Intermediate', 'Advanced': 'Advanced', 'Strength': 'Strength', 'Power': 'Power', 'Core': 'Core', 'Conditioning': 'Cardio' };
     let exercisesList = [];
     if (state.routinesDB && state.routinesDB.exercises) {
         exercisesList = Object.keys(state.routinesDB.exercises).map(key => {
@@ -989,7 +988,7 @@ function renderExercises() {
             '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Ejercicios</h1>' +
             '<div style="margin-top: 16px; background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(31,63,58,0.08); box-shadow: var(--shadow-sm);">' +
                 '<i data-lucide="search" style="color: var(--text-tertiary); width: 22px;"></i>' +
-                '<input type="text" placeholder="Buscar movimientos..." style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; width: 100%; outline: none; font-weight: 500;">' +
+                '<input type="text" placeholder="Search exercises..." style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; width: 100%; outline: none; font-weight: 500;">' +
             '</div>' +
         '</header>' +
 
@@ -1027,19 +1026,19 @@ function renderProgress() {
     const progPct = Math.min(100, Math.round((stats.count / totalProgWorkouts) * 100));
 
     let headerHTML = '<header style="margin-bottom: 24px;">' +
-        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Semana ' + currentWeek + ' de 12</h2>' +
-        '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Tu Progreso</h1>' +
+        '<h2 style="font-size: 14px; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Week ' + currentWeek + ' of 12</h2>' +
+        '<h3 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 16px; color: var(--primary-color);">Your Progress</h3>' +
     '</header>';
 
     let streakCardHTML = '<div style="background: linear-gradient(145deg, var(--accent-color) 0%, #FF8C61 100%); border-radius: var(--border-radius-lg); padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2); margin-bottom: 24px; color: #FFF; display: flex; align-items: center; justify-content: space-between;">' +
         '<div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: #FFF; opacity: 0.1; filter: blur(30px); border-radius: 50%;"></div>' +
         '<div style="position: relative; z-index: 2;">' +
-            '<h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: rgba(255,255,255,0.8);">Racha Actual</h3>' +
+            '<h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: rgba(255,255,255,0.8);">Current Streak</h3>' +
             '<div style="display: flex; align-items: baseline; gap: 8px;">' +
                 '<h2 style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px;">' + streak.current + '</h2>' +
                 '<span style="font-size: 18px; font-weight: 700;">days</span>' +
             '</div>' +
-            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Longest streak: ' + streak.longest + ' días</p>' +
+            '<p style="font-size: 13px; font-weight: 600; margin-top: 8px; color: rgba(255,255,255,0.8);">Longest streak: ' + streak.longest + ' days</p>' +
         '</div>' +
         '<i data-lucide="flame" fill="currentColor" style="width: 48px; height: 48px; color: #FFF; opacity: 0.9; position: relative; z-index: 2;"></i>' +
     '</div>';
@@ -1073,39 +1072,67 @@ function renderProgress() {
             '</div>' +
         '</div></div>';
 
-    // Activity bar chart dynamic
-    const weekDays = ['M','T','W','T','F','S','S'];
+    // Activity Calendar dynamic
     let d = new Date();
-    let todayIndex = (d.getDay() + 6) % 7; 
+    let month = d.getMonth();
+    let year = d.getFullYear();
+    let firstDayObj = new Date(year, month, 1);
+    let lastDayObj = new Date(year, month + 1, 0);
+    let daysInMonth = lastDayObj.getDate();
+    let startDayOfWeek = (firstDayObj.getDay() + 6) % 7; // Monday=0
     let historyDates = (state.userProfile.workoutHistory || []).map(h => new Date(h.date).toDateString());
     
-    const chartBars = weekDays.map((dStr, index) => {
-        let dateObj = new Date();
-        dateObj.setDate(dateObj.getDate() - (todayIndex - index));
-        let dateStr = dateObj.toDateString();
-        let isActive = historyDates.includes(dateStr);
-        let pct = isActive ? '100%' : '5px';
-        return { day: dStr, h: pct, active: isActive };
-    });
+    // Target days distribution (0-6)
+    let targetDaysPerWeek = parseInt(state.userProfile.daysPerWeek) || 3;
+    let targetDaysArr = [];
+    if (targetDaysPerWeek >= 1) targetDaysArr.push(0); // M
+    if (targetDaysPerWeek >= 2) targetDaysArr.push(3); // T
+    if (targetDaysPerWeek >= 3) targetDaysArr.push(5); // S
+    if (targetDaysPerWeek >= 4) targetDaysArr.push(1); // T
+    if (targetDaysPerWeek >= 5) targetDaysArr.push(4); // F
+    if (targetDaysPerWeek >= 6) targetDaysArr.push(2); // W
+    if (targetDaysPerWeek >= 7) targetDaysArr.push(6); // S
+
+    let calendarDaysHTML = '';
+    for (let i = 0; i < startDayOfWeek; i++) {
+        calendarDaysHTML += '<div style="aspect-ratio: 1;"></div>';
+    }
+    const todayNum = d.getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+        let currentDateObj = new Date(year, month, i);
+        let dateStr = currentDateObj.toDateString();
+        let isCompleted = historyDates.includes(dateStr);
+        let dw = (currentDateObj.getDay() + 6) % 7;
+        let isTarget = targetDaysArr.includes(dw);
+        let isFuture = currentDateObj > new Date();
+
+        let bgColor = 'var(--card-bg-elevated)';
+        let boxShad = 'none';
+        let borderColor = isTarget ? 'rgba(75, 208, 160, 0.3)' : 'rgba(255,255,255,0.02)';
+        
+        if (isCompleted) {
+            bgColor = 'var(--primary-color)';
+            boxShad = '0 0 10px rgba(75, 208, 160, 0.4)';
+            borderColor = 'rgba(75, 208, 160, 0.8)';
+        }
+
+        calendarDaysHTML += '<div style="aspect-ratio: 1; border-radius: 6px; background: ' + bgColor + '; border: 1px solid ' + borderColor + '; box-shadow: ' + boxShad + ';"></div>';
+    }
 
     let chartHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Weekly Activity</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Monthly Activity</h3>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
-            '<div style="display: flex; justify-content: space-between; align-items: flex-end; height: 120px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(31,63,58,0.05);">' +
-                chartBars.map(b => '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; height: 100%;">' +
-                    '<div style="width: 100%; max-width: 24px; height: 100%; display: flex; align-items: flex-end; justify-content: center;">' +
-                        '<div style="width: 100%; background: ' + (b.active ? 'var(--primary-color)' : 'var(--card-bg-elevated)') + '; border-radius: 4px; height: ' + b.h + '; transition: height 0.5s ease;"></div>' +
-                    '</div>' +
-                '</div>').join('') +
+            '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px; text-align: center; color: var(--text-tertiary); font-size: 11px; font-weight: 700;">' +
+                '<span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>' +
             '</div>' +
-            '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-                chartBars.map(b => '<div style="width: 100%; text-align: center; font-size: 12px; font-weight: 700; color: ' + (b.active ? 'var(--primary-color)' : 'var(--text-tertiary)') + ';">' + b.day + '</div>').join('') +
+            '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">' +
+                calendarDaysHTML +
             '</div>' +
         '</div></div>';
 
     // Strength Progress
     let strengthHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Progreso de Fuerza</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Strength Progress</h3>' +
         '<div style="background: var(--card-bg); border-radius: var(--border-radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">' +
                 '<h4 style="font-size: 16px; font-weight: 800; color: var(--primary-color);">Goblet Squat (Estimado)</h4>' +
@@ -1128,10 +1155,10 @@ function renderProgress() {
     if (stats.count >= 1) rawAchievements.push({icon: "check-circle", color: "#32d74b", bg: "rgba(50, 215, 75, 0.15)", title: "First Step", desc: "You completed your first workout."});
     if (stats.count >= 5) rawAchievements.push({icon: "award", color: "#DAA520", bg: "rgba(255, 215, 0, 0.15)", title: "5 Workouts", desc: "Consistency is key."});
     if (streak.longest >= 3) rawAchievements.push({icon: "flame", color: "var(--accent-color)", bg: "rgba(234, 99, 44, 0.15)", title: "3-Day Streak", desc: "You're unstoppable!"});
-    if (rawAchievements.length === 0) rawAchievements.push({icon: "lock", color: "var(--text-tertiary)", bg: "rgba(255,255,255,0.05)", title: "Aún no hay logros", desc: "Logra 5 workouts para desbloquear tu primer logro."});
+    if (rawAchievements.length === 0) rawAchievements.push({icon: "lock", color: "var(--text-tertiary)", bg: "rgba(255,255,255,0.05)", title: "No achievements yet", desc: "Complete 5 workouts to unlock your first achievement."});
 
     let achievementsHTML = '<div style="margin-bottom: 32px;">' +
-        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Logros</h3>' +
+        '<h3 style="font-size: 18px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">Achievements</h3>' +
         '<div style="display: flex; flex-direction: column; gap: 12px;">' +
             rawAchievements.map(ac => 
             '<div style="background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); border: 1px solid rgba(31,63,58,0.05);">' +
@@ -1719,7 +1746,7 @@ window.renderWorkoutPlayer = function(blockIndex = 0) {
         // Bottom Controls
         '<div style="padding: 0 var(--spacing-md) calc(var(--spacing-xl) + env(safe-area-inset-bottom, 20px)) var(--spacing-md); margin-top: auto;">' +
             '<button class="btn btn-accent" style="width: 100%; border-radius: 16px; font-size: 18px; font-weight: 800; padding: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 30px rgba(234, 99, 44, 0.4); margin-bottom: 24px;" onclick="' + 
-                (blockIndex + 1 === totalBlocks ? 'window.finishWorkoutSession()' : ('window.startRestPhase(' + blockIndex + ', ' + parseInt((b.rest || "45").replace("s","")) + ')')) + '">' +
+                (blockIndex + 1 === totalBlocks ? 'window.finishWorkoutSession()' : ('window.startRestPhase(' + blockIndex + ', ' + parseInt(String(b.rest || "45").replace("s","")) + ')')) + '">' +
                 '<i data-lucide="check-circle" style="width: 24px; height: 24px; stroke-width: 2.5;"></i> ' + (blockIndex + 1 === totalBlocks ? 'FINISH WORKOUT' : 'COMPLETE SET') +
             '</button>' +
             '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">' +
