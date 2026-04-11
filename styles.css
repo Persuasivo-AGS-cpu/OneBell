@@ -648,7 +648,6 @@ input[type=range]::-webkit-slider-runnable-track {
     background: var(--accent-color);
     border-radius: 50%;
     z-index: -1;
-    animation: plasma-aura 2s infinite cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .fab-coach:active {

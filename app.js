@@ -460,8 +460,8 @@ function renderOnboarding() {
                 '<div class="radar-ring"></div>' +
                 '<i data-lucide="cpu" style="width: 42px; height: 42px; color: var(--accent-color); position: absolute;" class="ai-wow-pulse"></i>' +
             '</div>' +
-            '<h2 id="wow-title" style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; text-align:center; padding: 0 20px; height: 32px; transition: opacity 0.3s; letter-spacing:-0.4px;">Initializing AI Engine...</h2>' +
-            '<p id="wow-subtitle" style="color: var(--text-secondary); margin-bottom: 40px; font-size: 15px; height: 20px; transition: opacity 0.3s; opacity: 0.8;">Connecting to OneBell database</p>' +
+            '<h2 id="wow-title" style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; text-align:center; padding: 0 20px; min-height: 32px; transition: opacity 0.3s; letter-spacing:-0.4px;">Initializing AI Engine...</h2>' +
+            '<p id="wow-subtitle" style="color: var(--text-secondary); margin-bottom: 40px; font-size: 15px; min-height: 20px; transition: opacity 0.3s; opacity: 0.8; text-align: center;">Connecting to OneBell database</p>' +
             '<div style="width: 60%; max-width: 240px; height: 4px; background: var(--card-bg-elevated); border-radius: 2px; overflow: hidden;">' +
                 '<div id="wow-progress" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);"></div>' +
             '</div>' +
@@ -1800,16 +1800,7 @@ window.showInfoModal = function(exerciseId) {
     let instructionsHTML = ex.instructions ? ex.instructions.map(i => '<li style="margin-bottom:8px;">' + i + '</li>').join('') : '<li>Mantén una postura firme.</li><li>Ejecuta el movimiento con control.</li>';
     let mistakesHTML = ex.mistakes ? ex.mistakes.map(m => '<li style="margin-bottom:8px;">' + m + '</li>').join('') : '<li>Perder la tensión del core.</li>';
 
-    let mediaHTML = "";
-    if (ex.frames && ex.frames.length >= 3) {
-        mediaHTML = '<div class="stop-motion-container">' +
-            '<img src="' + ex.frames[0] + '" class="stop-motion-frame frame-1-of-3">' +
-            '<img src="' + ex.frames[1] + '" class="stop-motion-frame frame-2-of-3">' +
-            '<img src="' + ex.frames[2] + '" class="stop-motion-frame frame-3-of-3">' +
-        '</div>';
-    } else {
-         mediaHTML = '<div style="width: 100%; height: 200px; border-radius: 12px; margin-bottom: 24px; background: url(' + ex.img + ') center/cover; position: relative;"></div>';
-    }
+    let mediaHTML = '<div style="width: 100%; height: 200px; border-radius: 12px; margin-bottom: 24px; background: url(' + ex.img + ') center/cover; position: relative;"></div>';
 
     let infoModalHTML = '<div id="info-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); display: flex;">' +
         '<div style="background: #111A18; border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">' +
@@ -1895,6 +1886,22 @@ window.openHeadCoachChat = function() {
     modal.style.display = 'flex';
 };
 
+window.generateCoachResponse = function(text) {
+    let t = text.toLowerCase();
+    if(t.includes("dieta") || t.includes("comer") || t.includes("eat") || t.includes("food") || t.includes("diet") || t.includes("protein")) {
+        return "Nutrition is 80% of the game. Eat in a slight caloric surplus with 1.6g of protein per kg of bodyweight to build mass. Hydrate properly before our next session.";
+    } else if(t.includes("duele") || t.includes("pain") || t.includes("lesion") || t.includes("hurt") || t.includes("sore")) {
+        return "Stop immediately if you feel sharp pain. Check your form tracking. Muscle soreness (DOMS) is normal, but joint pain means you need to rest and stretch.";
+    } else if(t.includes("dias") || t.includes("days") || t.includes("progreso") || t.includes("resultados") || t.includes("results")) {
+        return "Train 3-4 days a week with maximum intensity. Consistency builds iron. Your Central Nervous System needs 48 hours to recover between heavy blocks.";
+    } else if(t.includes("pecho") || t.includes("chest") || t.includes("brazo") || t.includes("biceps") || t.includes("arms")) {
+        return "We do full-body explosive movements here, but to isolate arms and chest, add push-ups and strictly controlled rows. Respect the tension.";
+    } else if(t.includes("hola") || t.includes("hello") || t.includes("hi")) {
+        return "I am ready when you are. Focus on your breathing and let's get to work.";
+    }
+    return "I am your Senior Trainer. Keep your focus sharp, don't skip rests, and track your metrics. What else do you need?";
+};
+
 window.sendCoachMsg = function() {
     let input = document.getElementById('chat-input-msg');
     let text = input.value.trim();
@@ -1905,9 +1912,11 @@ window.sendCoachMsg = function() {
     input.value = '';
     
     setTimeout(() => {
-        history.innerHTML += `<div class="msg-bubble msg-coach">Stop immediately if you feel sharp pain. Check your hip hinge tracking. Focus on recovery and let's switch to Glute Bridges to activate the CNS.</div>`;
+        let response = window.generateCoachResponse(text);
+        history.innerHTML += `<div class="msg-bubble msg-coach">${response}</div>`;
         history.scrollTop = history.scrollHeight;
         if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        window.coachSpeak(response);
     }, 1000);
     history.scrollTop = history.scrollHeight;
 };
