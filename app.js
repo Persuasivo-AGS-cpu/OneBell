@@ -1916,7 +1916,8 @@ window.sendCoachMsg = function() {
         history.innerHTML += `<div class="msg-bubble msg-coach">${response}</div>`;
         history.scrollTop = history.scrollHeight;
         if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        window.coachSpeak(response);
+        // Audio apagado por solicitud del Jefe de Operaciones 
+        // window.coachSpeak(response);
     }, 1000);
     history.scrollTop = history.scrollHeight;
 };
