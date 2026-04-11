@@ -1840,8 +1840,23 @@ window.coachSpeak = function(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         let msg = new SpeechSynthesisUtterance(text);
-        msg.rate = 1.0;
-        msg.pitch = 0.9;
+        
+        // Select an energetic, young female voice
+        let voices = window.speechSynthesis.getVoices();
+        let femaleVoice = voices.find(v => 
+            v.name.includes("Samantha") || 
+            v.name.includes("Victoria") || 
+            v.name.includes("Karen") || 
+            (v.name.includes("Female") && v.lang.startsWith("en")) ||
+            (v.name.includes("Siri") && !v.name.includes("Male"))
+        );
+        
+        if (femaleVoice) {
+            msg.voice = femaleVoice;
+        }
+        
+        msg.rate = 1.05; // Slightly faster, dynamic
+        msg.pitch = 1.25; // Higher pitch for younger tone
         msg.lang = 'en-US';
         window.speechSynthesis.speak(msg);
     }
