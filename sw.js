@@ -1,9 +1,10 @@
-const CACHE_NAME = 'onebell-cache-v42';
+const CACHE_NAME = 'onebell-cache-v57';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './js/coach-ai.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap',
   'https://unpkg.com/lucide@latest',
   './routines.json',
