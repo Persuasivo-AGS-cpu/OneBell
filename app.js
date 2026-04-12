@@ -729,9 +729,7 @@ function renderHome() {
         '</header>' +
         quickStatsHTML + heroCardHTML + horizontalCardsHTML + progressHTML +
     '</div>' +
-    '<button class="fab-coach" onclick="window.openHeadCoachChat()">' +
-        '<i data-lucide="message-circle" style="width: 28px; height: 28px; color: white;"></i>' +
-    '</button>';
+
 
     lucide.createIcons();
 }
@@ -1845,8 +1843,7 @@ window.startRestPhase = function(blockIndex, restSeconds) {
     let exercisesDB = state.routinesDB ? state.routinesDB.exercises : null;
     if(exercisesDB && exercisesDB[nextExName]) nextExName = exercisesDB[nextExName].name;
     
-    window.coachSpeak("Set completed. Rest for " + restSeconds + " seconds. Up next: " + nextExName);
-    
+
     mainContent.innerHTML = `
         <div class="page hide-scrollbar" style="height: 100%; display: flex; flex-direction: column; background: #0A0F0E; color: #FFF;">
             <header style="display:flex; justify-content:flex-end; padding: calc(var(--spacing-lg) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md);">
@@ -1866,11 +1863,7 @@ window.startRestPhase = function(blockIndex, restSeconds) {
                     <h2 style="font-size:24px; font-weight:800; color:white;">${nextExName}</h2>
                 </div>
             </div>
-            
-            <button class="fab-coach" onclick="window.openHeadCoachChat()" style="position:absolute; bottom:40px; right:20px;">
-                <i data-lucide="shield-alert" style="width: 28px; height: 28px; color: white;"></i>
-            </button>
-        </div>
+    </div>
     `;
     lucide.createIcons();
     
@@ -1887,10 +1880,6 @@ window.startRestPhase = function(blockIndex, restSeconds) {
             textNode.innerText = timeLeft;
             circle.style.strokeDashoffset = initialDash - (timeLeft / restSeconds) * initialDash;
             
-            if (timeLeft === 3) window.coachSpeak("3");
-            if (timeLeft === 2) window.coachSpeak("2");
-            if (timeLeft === 1) window.coachSpeak("1");
-            
             if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
                 if (navigator.vibrate) navigator.vibrate(200);
                 window.playBeep(440, 'sine', 0.1, 0.5);
@@ -1899,7 +1888,6 @@ window.startRestPhase = function(blockIndex, restSeconds) {
             clearInterval(window.workoutTimerInterval);
             if(navigator.vibrate) navigator.vibrate([300, 100, 300]);
             window.playBeep(880, 'square', 0.3, 0.5);
-            window.coachSpeak("Go!");
             window.renderWorkoutPlayer(blockIndex + 1);
         }
     }, 1000);
