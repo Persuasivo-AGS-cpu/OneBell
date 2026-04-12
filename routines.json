@@ -2,72 +2,72 @@
   "warmup_library": {
     "neck_shoulder_rolls": {
       "name": "Neck & Shoulder Rolls",
-      "instruction": "Libera tensión rotando suavemente el cuello y los hombros hacia atrás.",
+      "instruction": "Release tension by gently rolling your neck and shoulders backwards.",
       "img": "./assets/warmup_neck_shoulder_rolls.png"
     },
     "arm_circles": {
       "name": "Arm Circles",
-      "instruction": "Rotaciones amplias con los brazos para lubricar la articulación del hombro.",
+      "instruction": "Wide arm circles to lubricate the shoulder joint.",
       "img": "./assets/warmup_arm_circles.png"
     },
     "hip_circles": {
       "name": "Hip Circles",
-      "instruction": "Manos en la cadera, realiza círculos amplios para aflojar la zona lumbar y pélvica.",
+      "instruction": "Hands on your hips, make wide circles to loosen your lower back and pelvis.",
       "img": "./assets/warmup_hip_circles.png"
     },
     "prying_squat": {
       "name": "Prying Squat",
-      "instruction": "Sentadilla profunda, usa los codos para empujar las rodillas hacia afuera suavemente.",
+      "instruction": "Deep squat, use your elbows to gently push your knees outward.",
       "img": "./assets/warmup_prying_squat.png"
     },
     "inchworms": {
       "name": "Walkouts / Inchworms",
-      "instruction": "Camina con las manos hasta posición de plancha, estirando los isquiotibiales.",
+      "instruction": "Walk your hands out to a plank position, stretching your hamstrings.",
       "img": "./assets/warmup_inchworms.png"
     },
     "glute_bridges": {
       "name": "Glute Bridges",
-      "instruction": "Tumbado bocarriba, eleva la cadera contrayendo fuertemente los glúteos.",
+      "instruction": "Lying on your back, push your hips up by squeezing your glutes tightly.",
       "img": "./assets/warmup_glute_bridges.png"
     },
     "dynamic_lunges": {
       "name": "Spiderman Lunges",
-      "instruction": "Zancada profunda, bajando la cadera hacia el piso para abrir la ingle.",
+      "instruction": "Deep lunge, dropping your hips to the floor to open up your groin.",
       "img": "./assets/warmup_dynamic_lunges.png"
     },
     "jumping_jacks": {
       "name": "Jumping Jacks",
-      "instruction": "Aumenta la frecuencia cardíaca con saltos y apertura de brazos.",
+      "instruction": "Raise your heart rate with jumping jacks.",
       "img": "./assets/warmup_jumping_jacks.png"
     },
     "high_knees": {
       "name": "High Knees",
-      "instruction": "Correr en el sitio subiendo las rodillas lo más alto posible.",
+      "instruction": "Run in place bringing your knees as high as possible.",
       "img": "./assets/warmup_high_knees.png"
     },
     "tspine_rotations": {
       "name": "T-Spine Rotations",
-      "instruction": "En cuatro puntos, abre el pecho y lleva un brazo hacia el techo.",
+      "instruction": "On all fours, open your chest and reach one arm towards the ceiling.",
       "img": "./assets/warmup_tspine_rotations.png"
     },
     "downward_dog": {
       "name": "Downward Dog",
-      "instruction": "Cadera arriba, estira la espalda y la cadena posterior de las piernas.",
+      "instruction": "Hips up, stretch your back and the posterior chain of your legs.",
       "img": "./assets/warmup_downward_dog.png"
     },
     "shoulder_taps": {
       "name": "Shoulder Taps",
-      "instruction": "En plancha alta, sin mover la cadera, toca el hombro opuesto.",
+      "instruction": "In a high plank, touch your opposite shoulder without shifting your hips.",
       "img": "./assets/warmup_shoulder_taps.png"
     },
     "cossack_squat": {
       "name": "Cossack Squat",
-      "instruction": "Zancada lateral profunda manteniendo una pierna extendida.",
+      "instruction": "Deep lateral lunge keeping one leg fully extended.",
       "img": "./assets/warmup_cossack_squat.png"
     },
     "good_mornings": {
       "name": "Good Mornings",
-      "instruction": "Bisagra de cadera con la espalda recta para activar femorales.",
+      "instruction": "Hinge at the hips with a straight back to activate your hamstrings.",
       "img": "./assets/warmup_good_mornings.png"
     }
   },

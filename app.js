@@ -983,7 +983,7 @@ function renderExercises() {
 
     let html = '<div class="page" style="padding-top: calc(var(--spacing-xl) + env(safe-area-inset-top, 20px)); padding-bottom: calc(var(--nav-height) + 20px);">' +
         '<header style="margin-bottom: 24px;">' +
-            '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Ejercicios</h1>' +
+            '<h1 style="font-size: 34px; font-weight: 800; letter-spacing: -1px; color: var(--primary-color);">Exercises</h1>' +
             '<div style="margin-top: 16px; background: var(--card-bg); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(31,63,58,0.08); box-shadow: var(--shadow-sm);">' +
                 '<i data-lucide="search" style="color: var(--text-tertiary); width: 22px;"></i>' +
                 '<input type="text" placeholder="Search exercises..." style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; width: 100%; outline: none; font-weight: 500;">' +
@@ -992,7 +992,7 @@ function renderExercises() {
 
         // Filter Chips
         '<div class="hide-scrollbar" style="display: flex; gap: 12px; overflow-x: auto; margin-bottom: 32px; padding-bottom: 4px;">' +
-            '<div role="button" tabindex="0" onclick="window.setExerciseFilter(\'All\')" style="background: ' + (window.activeFilter === 'All' ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === 'All' ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">Todos</div>' +
+            '<div role="button" tabindex="0" onclick="window.setExerciseFilter(\'All\')" style="background: ' + (window.activeFilter === 'All' ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === 'All' ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">All</div>' +
             filters.map(f => '<div role="button" tabindex="0" onclick="window.setExerciseFilter(\'' + f + '\')" style="background: ' + (window.activeFilter === f ? 'var(--primary-color)' : 'var(--card-bg)') + '; color: ' + (window.activeFilter === f ? '#FFF' : 'var(--text-secondary)') + '; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(31,63,58,0.05); box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;">' + filterMap[f] + '</div>').join('') +
         '</div>' +
 
@@ -1609,9 +1609,9 @@ window.renderWarmupPlayer = function(routineKey, stepIndex = 0) {
     let playerHTML = '<div class="page" style="padding: 0; display: flex; flex-direction: column; background: var(--bg-color); height: 100vh; overflow: hidden; justify-content: space-between;">' +
         // Header
         '<div style="padding: calc(var(--spacing-md) + env(safe-area-inset-top, 20px)) var(--spacing-md) var(--spacing-md) var(--spacing-md); display: flex; justify-content: space-between; align-items: center; z-index: 10; background: linear-gradient(180deg, var(--bg-color) 0%, rgba(13,17,16,0) 100%); position: absolute; top: 0; left: 0; right: 0;">' +
-            '<button class="icon-btn" onclick="window.renderWorkoutPlayer(0)" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: var(--text-primary); padding: 12px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;">Saltar</button>' +
+            '<button class="icon-btn" onclick="window.renderWorkoutPlayer(0)" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: var(--text-primary); padding: 12px 20px; border-radius: 24px; font-size: 14px; font-weight: 700; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;">Skip</button>' +
             '<div style="background: rgba(234, 99, 44, 0.15); color: var(--accent-color); font-size: 14px; font-weight: 800; padding: 10px 16px; border-radius: 24px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">' +
-                '<i data-lucide="flame" style="width: 16px; height: 16px;"></i> Paso ' + (stepIndex + 1) + '/' + routine.length +
+                '<i data-lucide="flame" style="width: 16px; height: 16px;"></i> Step ' + (stepIndex + 1) + '/' + routine.length +
             '</div>' +
         '</div>' +
 
@@ -1634,8 +1634,8 @@ window.renderWarmupPlayer = function(routineKey, stepIndex = 0) {
             '<h2 style="font-size: 28px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px;">' + ex.name + '</h2>' +
             '<p style="font-size: 15px; color: var(--text-secondary); max-width: 90%; margin-bottom: 24px; line-height: 1.5; font-weight: 500;">' + ex.instruction + '</p>' +
             '<div style="display: flex; gap: 12px;">' +
-                '<button class="btn btn-secondary" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex - 1 < 0 ? 0 : stepIndex - 1) + ')" style="flex: 1; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center;"><i data-lucide="skip-back" style="width: 20px;"></i> Atrás</button>' +
-                '<button class="btn btn-accent" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex + 1) + ')" style="flex: 2; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center; box-shadow: 0 4px 20px rgba(234, 99, 44, 0.4);">Siguiente <i data-lucide="skip-forward" style="width: 20px;"></i></button>' +
+                '<button class="btn btn-secondary" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex - 1 < 0 ? 0 : stepIndex - 1) + ')" style="flex: 1; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center;"><i data-lucide="skip-back" style="width: 20px;"></i> Back</button>' +
+                '<button class="btn btn-accent" onclick="window.renderWarmupPlayer(\'' + routineKey + '\', ' + (stepIndex + 1) + ')" style="flex: 2; padding: 20px; font-size: 16px; font-weight: 800; border-radius: 16px; display: flex; justify-content: center; gap: 8px; align-items: center; box-shadow: 0 4px 20px rgba(234, 99, 44, 0.4);">Next <i data-lucide="skip-forward" style="width: 20px;"></i></button>' +
             '</div>' +
         '</div>' +
     '</div>';
