@@ -1,0 +1,19 @@
+{
+  "name": "OneBell Coach",
+  "short_name": "OneBell",
+  "description": "Adaptive kettlebell strength coach for one-bell training.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050606",
+  "theme_color": "#ea632c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
