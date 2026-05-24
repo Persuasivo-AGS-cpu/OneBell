@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import BottomNav from './components/BottomNav';
@@ -14,6 +14,9 @@ import {
   updateSession,
 } from './services/appState';
 import { requestNotificationPermission } from './services/nudges';
+import { shouldHideBottomNav } from './services/navigation';
+import { getLanguage } from './services/copy';
+import { getThemePreference, resolveTheme } from './services/theme';
 import Exercises from './views/Exercises';
 import Home from './views/Home';
 import Onboarding from './views/Onboarding';
@@ -24,11 +27,23 @@ import Workout from './views/Workout';
 
 function App() {
   const [appState, setAppState] = useState(() => loadOneBellState());
+  const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
+    typeof window === 'undefined' || !window.matchMedia ? true : window.matchMedia('(prefers-color-scheme: dark)').matches,
+  );
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     saveOneBellState(appState);
   }, [appState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (event) => setSystemPrefersDark(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
 
   const coachPlan = useMemo(
     () =>
@@ -99,9 +114,13 @@ function App() {
     }));
   }, []);
 
+  const themePreference = getThemePreference(appState.userProfile);
+  const resolvedTheme = resolveTheme(themePreference, systemPrefersDark);
+  const language = getLanguage(appState.userProfile);
+
   if (!appState.hasCompletedOnboarding) {
     return (
-      <div className="app-container">
+      <div className="app-container" data-theme={resolvedTheme} data-theme-preference={themePreference}>
         <Routes>
           <Route path="/onboarding" element={<Onboarding onComplete={completeOnboarding} routines={routinesData} />} />
           <Route path="*" element={<Navigate to="/onboarding" replace />} />
@@ -111,7 +130,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container" data-theme={resolvedTheme} data-theme-preference={themePreference}>
       <AnimatePresence mode="wait">
         <Routes>
           <Route
@@ -129,7 +148,7 @@ function App() {
             path="/program"
             element={<Program appState={appState} coachPlan={coachPlan} onStartWorkout={beginWorkout} />}
           />
-          <Route path="/exercises" element={<Exercises routines={routinesData} coachPlan={coachPlan} />} />
+          <Route path="/exercises" element={<Exercises routines={routinesData} coachPlan={coachPlan} appState={appState} />} />
           <Route path="/progress" element={<Progress appState={appState} coachPlan={coachPlan} />} />
           <Route
             path="/profile"
@@ -160,7 +179,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
-      <BottomNav hidden={Boolean(appState.activeSession)} />
+      <BottomNav hidden={shouldHideBottomNav({ pathname: location.pathname, activeSession: appState.activeSession })} language={language} />
     </div>
   );
 }

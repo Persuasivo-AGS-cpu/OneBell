@@ -1,3 +1,5 @@
+import { workoutTheme } from './workoutCopy.js';
+
 const MODE_COPY = {
   progress: {
     body: 'Your last session felt easy, so the coach is nudging the plan forward.',
@@ -17,15 +19,37 @@ const MODE_COPY = {
   },
 };
 
-export function buildCoachExplanation({ coachPlan = {} } = {}) {
+const MODE_COPY_ES = {
+  progress: {
+    body: 'Tu última sesión se sintió fácil, así que el coach está empujando el plan hacia adelante.',
+    effect: 'Espera un poco más de trabajo, un poco menos de descanso o ambos.',
+  },
+  deload: {
+    body: 'Tu feedback reciente dice que la recuperación necesita prioridad hoy.',
+    effect: 'El coach baja la presión para mantener alta la calidad.',
+  },
+  protect: {
+    body: 'Reportaste dolor, así que el coach está protegiendo la sesión.',
+    effect: 'El volumen y el trabajo pesado bajan hasta que la señal mejore.',
+  },
+  hold: {
+    body: 'Tu perfil e historial reciente sostienen una progresión normal hoy.',
+    effect: 'El coach mantiene el estímulo estable y fácil de leer.',
+  },
+};
+
+export function buildCoachExplanation({ coachPlan = {}, language = 'en' } = {}) {
   const mode = coachPlan.adaptation?.mode || 'hold';
-  const copy = MODE_COPY[mode] || MODE_COPY.hold;
-  const theme = coachPlan.variety?.theme || coachPlan.workout?.theme || 'today';
+  const copySet = language === 'es' ? MODE_COPY_ES : MODE_COPY;
+  const copy = copySet[mode] || copySet.hold;
+  const theme = workoutTheme(coachPlan.variety?.theme || coachPlan.workout?.theme || (language === 'es' ? 'hoy' : 'today'), language);
   const blocks = coachPlan.workout?.blocks?.length || 0;
 
   return {
-    title: 'Coach changed this because...',
+    title: language === 'es' ? 'El coach cambió esto porque...' : 'Coach changed this because...',
     body: copy.body,
-    effect: `${copy.effect} Today's stimulus is ${theme} across ${blocks} blocks.`,
+    effect: language === 'es'
+      ? `${copy.effect} El estímulo de hoy es ${theme} en ${blocks} bloques.`
+      : `${copy.effect} Today's stimulus is ${theme} across ${blocks} blocks.`,
   };
 }

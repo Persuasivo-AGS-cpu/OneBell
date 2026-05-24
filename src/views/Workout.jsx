@@ -3,8 +3,9 @@ import { CheckCircle2, ChevronLeft, ChevronRight, Info, Timer, X } from 'lucide-
 
 import { Button, Modal } from '../components/ui';
 import { getLanguage, t } from '../services/copy';
-import { getExerciseInsight } from '../services/exerciseGuide';
+import { getExerciseText } from '../services/exerciseGuide';
 import { buildFinishSummary, buildSessionFocus, calculateSessionProgress } from '../services/workoutExperience';
+import { workoutFocus, workoutReps, workoutTheme, workoutTitle } from '../services/workoutCopy';
 
 export default function Workout({ appState, routines, onSessionPatch, onFinish }) {
   const session = appState.activeSession;
@@ -12,14 +13,15 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
   const language = getLanguage(appState.userProfile);
   const block = workout.blocks[session.blockIndex];
   const exercise = routines.exercises[block?.exercise] || {};
-  const exerciseInsight = getExerciseInsight(block?.exercise, exercise);
+  const exerciseInsight = getExerciseText(block?.exercise, exercise, language);
   const progress = calculateSessionProgress({ session, workout, warmupCount: 3 });
   const sessionFocus = buildSessionFocus({
     block,
-    exercise,
+    exercise: exerciseInsight,
     insight: exerciseInsight,
     blockIndex: session.blockIndex,
     totalBlocks: workout.blocks.length,
+    language,
   });
   const [infoOpen, setInfoOpen] = useState(false);
   const [feedback, setFeedback] = useState('correct');
@@ -53,6 +55,7 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
       workout,
       completedBlocks: session.completedBlocks || [],
       feedback,
+      language,
     });
 
     return (
@@ -60,37 +63,37 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
         <SessionProgress value={100} />
         <section className="ob-finish">
           <CheckCircle2 size={56} />
-          <p className="caption">Workout complete</p>
-          <h1>{workout.title}</h1>
+          <p className="caption">{t('workout.complete', language)}</p>
+          <h1>{workoutTitle(workout.title, language)}</h1>
           <div className="ob-finish-proof">
             <div>
-              <span>Work done</span>
+              <span>{t('workout.workDone', language)}</span>
               <strong>{finishSummary.completedLabel}</strong>
             </div>
             <div>
-              <span>Duration</span>
+              <span>{t('workout.duration', language)}</span>
               <strong>{finishSummary.durationLabel}</strong>
             </div>
             <div>
-              <span>Focus</span>
-              <strong>{finishSummary.focusLabel}</strong>
+              <span>{t('workout.focus', language)}</span>
+              <strong>{workoutFocus(finishSummary.focusLabel, language)}</strong>
             </div>
           </div>
           <p>{finishSummary.coachNote}</p>
           <div className="ob-feedback-grid">
             {[
-              ['easy', 'Easy'],
-              ['correct', 'Correct'],
-              ['brutal', 'Brutal'],
-              ['pain', 'Pain'],
+              ['easy', t('workout.easy', language)],
+              ['correct', t('workout.correct', language)],
+              ['brutal', t('workout.brutal', language)],
+              ['pain', t('workout.pain', language)],
             ].map(([id, label]) => (
               <button key={id} className={feedback === id ? 'is-active' : ''} onClick={() => setFeedback(id)} type="button">
                 {label}
               </button>
             ))}
           </div>
-          <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Optional note for the coach" />
-          <Button onClick={() => onFinish(feedback, notes)}>Save session</Button>
+          <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={t('workout.optionalNote', language)} />
+          <Button onClick={() => onFinish(feedback, notes)}>{t('workout.saveSession', language)}</Button>
         </section>
       </main>
     );
@@ -102,13 +105,13 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
     return (
       <main className="ob-session">
         <SessionProgress value={progress} />
-        <SessionHeader label={`Warmup ${(session.warmupIndex || 0) + 1}/${warmup.length}`} onQuit={() => onSessionPatch({ phase: 'exercise' })} />
+        <SessionHeader label={t('workout.warmup', language, { current: (session.warmupIndex || 0) + 1, total: warmup.length })} onQuit={() => onSessionPatch({ phase: 'exercise' })} language={language} />
         <section className="ob-session__center ob-session__center--exercise">
           <div className="ob-session__media">
             <Timer size={54} />
           </div>
-          <h1>{warmupInfo.name || 'Warmup'}</h1>
-          <p>{warmupInfo.instruction || 'Move with control and prepare the joints you are about to load.'}</p>
+          <h1>{localizeWarmupName(warmupInfo.name, language) || t('workout.warmupFallback', language)}</h1>
+          <p>{localizeWarmupInstruction(warmupInfo.instruction, language) || t('workout.warmupInstructionFallback', language)}</p>
           <strong className="ob-session__target">{countdown}s</strong>
         </section>
         <div className="ob-session__controls">
@@ -121,7 +124,7 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
             }
           >
             <ChevronLeft size={20} />
-            Back
+            {t('common.back', language)}
           </Button>
           <Button
             onClick={() => {
@@ -129,7 +132,7 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
               onSessionPatch(next >= warmup.length ? { phase: 'exercise' } : { warmupIndex: next });
             }}
           >
-            Next
+            {t('common.next', language)}
             <ChevronRight size={20} />
           </Button>
         </div>
@@ -143,19 +146,19 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
     return (
       <main className="ob-session">
         <SessionProgress value={progress} />
-        <SessionHeader label="Recovery phase" onQuit={() => onSessionPatch({ phase: 'exercise' })} />
+        <SessionHeader label={t('workout.recoveryPhase', language)} onQuit={() => onSessionPatch({ phase: 'exercise' })} language={language} />
         <section className="ob-session__center">
           <div className="ob-set-locked">
             <CheckCircle2 size={18} />
-            <span>{completedExercise.name || 'Set'} locked in</span>
+            <span>{t('workout.lockedIn', language, { name: getExerciseText(completedBlock?.exercise, completedExercise, language).name || 'Set' })}</span>
           </div>
           <div className="ob-rest-ring">
             <strong>{countdown}</strong>
-            <span>sec</span>
+            <span>{t('workout.seconds', language)}</span>
           </div>
-          <p className="caption">Up next</p>
-          <h1>{exercise.name || block.exercise}</h1>
-          <p>Breathe through your nose, shake out tension, keep the next set crisp.</p>
+          <p className="caption">{t('workout.upNext', language)}</p>
+          <h1>{exerciseInsight.name || block.exercise}</h1>
+          <p>{t('workout.restCue', language)}</p>
         </section>
         <div className="ob-session__controls">
           <Button onClick={() => onSessionPatch({ phase: 'exercise' })}>{t('workout.startNextSet', language)}</Button>
@@ -168,15 +171,16 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
     <main className="ob-session">
       <SessionProgress value={progress} />
       <SessionHeader
-        label={`Exercise ${session.blockIndex + 1}/${workout.blocks.length}`}
+        label={t('workout.exerciseCount', language, { current: session.blockIndex + 1, total: workout.blocks.length })}
         onQuit={() => onSessionPatch({ phase: 'finish' })}
+        language={language}
       />
         <section className="ob-session__center">
           <button className="ob-info-link" type="button" onClick={() => setInfoOpen(true)}>
             <Info size={18} />
             {t('workout.formGuide', language)}
           </button>
-          <p className="ob-session__theme">{workout.theme}</p>
+          <p className="ob-session__theme">{workoutTheme(workout.theme, language)}</p>
           <div className="ob-set-focus">
             <span>{sessionFocus.label}</span>
             <strong>{sessionFocus.headline}</strong>
@@ -188,9 +192,9 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
             </div>
           </div>
           <div className="ob-session__media ob-session__media--exercise">
-            <span>{exerciseInsight.pattern}</span>
+            <span>{exerciseInsight.patternLabel}</span>
           </div>
-        <h1>{exercise.name || block.exercise}</h1>
+        <h1>{exerciseInsight.name || block.exercise}</h1>
         <p>{exerciseInsight.intent}</p>
         <div className="ob-session__cue">
           <strong>{t('workout.coachCue', language)}</strong>
@@ -198,11 +202,11 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
         </div>
         <div className="ob-session__stats">
           <div>
-            <span>Target</span>
-            <strong>{block.reps}</strong>
+            <span>{t('workout.target', language)}</span>
+            <strong>{workoutReps(block.reps, language)}</strong>
           </div>
           <div>
-            <span>Rest</span>
+            <span>{t('workout.rest', language)}</span>
             <strong>{block.restSeconds}s</strong>
           </div>
         </div>
@@ -214,7 +218,7 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
           disabled={session.blockIndex === 0}
         >
           <ChevronLeft size={20} />
-          Previous
+          {t('common.previous', language)}
         </Button>
         <Button
           onClick={() => {
@@ -238,21 +242,21 @@ export default function Workout({ appState, routines, onSessionPatch, onFinish }
       </div>
 
       {infoOpen && (
-        <Modal title={exercise.name || block.exercise} onClose={() => setInfoOpen(false)}>
+        <Modal title={exerciseInsight.name || block.exercise} onClose={() => setInfoOpen(false)} closeLabel={t('common.closeModal', language)}>
           <div className="ob-info-section">
             <div className="ob-coach-cue">
-              <strong>Priority cue</strong>
+              <strong>{t('exercises.priorityCue', language)}</strong>
               <span>{exerciseInsight.coachCue}</span>
             </div>
-            <h3>Instructions</h3>
+            <h3>{t('exercises.instructions', language)}</h3>
             <ol>
-              {(exercise.instructions || ['Keep your core braced.', 'Move with control.', 'Stop if pain appears.']).map((item) => (
+              {(exerciseInsight.instructions || [t('workout.fallbackInstruction1', language), t('workout.fallbackInstruction2', language), t('workout.fallbackInstruction3', language)]).map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ol>
-            <h3>Common mistakes</h3>
+            <h3>{t('exercises.commonMistakes', language)}</h3>
             <ul>
-              {([exerciseInsight.priorityMistake, ...(exercise.mistakes || ['Rushing reps.', 'Losing posture.']).filter((item) => item !== exerciseInsight.priorityMistake)]).map((item) => (
+              {([exerciseInsight.priorityMistake, ...(exerciseInsight.mistakes || [t('workout.fallbackMistake1', language), t('workout.fallbackMistake2', language)]).filter((item) => item !== exerciseInsight.priorityMistake)]).map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
@@ -271,16 +275,59 @@ function SessionProgress({ value }) {
   );
 }
 
-function SessionHeader({ label, onQuit }) {
+function SessionHeader({ label, onQuit, language = 'en' }) {
   return (
     <header className="ob-session__header">
-      <button type="button" onClick={onQuit} aria-label="Close session">
+      <button type="button" onClick={onQuit} aria-label={t('workout.closeSession', language)}>
         <X size={20} />
       </button>
       <span>{label}</span>
       <div />
     </header>
   );
+}
+
+function localizeWarmupName(name, language) {
+  if (language !== 'es') return name;
+  const copy = {
+    'Neck & Shoulder Rolls': 'Círculos de cuello y hombros',
+    'Arm Circles': 'Círculos de brazos',
+    'Hip Circles': 'Círculos de cadera',
+    'Good Mornings': 'Good mornings',
+    'Prying Squat': 'Sentadilla prying',
+    'Glute Bridges': 'Puentes de glúteo',
+    'T-Spine Rotations': 'Rotaciones torácicas',
+    'Walkouts / Inchworms': 'Walkouts / inchworms',
+    'Spiderman Lunges': 'Zancadas spiderman',
+    'High Knees': 'Rodillas altas',
+    'Jumping Jacks': 'Jumping jacks',
+    'Shoulder Taps': 'Toques de hombros',
+    'Downward Dog': 'Downward dog',
+    'Cossack Squat': 'Sentadilla cossack',
+  };
+  return copy[name] || name;
+}
+
+function localizeWarmupInstruction(instruction, language) {
+  if (language !== 'es') return instruction;
+  if (!instruction) return instruction;
+  const copy = {
+    'Release tension by gently rolling your neck and shoulders backwards.': 'Libera tensión rodando cuello y hombros suavemente hacia atrás.',
+    'Wide arm circles to lubricate the shoulder joint.': 'Haz círculos amplios con los brazos para preparar hombros.',
+    'Hands on your hips, make wide circles to loosen your lower back and pelvis.': 'Manos en la cadera, haz círculos amplios para soltar pelvis y espalda baja.',
+    'Deep squat, use your elbows to gently push your knees outward.': 'En sentadilla profunda, usa los codos para abrir suavemente las rodillas.',
+    'Walk your hands out to a plank position, stretching your hamstrings.': 'Camina con las manos hasta plancha y estira isquios.',
+    'Lying on your back, push your hips up by squeezing your glutes tightly.': 'Acostado boca arriba, sube la cadera apretando glúteos.',
+    'Deep lunge, dropping your hips to the floor to open up your groin.': 'Haz una zancada profunda y baja la cadera para abrir la ingle.',
+    'Raise your heart rate with jumping jacks.': 'Eleva pulsaciones con jumping jacks.',
+    'Run in place bringing your knees as high as possible.': 'Corre en tu lugar subiendo las rodillas lo más alto posible.',
+    'On all fours, open your chest and reach one arm towards the ceiling.': 'En cuatro puntos, abre el pecho y lleva un brazo hacia el techo.',
+    'Hips up, stretch your back and the posterior chain of your legs.': 'Cadera arriba, estira espalda y cadena posterior.',
+    'In a high plank, touch your opposite shoulder without shifting your hips.': 'En plancha alta, toca el hombro contrario sin mover la cadera.',
+    'Deep lateral lunge keeping one leg fully extended.': 'Haz una zancada lateral profunda manteniendo una pierna extendida.',
+    'Hinge at the hips with a straight back to activate your hamstrings.': 'Haz bisagra de cadera con espalda recta para activar isquios.',
+  };
+  return copy[instruction] || instruction;
 }
 
 function useCountdown({ seconds, active, onDone }) {

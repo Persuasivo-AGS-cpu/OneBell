@@ -45,11 +45,11 @@ export function ProgressRing({ value = 0, label }) {
   );
 }
 
-export function Modal({ title, children, onClose }) {
+export function Modal({ title, children, onClose, closeLabel = 'Close modal' }) {
   return (
     <div className="ob-modal" role="dialog" aria-modal="true" aria-label={title}>
       <div className="ob-modal__panel">
-        <button className="ob-icon-button" type="button" onClick={onClose} aria-label="Close modal">
+        <button className="ob-icon-button" type="button" onClick={onClose} aria-label={closeLabel}>
           x
         </button>
         <h2>{title}</h2>

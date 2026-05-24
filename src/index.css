@@ -25,6 +25,26 @@
   --nav-safe: env(safe-area-inset-bottom, 18px);
 }
 
+.app-container[data-theme="light"] {
+  --bg-color: #f7f3ea;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: rgba(255, 252, 246, 0.96);
+  --surface-soft: rgba(40, 31, 22, 0.055);
+  --border-color: rgba(64, 48, 32, 0.14);
+  --primary-color: #1f1d19;
+  --secondary-color: #65685f;
+  --muted-color: #8a877e;
+  --accent-onebell: #d95724;
+  --accent-red: #cf2451;
+  --accent-green: #3d7f21;
+  --accent-blue: #087c95;
+  --success: #2f9464;
+  --danger: #d23f38;
+  --ember: #b85b18;
+  --steel: #657675;
+  --shadow: 0 18px 44px rgba(81, 56, 28, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -62,11 +82,20 @@ button {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  color: var(--primary-color);
   background:
     radial-gradient(circle at 14% -8%, rgba(255, 122, 45, 0.28), transparent 34%),
     radial-gradient(circle at 92% 16%, rgba(138, 160, 160, 0.16), transparent 31%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 12px),
     linear-gradient(180deg, #11100d 0%, #050505 74%);
+}
+
+.app-container[data-theme="light"] {
+  background:
+    radial-gradient(circle at 18% -8%, rgba(217, 87, 36, 0.18), transparent 32%),
+    radial-gradient(circle at 95% 8%, rgba(8, 124, 149, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(44, 33, 22, 0.04) 0 1px, transparent 1px 13px),
+    linear-gradient(180deg, #fbf8f1 0%, var(--bg-color) 78%);
 }
 
 .view-container {
@@ -183,6 +212,10 @@ button {
   transition: transform 180ms ease, opacity 180ms ease, background 180ms ease;
 }
 
+.app-container[data-theme="light"] .ob-button {
+  color: #fff;
+}
+
 .ob-button--primary {
   background: var(--accent-onebell);
   color: #fff;
@@ -194,6 +227,11 @@ button {
   color: var(--primary-color);
   border: 1px solid var(--border-color);
   box-shadow: none;
+}
+
+.app-container[data-theme="light"] .ob-button--secondary {
+  background: rgba(31, 29, 25, 0.055);
+  color: var(--primary-color);
 }
 
 .ob-button:active {
@@ -264,6 +302,14 @@ button {
   box-shadow: var(--shadow);
 }
 
+.app-container[data-theme="light"] .ob-daily-card {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.2), rgba(255, 252, 246, 0.92)),
+    radial-gradient(circle at 78% 14%, rgba(217, 87, 36, 0.24), transparent 24%),
+    radial-gradient(circle at 30% 50%, rgba(8, 124, 149, 0.1), transparent 34%),
+    linear-gradient(145deg, #fffaf1 0%, #f4ebdf 48%, #eadcca 100%);
+}
+
 .ob-daily-card::before {
   content: "";
   position: absolute;
@@ -317,6 +363,15 @@ button {
   border-radius: 32px 32px 6px 6px;
 }
 
+.app-container[data-theme="light"] .ob-kettlebell-mark {
+  opacity: 0.22;
+  filter: drop-shadow(0 18px 24px rgba(83, 52, 22, 0.28));
+}
+
+.app-container[data-theme="light"] .ob-kettlebell-mark::before {
+  border-color: rgba(31, 29, 25, 0.32);
+}
+
 .ob-kettlebell-mark span {
   position: absolute;
   left: 10px;
@@ -327,6 +382,12 @@ button {
   background:
     radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.35), transparent 20%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06));
+}
+
+.app-container[data-theme="light"] .ob-kettlebell-mark span {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.8), transparent 20%),
+    linear-gradient(145deg, rgba(31, 29, 25, 0.24), rgba(31, 29, 25, 0.06));
 }
 
 .ob-daily-card p {
@@ -427,6 +488,11 @@ button {
   font-size: 12px;
   font-weight: 800;
   text-transform: capitalize;
+}
+
+.app-container[data-theme="light"] .ob-pill-row span,
+.app-container[data-theme="light"] .ob-filter-row button:not(.is-active) {
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .ob-two-column {
@@ -541,6 +607,10 @@ button {
   text-align: center;
 }
 
+.app-container[data-theme="light"] .ob-ring > div {
+  background: #fffaf3;
+}
+
 .ob-ring strong {
   font-size: 18px;
   font-weight: 900;
@@ -565,6 +635,12 @@ button {
   justify-content: space-around;
   padding: 8px 10px var(--nav-safe);
   border-top: 1px solid var(--border-color);
+}
+
+.app-container[data-theme="light"] .ob-bottom-nav {
+  background: rgba(255, 252, 246, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .ob-bottom-nav a {
@@ -732,6 +808,12 @@ button {
   color: var(--primary-color);
 }
 
+.app-container[data-theme="light"] .ob-session {
+  background:
+    radial-gradient(circle at 50% -10%, rgba(217, 87, 36, 0.18), transparent 34%),
+    linear-gradient(180deg, #fbf7ef, #efe4d5 78%);
+}
+
 .ob-session-progress {
   position: absolute;
   z-index: 2;
@@ -740,6 +822,10 @@ button {
   width: 100%;
   height: 4px;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.app-container[data-theme="light"] .ob-session-progress {
+  background: rgba(31, 29, 25, 0.08);
 }
 
 .ob-session-progress span {
@@ -767,6 +853,11 @@ button {
   background: rgba(255, 255, 255, 0.08);
   color: var(--primary-color);
   cursor: pointer;
+}
+
+.app-container[data-theme="light"] .ob-session__header button,
+.app-container[data-theme="light"] .ob-icon-button {
+  background: rgba(255, 255, 255, 0.64);
 }
 
 .ob-session__header span {
@@ -827,6 +918,13 @@ button {
   box-shadow: var(--shadow);
 }
 
+.app-container[data-theme="light"] .ob-session__media {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(217, 87, 36, 0.2), transparent 38%),
+    repeating-linear-gradient(135deg, rgba(31, 29, 25, 0.035) 0 1px, transparent 1px 16px),
+    var(--surface-strong);
+}
+
 .ob-session__theme {
   color: var(--ember);
   font-size: 12px;
@@ -845,6 +943,12 @@ button {
     rgba(255, 255, 255, 0.06);
   padding: 15px;
   text-align: left;
+}
+
+.app-container[data-theme="light"] .ob-set-focus {
+  background:
+    radial-gradient(circle at 8% 20%, rgba(217, 87, 36, 0.1), transparent 34%),
+    rgba(255, 255, 255, 0.66);
 }
 
 .ob-set-focus > span,
@@ -886,6 +990,10 @@ button {
   font-weight: 850;
 }
 
+.app-container[data-theme="light"] .ob-set-focus__badges em {
+  background: rgba(255, 255, 255, 0.74);
+}
+
 .ob-session__media--exercise span {
   max-width: 84%;
   font-size: 30px;
@@ -893,6 +1001,10 @@ button {
   line-height: 1;
   color: rgba(255, 255, 255, 0.26);
   text-transform: uppercase;
+}
+
+.app-container[data-theme="light"] .ob-session__media--exercise span {
+  color: rgba(31, 29, 25, 0.24);
 }
 
 .ob-session__target {
@@ -918,6 +1030,11 @@ button {
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.06);
   padding: 16px;
+}
+
+.app-container[data-theme="light"] .ob-session__stats div,
+.app-container[data-theme="light"] .ob-finish-proof div {
+  background: rgba(255, 255, 255, 0.66);
 }
 
 .ob-session__stats span {
@@ -949,6 +1066,13 @@ button {
   -webkit-backdrop-filter: blur(18px);
 }
 
+.app-container[data-theme="light"] .ob-session__controls {
+  border-top-color: rgba(64, 48, 32, 0.12);
+  background:
+    linear-gradient(180deg, rgba(247, 243, 234, 0), rgba(247, 243, 234, 0.9) 20%),
+    rgba(255, 252, 246, 0.86);
+}
+
 .ob-session__controls .ob-button:only-child {
   grid-column: 1 / -1;
 }
@@ -962,6 +1086,10 @@ button {
   background: rgba(255, 255, 255, 0.08);
   color: var(--primary-color);
   padding: 8px 14px;
+}
+
+.app-container[data-theme="light"] .ob-info-link {
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .ob-rest-ring {
@@ -1049,6 +1177,7 @@ button {
 .ob-filter-row .is-active {
   background: var(--accent-onebell);
   color: #fff;
+  border-color: var(--accent-onebell);
 }
 
 .ob-finish textarea {
@@ -1060,6 +1189,10 @@ button {
   background: rgba(255, 255, 255, 0.07);
   color: var(--primary-color);
   padding: 14px;
+}
+
+.app-container[data-theme="light"] .ob-finish textarea {
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .ob-filter-row {
@@ -1180,6 +1313,11 @@ button {
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
 }
 
+.app-container[data-theme="light"] .ob-exercise-card__mark {
+  color: #833414;
+  box-shadow: 0 12px 24px rgba(81, 56, 28, 0.12);
+}
+
 .ob-exercise-card > div:not(.ob-exercise-card__mark),
 .ob-exercise-card > strong {
   position: relative;
@@ -1280,6 +1418,12 @@ button {
   line-height: 1.4;
 }
 
+.app-container[data-theme="light"] .ob-coach-cue,
+.app-container[data-theme="light"] .ob-session__cue,
+.app-container[data-theme="light"] .ob-set-locked {
+  background: rgba(61, 127, 33, 0.08);
+}
+
 .ob-phase-list .is-active {
   border-color: rgba(234, 99, 44, 0.46);
 }
@@ -1306,6 +1450,13 @@ button {
     linear-gradient(145deg, #ea632c 0%, #9f2f22 100%);
 }
 
+.app-container[data-theme="light"] .ob-streak-card {
+  color: #fff;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.24), transparent 24%),
+    linear-gradient(145deg, #d95724 0%, #8f3320 100%);
+}
+
 .ob-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -1325,6 +1476,10 @@ button {
 
 .ob-calendar span {
   background: rgba(255, 255, 255, 0.055);
+}
+
+.app-container[data-theme="light"] .ob-calendar span {
+  background: rgba(31, 29, 25, 0.055);
 }
 
 .ob-calendar .is-complete {
@@ -1348,6 +1503,10 @@ button {
   background: rgba(0, 0, 0, 0.72);
 }
 
+.app-container[data-theme="light"] .ob-modal {
+  background: rgba(31, 29, 25, 0.36);
+}
+
 .ob-modal__panel {
   position: relative;
   width: min(100%, 440px);
@@ -1358,6 +1517,10 @@ button {
   background: #111514;
   padding: 26px;
   box-shadow: var(--shadow);
+}
+
+.app-container[data-theme="light"] .ob-modal__panel {
+  background: #fffaf3;
 }
 
 .ob-modal__panel .ob-icon-button {
@@ -1400,6 +1563,9 @@ button {
 
 .ob-field-group > span,
 .ob-range-row > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: var(--secondary-color);
   font-size: 13px;
   font-weight: 850;
@@ -1409,6 +1575,10 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+}
+
+.ob-segmented--2 {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .ob-segmented button {
@@ -1422,9 +1592,14 @@ button {
   padding: 0 8px;
 }
 
+.app-container[data-theme="light"] .ob-segmented button:not(.is-active) {
+  background: rgba(31, 29, 25, 0.045);
+}
+
 .ob-segmented .is-active {
   background: var(--accent-onebell);
   color: #fff;
+  border-color: var(--accent-onebell);
 }
 
 .ob-range-row {
@@ -1442,6 +1617,38 @@ button {
   color: var(--primary-color);
 }
 
+.ob-bmi-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 14px;
+}
+
+.app-container[data-theme="light"] .ob-bmi-card {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.ob-bmi-card span {
+  color: var(--secondary-color);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.ob-bmi-card strong {
+  color: var(--primary-color);
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.ob-bmi-card p {
+  color: var(--secondary-color);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .ob-save-link {
   display: inline-flex;
   align-items: center;
@@ -1453,6 +1660,11 @@ button {
   color: #080909;
   font-weight: 900;
   text-decoration: none;
+}
+
+.app-container[data-theme="light"] .ob-save-link {
+  background: var(--accent-onebell);
+  color: #fff;
 }
 
 @media (min-width: 760px) {

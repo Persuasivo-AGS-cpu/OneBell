@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Calendar, Dumbbell, BarChart2 } from 'lucide-react';
+import { t } from '../services/copy';
 
-export default function BottomNav({ hidden = false }) {
+export default function BottomNav({ hidden = false, language = 'en' }) {
   if (hidden) return null;
 
   const triggerHaptic = () => {
@@ -12,10 +13,10 @@ export default function BottomNav({ hidden = false }) {
   };
 
   const navItems = [
-    { to: '/', icon: Home, label: 'Home' },
-    { to: '/program', icon: Calendar, label: 'Program' },
-    { to: '/exercises', icon: Dumbbell, label: 'Exercises' },
-    { to: '/progress', icon: BarChart2, label: 'Progress' },
+    { to: '/', icon: Home, label: t('nav.home', language) },
+    { to: '/program', icon: Calendar, label: t('nav.program', language) },
+    { to: '/exercises', icon: Dumbbell, label: t('nav.exercises', language) },
+    { to: '/progress', icon: BarChart2, label: t('nav.progress', language) },
   ];
 
   return (

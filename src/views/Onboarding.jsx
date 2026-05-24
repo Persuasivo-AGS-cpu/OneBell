@@ -4,19 +4,22 @@ import { AnimatePresence, motion as Motion } from 'framer-motion';
 
 import { buildCoachPlan } from '../services/coachEngine';
 import { Button } from '../components/ui';
+import { getLanguage, t } from '../services/copy';
+import { getExerciseText } from '../services/exerciseGuide';
+import { programName, workoutFocus, workoutReps } from '../services/workoutCopy';
 
 const steps = ['goal', 'level', 'equipment', 'schedule', 'readiness', 'preview'];
 
 const choices = {
   goal: [
-    { id: 'burn-fat', title: 'Burn fat', detail: 'Short metabolic sessions', icon: Flame },
-    { id: 'build-strength', title: 'Build strength', detail: 'Progressive iron practice', icon: Dumbbell },
-    { id: 'conditioning', title: 'Conditioning', detail: 'Capacity, grit, recovery', icon: HeartPulse },
+    { id: 'burn-fat', titleKey: 'goal.burn-fat', detailKey: 'goal.burn-fat.detail', icon: Flame },
+    { id: 'build-strength', titleKey: 'goal.build-strength', detailKey: 'goal.build-strength.detail', icon: Dumbbell },
+    { id: 'conditioning', titleKey: 'goal.conditioning', detailKey: 'goal.conditioning.detail', icon: HeartPulse },
   ],
   level: [
-    { id: 'beginner', title: 'Beginner', detail: 'More coaching, cleaner reps', icon: Shield },
-    { id: 'intermediate', title: 'Intermediate', detail: 'Balanced volume and load', icon: Target },
-    { id: 'advanced', title: 'Advanced', detail: 'Higher density, less hand-holding', icon: Zap },
+    { id: 'beginner', titleKey: 'level.beginner', detailKey: 'level.beginner.detail', icon: Shield },
+    { id: 'intermediate', titleKey: 'level.intermediate', detailKey: 'level.intermediate.detail', icon: Target },
+    { id: 'advanced', titleKey: 'level.advanced', detailKey: 'level.advanced.detail', icon: Zap },
   ],
 };
 
@@ -31,8 +34,10 @@ export default function Onboarding({ onComplete, routines }) {
     bodyWeight: 75,
     readiness: 'normal',
     limitation: 'none',
+    language: 'en',
   });
 
+  const language = getLanguage(profile);
   const step = steps[stepIndex];
   const preview = useMemo(
     () => buildCoachPlan({ profile, exercises: routines.exercises }),
@@ -64,25 +69,25 @@ export default function Onboarding({ onComplete, routines }) {
         >
           {step === 'goal' && (
             <>
-              <p className="caption">OneBell Coach</p>
-              <h1 className="title-xl">One kettlebell. Adaptive strength.</h1>
-              <p className="body-text">Tell the coach what you want. It will scale the work to your level.</p>
-              <ChoiceList items={choices.goal} onChoose={(goal) => setAndNext({ goal })} />
+              <p className="caption">{t('onboarding.brand', language)}</p>
+              <h1 className="title-xl">{t('onboarding.hero', language)}</h1>
+              <p className="body-text">{t('onboarding.heroBody', language)}</p>
+              <ChoiceList items={choices.goal} language={language} onChoose={(goal) => setAndNext({ goal })} />
             </>
           )}
 
           {step === 'level' && (
             <>
-              <p className="caption">Training level</p>
-              <h1 className="title-lg">How should the coach load you?</h1>
-              <ChoiceList items={choices.level} onChoose={(level) => setAndNext({ level })} />
+              <p className="caption">{t('onboarding.trainingLevel', language)}</p>
+              <h1 className="title-lg">{t('onboarding.loadQuestion', language)}</h1>
+              <ChoiceList items={choices.level} language={language} onChoose={(level) => setAndNext({ level })} />
             </>
           )}
 
           {step === 'equipment' && (
             <>
-              <p className="caption">Equipment</p>
-              <h1 className="title-lg">Current kettlebell weight</h1>
+              <p className="caption">{t('onboarding.equipment', language)}</p>
+              <h1 className="title-lg">{t('onboarding.kettlebellWeight', language)}</h1>
               <div className="ob-weight-grid">
                 {[12, 16, 20, 24, 28, 32].map((weight) => (
                   <button key={weight} type="button" onClick={() => setAndNext({ weight })}>
@@ -96,11 +101,11 @@ export default function Onboarding({ onComplete, routines }) {
 
           {step === 'schedule' && (
             <>
-              <p className="caption">Weekly rhythm</p>
-              <h1 className="title-lg">Make the plan realistic</h1>
+              <p className="caption">{t('onboarding.weeklyRhythm', language)}</p>
+              <h1 className="title-lg">{t('onboarding.realisticPlan', language)}</h1>
               <div className="ob-control-stack">
                 <label>
-                  Days per week
+                  {t('onboarding.daysPerWeek', language)}
                   <input
                     type="range"
                     min="2"
@@ -108,10 +113,10 @@ export default function Onboarding({ onComplete, routines }) {
                     value={profile.daysPerWeek}
                     onChange={(event) => setProfile((current) => ({ ...current, daysPerWeek: Number(event.target.value) }))}
                   />
-                  <span>{profile.daysPerWeek} days</span>
+                  <span>{t('onboarding.days', language, { count: profile.daysPerWeek })}</span>
                 </label>
                 <label>
-                  Session length
+                  {t('onboarding.sessionLength', language)}
                   <input
                     type="range"
                     min="15"
@@ -123,20 +128,21 @@ export default function Onboarding({ onComplete, routines }) {
                   <span>{profile.duration} min</span>
                 </label>
               </div>
-              <Button onClick={() => setStepIndex((current) => current + 1)}>Continue</Button>
+              <Button onClick={() => setStepIndex((current) => current + 1)}>{t('common.continue', language)}</Button>
             </>
           )}
 
           {step === 'readiness' && (
             <>
-              <p className="caption">Readiness baseline</p>
-              <h1 className="title-lg">How are you arriving?</h1>
+              <p className="caption">{t('onboarding.readinessBaseline', language)}</p>
+              <h1 className="title-lg">{t('onboarding.arrivingQuestion', language)}</h1>
               <ChoiceList
                 items={[
-                  { id: 'low', title: 'Low energy', detail: 'Start conservative', icon: Activity },
-                  { id: 'normal', title: 'Ready', detail: 'Balanced plan', icon: Sparkles },
-                  { id: 'high', title: 'Hungry', detail: 'Coach can push', icon: Zap },
+                  { id: 'low', titleKey: 'readiness.low', detailKey: 'readiness.low.detail', icon: Activity },
+                  { id: 'normal', titleKey: 'readiness.normal', detailKey: 'readiness.normal.detail', icon: Sparkles },
+                  { id: 'high', titleKey: 'readiness.high', detailKey: 'readiness.high.detail', icon: Zap },
                 ]}
+                language={language}
                 onChoose={(readiness) => setAndNext({ readiness })}
               />
             </>
@@ -144,8 +150,8 @@ export default function Onboarding({ onComplete, routines }) {
 
           {step === 'preview' && (
             <>
-              <p className="caption">Protocol preview</p>
-              <h1 className="title-lg">{preview.programName}</h1>
+              <p className="caption">{t('onboarding.protocolPreview', language)}</p>
+              <h1 className="title-lg">{programName(preview.programName, language)}</h1>
               <div className="ob-card ob-preview-card">
                 <div>
                   <Clock size={18} />
@@ -153,7 +159,7 @@ export default function Onboarding({ onComplete, routines }) {
                 </div>
                 <div>
                   <Target size={18} />
-                  <span>{preview.workout.focus}</span>
+                  <span>{workoutFocus(preview.workout.focus, language)}</span>
                 </div>
                 <div>
                   <Dumbbell size={18} />
@@ -163,12 +169,12 @@ export default function Onboarding({ onComplete, routines }) {
               <div className="ob-block-list">
                 {preview.workout.blocks.map((block) => (
                   <div key={block.id}>
-                    <span>{block.detail?.name || block.exercise}</span>
-                    <strong>{block.reps}</strong>
+                    <span>{getExerciseText(block.exercise, block.detail, language).name || block.exercise}</span>
+                    <strong>{workoutReps(block.reps, language)}</strong>
                   </div>
                 ))}
               </div>
-              <Button onClick={() => onComplete(profile)}>Start training</Button>
+              <Button onClick={() => onComplete(profile)}>{t('onboarding.startTraining', language)}</Button>
             </>
           )}
         </Motion.section>
@@ -177,14 +183,14 @@ export default function Onboarding({ onComplete, routines }) {
   );
 }
 
-function ChoiceList({ items, onChoose }) {
+function ChoiceList({ items, language, onChoose }) {
   return (
     <div className="ob-choice-list">
       {items.map((item) => (
         <button key={item.id} type="button" onClick={() => onChoose(item.id)}>
           <span>{item.icon && <item.icon size={22} />}</span>
-          <strong>{item.title}</strong>
-          <small>{item.detail}</small>
+          <strong>{t(item.titleKey, language)}</strong>
+          <small>{t(item.detailKey, language)}</small>
         </button>
       ))}
     </div>

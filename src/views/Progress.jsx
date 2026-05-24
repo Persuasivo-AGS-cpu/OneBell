@@ -14,7 +14,7 @@ export default function Progress({ appState, coachPlan }) {
   });
   const { stats, streak } = proof;
   const total = (Number(appState.userProfile.daysPerWeek) || 3) * 12;
-  const achievements = getAchievements(stats, streak);
+  const achievements = getAchievements(stats, streak, language);
 
   return (
     <Page>
@@ -28,15 +28,15 @@ export default function Progress({ appState, coachPlan }) {
         <div>
           <p className="caption">{t('progress.currentStreak', language)}</p>
           <h2>{proof.currentStreakLabel}</h2>
-          <p>Longest: {proof.longestStreakLabel}</p>
+          <p>{t('progress.longest', language, { value: proof.longestStreakLabel })}</p>
         </div>
         <Flame size={48} fill="currentColor" />
       </section>
 
       <section className="ob-metric-grid">
-        <MetricCard icon={Target} label="Workouts" value={stats.count} tone="green" />
-        <MetricCard icon={Clock} label="Time" value={proof.timeValue} tone="blue" />
-        <MetricCard icon={Flame} label="Kcal" value={proof.kcalValue} tone="red" />
+        <MetricCard icon={Target} label={t('home.workouts', language)} value={stats.count} tone="green" />
+        <MetricCard icon={Clock} label={t('home.time', language)} value={proof.timeValue} tone="blue" />
+        <MetricCard icon={Flame} label={t('progress.kcal', language)} value={proof.kcalValue} tone="red" />
       </section>
 
       <section className="ob-proof-grid">
@@ -52,24 +52,24 @@ export default function Progress({ appState, coachPlan }) {
 
       <section className="ob-card ob-program-overview">
         <div>
-          <p className="caption">12-week protocol</p>
-          <h2>Week {coachPlan.week}</h2>
-          <p>{stats.count}/{total} planned sessions completed. {proof.nextMilestone.value}.</p>
+          <p className="caption">{t('progress.protocolTitle', language)}</p>
+          <h2>{t('progress.week', language, { week: coachPlan.week })}</h2>
+          <p>{t('progress.plannedSessions', language, { count: stats.count, total, milestone: proof.nextMilestone.value })}</p>
         </div>
-        <ProgressRing value={proof.planPercent} label="plan" />
+        <ProgressRing value={proof.planPercent} label={t('common.plan', language)} />
       </section>
 
       <section>
         <div className="ob-section-title">
-          <h2 className="title-sm">Monthly activity</h2>
+          <h2 className="title-sm">{t('progress.monthlyActivity', language)}</h2>
           <TrendingUp size={18} />
         </div>
-        <CalendarGrid history={appState.workoutHistory} />
+        <CalendarGrid history={appState.workoutHistory} language={language} />
       </section>
 
       <section>
         <div className="ob-section-title">
-          <h2 className="title-sm">Achievements</h2>
+          <h2 className="title-sm">{t('progress.achievements', language)}</h2>
           <Award size={18} />
         </div>
         <div className="ob-achievement-list">
@@ -88,7 +88,7 @@ export default function Progress({ appState, coachPlan }) {
   );
 }
 
-function CalendarGrid({ history }) {
+function CalendarGrid({ history, language }) {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -103,7 +103,15 @@ function CalendarGrid({ history }) {
 
   return (
     <div className="ob-card ob-calendar">
-      {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+      {[
+        t('progress.days.mon', language),
+        t('progress.days.tue', language),
+        t('progress.days.wed', language),
+        t('progress.days.thu', language),
+        t('progress.days.fri', language),
+        t('progress.days.sat', language),
+        t('progress.days.sun', language),
+      ].map((day, index) => (
         <strong key={`${day}-${index}`}>{day}</strong>
       ))}
       {cells.map((date, index) => (
@@ -115,11 +123,11 @@ function CalendarGrid({ history }) {
   );
 }
 
-function getAchievements(stats, streak) {
+function getAchievements(stats, streak, language = 'en') {
   const items = [];
-  if (stats.count >= 1) items.push({ icon: Target, title: 'First bell', detail: 'You completed the first OneBell session.' });
-  if (stats.count >= 5) items.push({ icon: Award, title: 'Five sessions', detail: 'Consistency has entered the chat.' });
-  if (streak.longest >= 3) items.push({ icon: Flame, title: 'Three-day streak', detail: 'Momentum without drama.' });
-  if (items.length === 0) items.push({ icon: Award, title: 'Locked', detail: 'Complete one session to unlock your first badge.' });
+  if (stats.count >= 1) items.push({ icon: Target, title: language === 'es' ? 'Primera sesión' : 'First bell', detail: language === 'es' ? 'Completaste tu primera sesión OneBell.' : 'You completed the first OneBell session.' });
+  if (stats.count >= 5) items.push({ icon: Award, title: language === 'es' ? 'Cinco sesiones' : 'Five sessions', detail: language === 'es' ? 'La consistencia ya está entrando.' : 'Consistency has entered the chat.' });
+  if (streak.longest >= 3) items.push({ icon: Flame, title: language === 'es' ? 'Racha de tres días' : 'Three-day streak', detail: language === 'es' ? 'Impulso sin drama.' : 'Momentum without drama.' });
+  if (items.length === 0) items.push({ icon: Award, title: language === 'es' ? 'Bloqueado' : 'Locked', detail: language === 'es' ? 'Completa una sesión para desbloquear tu primer logro.' : 'Complete one session to unlock your first badge.' });
   return items;
 }

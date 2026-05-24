@@ -49,6 +49,41 @@ test('buildExerciseGuide marks current workout movements with block order', () =
   );
 });
 
+test('buildExerciseGuide localizes exercise labels and usage in Spanish', () => {
+  const guide = buildExerciseGuide({
+    exercises,
+    currentBlocks: [{ id: 'block-1', exercise: 'goblet_squat' }],
+    language: 'es',
+  });
+  const squat = guide.find((exercise) => exercise.id === 'goblet_squat');
+
+  assert.equal(squat.name, 'Sentadilla goblet');
+  assert.equal(squat.levelLabel, 'Principiante');
+  assert.equal(squat.focusLabel, 'Fuerza');
+  assert.equal(squat.patternLabel, 'Sentadilla');
+  assert.equal(squat.usageLabel, 'Hoy: bloque 1');
+  assert.match(squat.intent, /fuerza/i);
+});
+
+test('buildExerciseGuide avoids Spanish instructions when English is selected', () => {
+  const guide = buildExerciseGuide({
+    exercises: {
+      push_press: {
+        name: 'Push Press',
+        level: 'Intermediate',
+        focus: 'Power',
+        instructions: ['Con la kettlebell en posición rack a un brazo.'],
+        mistakes: ['Bajar demasiado en la flexión.'],
+      },
+    },
+    language: 'en',
+  });
+
+  assert.equal(guide[0].name, 'Push Press');
+  assert.equal(guide[0].instructions.some((item) => /Con la/i.test(item)), false);
+  assert.equal(guide[0].mistakes.some((item) => /Bajar demasiado/i.test(item)), false);
+});
+
 test('getExerciseInsight gives pressing movements a pressing intent even when focus is power', () => {
   const insight = getExerciseInsight('clean_and_press', {
     name: 'Clean & Press',

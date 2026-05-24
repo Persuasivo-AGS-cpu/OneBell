@@ -19,41 +19,43 @@ export function shouldOfferNotifications({ history = [], permission = 'default' 
   return history.length > 0 && permission === 'default';
 }
 
-export function getRetentionNudge({ history = [], notificationPermission = 'default', now = new Date() } = {}) {
+export function getRetentionNudge({ history = [], notificationPermission = 'default', now = new Date(), language = 'en' } = {}) {
   const missedDays = daysSinceLastWorkout(history, now);
 
   if (missedDays !== null && missedDays >= 4) {
     return {
       type: 'streak-rescue',
-      title: 'Rhythm rescue',
-      message: 'Restart easy today. One controlled session brings the rhythm back.',
-      action: 'Start a recovery session',
+      title: language === 'es' ? 'Rescate de ritmo' : 'Rhythm rescue',
+      message: language === 'es' ? 'Reinicia fácil hoy. Una sesión controlada recupera el ritmo.' : 'Restart easy today. One controlled session brings the rhythm back.',
+      action: language === 'es' ? 'Empezar recuperación' : 'Start a recovery session',
     };
   }
 
   if (history.length === 1) {
     return {
       type: 'first-win',
-      title: 'First bell logged',
-      message: 'Your first workout is in. The coach can now adapt from real effort.',
-      action: notificationPermission === 'default' ? 'Enable smart reminders' : 'Keep training',
+      title: language === 'es' ? 'Primera sesión registrada' : 'First bell logged',
+      message: language === 'es' ? 'Tu primer entrenamiento ya cuenta. El coach puede adaptar con esfuerzo real.' : 'Your first workout is in. The coach can now adapt from real effort.',
+      action: notificationPermission === 'default'
+        ? (language === 'es' ? 'Activar recordatorios inteligentes' : 'Enable smart reminders')
+        : (language === 'es' ? 'Seguir entrenando' : 'Keep training'),
     };
   }
 
   if (history.length >= 3 && notificationPermission === 'default') {
     return {
       type: 'reminder-offer',
-      title: 'Smart reminders',
-      message: 'Let OneBell remind you when momentum needs a gentle push.',
-      action: 'Enable reminders',
+      title: language === 'es' ? 'Recordatorios inteligentes' : 'Smart reminders',
+      message: language === 'es' ? 'Deja que OneBell te avise cuando el impulso necesite un empujón suave.' : 'Let OneBell remind you when momentum needs a gentle push.',
+      action: language === 'es' ? 'Activar recordatorios' : 'Enable reminders',
     };
   }
 
   return {
     type: 'daily-coach',
-    title: 'Today matters',
-    message: 'Do the next honest session. The plan adapts after the work.',
-    action: 'Start workout',
+    title: language === 'es' ? 'Hoy cuenta' : 'Today matters',
+    message: language === 'es' ? 'Haz la siguiente sesión honesta. El plan se adapta después del trabajo.' : 'Do the next honest session. The plan adapts after the work.',
+    action: language === 'es' ? 'Empezar entrenamiento' : 'Start workout',
   };
 }
 
