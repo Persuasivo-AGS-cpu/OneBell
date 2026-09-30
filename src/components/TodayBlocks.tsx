@@ -3,7 +3,7 @@ import { Award, CalendarClock, Dumbbell, Flame, Medal, Repeat, Star, Trophy } fr
 import { ExerciseDetail, Thumb } from "./Exercise";
 import { Sheet } from "./Sheet";
 import { allowed } from "@/lib/catalog";
-import { TEST_MOVES, fmtDate, nextTestDate, totalFor, type TestResult } from "@/lib/fittest";
+import { TEST_MOVES, fmtDate, isTestDue, nextTestDate, totalFor, type TestResult } from "@/lib/fittest";
 import { TYPE_INFO, dateForIndex, programDose, type PlanDay, type Program, type ProgramState } from "@/lib/program";
 import type { Stats } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
@@ -14,8 +14,10 @@ const longDay = (d: Date) => { const s = new Intl.DateTimeFormat("es-MX", { week
 
 /** Tira de 7 días de la semana actual del programa. */
 export function WeekStrip({ state, plan, today, onOpen }: { state: ProgramState; plan: PlanDay[]; today: number; onOpen: () => void }) {
-  const week = Math.ceil(today / 7);
-  const days = plan.filter((d) => Math.ceil(d.index / 7) === week);
+  const todayDay = plan.find((d) => d.index === today);
+  const calWeek = Math.max(1, Math.ceil(today / 7));
+  const days = plan.filter((d) => Math.ceil(d.index / 7) === calWeek);
+  const week = todayDay?.week ?? calWeek;
   const trainable = days.filter((d) => d.type !== "Descanso");
   const done = trainable.filter((d) => state.done.includes(d.index)).length;
   return (
@@ -47,7 +49,7 @@ export function WeekStrip({ state, plan, today, onOpen }: { state: ProgramState;
 export function UpNext({ state, plan, today, tests, onTest }: { state: ProgramState; plan: PlanDay[]; today: number; tests: TestResult[]; onTest: () => void }) {
   const next = plan.find((d) => d.index > today && d.type !== "Descanso");
   const testDate = nextTestDate(tests);
-  const testDue = tests.length === 0 || (testDate && testDate <= new Date());
+  const testDue = tests.length === 0 || isTestDue(tests);
   return (
     <section className="mt-7">
       <h2 className="font-display text-[20px] uppercase">Lo que viene</h2>
@@ -130,7 +132,7 @@ export function achievements(stats: Stats, tests: TestResult[], state: ProgramSt
     { id: "primera", name: "Primera sesión", hint: "Completa tu primera sesión", icon: Dumbbell, earned: stats.sessions >= 1 },
     { id: "prueba", name: "Punto de partida", hint: "Haz tu prueba inicial", icon: Star, earned: tests.length >= 1 },
     { id: "semana", name: "Semana completa", hint: "Completa todos los días de una semana", icon: Medal, earned: fullWeek },
-    { id: "racha", name: "Racha de 3", hint: "Entrena 3 días seguidos", icon: Flame, earned: stats.streak >= 3 },
+    { id: "racha", name: "Racha de 3", hint: "Entrena 3 días seguidos", icon: Flame, earned: stats.bestStreak >= 3 },
     { id: "diez", name: "10 sesiones", hint: "Acumula 10 sesiones", icon: Award, earned: stats.sessions >= 10 },
     { id: "record", name: "Nuevo récord", hint: "Supera tu prueba anterior en un ejercicio", icon: Trophy, earned: record },
     { id: "programa", name: "Programa terminado", hint: "Completa todo el calendario", icon: Trophy, earned: programDone },

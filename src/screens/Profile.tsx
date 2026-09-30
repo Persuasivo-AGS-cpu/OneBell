@@ -14,7 +14,11 @@ export function Profile({ profile, update, onReset }: { profile: P; update: (p: 
   return (
     <Frame header={<Brand />}>
       <h1 className="mt-2 font-display text-[44px] uppercase leading-none">Tu perfil</h1>
-      <p className="mt-2 text-muted-foreground">Los cambios se guardan solos y ajustan tus próximas sesiones.</p>
+      <p className="mt-2 text-muted-foreground">Los cambios se guardan solos y ajustan tus próximas sesiones. Los días por semana rearman el calendario desde las mismas fechas.</p>
+      <label htmlFor="nombre" className="mt-5 block">
+        <span className="text-sm font-semibold text-muted-foreground">Tu nombre</span>
+        <input id="nombre" value={profile.name} maxLength={40} onChange={(e) => update({ name: e.target.value })} className="mt-2 h-14 w-full rounded-[14px] border border-border bg-card px-4 text-xl outline-none focus:border-primary" />
+      </label>
       <Group title="Tus pesas"><WeightGrid profile={profile} update={update} cols={4} /></Group>
       <Group title="Nivel"><div className="space-y-2">{LEVELS.map((l) => <Choice key={l.value} label={l.value} hint={l.hint} selected={profile.level === l.value} onClick={() => update({ level: l.value })} />)}</div></Group>
       <Group title="Tu espacio"><div className="space-y-2">{SPACES.map((o) => <Choice key={o.value} multi label={o.value} selected={profile.space.includes(o.value)} onClick={() => update({ space: profile.space.includes(o.value) ? profile.space.filter((v) => v !== o.value) : [...profile.space, o.value] })} />)}</div></Group>

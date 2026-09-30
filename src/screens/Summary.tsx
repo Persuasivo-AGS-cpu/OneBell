@@ -3,21 +3,25 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Frame } from "@/components/Chrome";
 import { MuscleFigure } from "@/components/MuscleFigure";
+import { sessionBell } from "@/lib/catalog";
 import type { Profile, SessionItem } from "@/lib/types";
 
-export function Summary({ profile, session, seconds, streak, onSave }: { profile: Profile; session: SessionItem[]; seconds: number; streak: number; onSave: () => void }) {
+export type ExerciseRating = { id: string; name: string; rating: string };
+export function Summary({ profile, session, seconds, streak, onSave }: { profile: Profile; session: SessionItem[]; seconds: number; streak: number; onSave: (ratings: ExerciseRating[]) => void }) {
   const [ratings, setRatings] = useState<Record<number, string>>({});
   const main = session.filter((s) => s.section === "Bloque principal" || s.section === "Programa");
   const groups = new Set(main.flatMap((s) => s.exercise.groups));
   if (groups.has("Cuerpo completo")) ["Piernas", "Glúteos", "Espalda", "Hombros", "Core", "Brazos", "Pecho"].forEach((g) => groups.add(g));
-  const kg = main.filter((s) => s.exercise.mode === "reps" && s.exercise.sides !== "Sin pesa")
-    .reduce((t, s) => t + (s.reps ?? s.exercise.amount) * (s.sets ?? 1) * (s.exercise.perSide ? 2 : 1) * (profile.testWeight ?? profile.weights[0] ?? 10), 0);
+  const bell = sessionBell(profile);
+  const kg = bell == null ? null : main.filter((s) => s.exercise.mode === "reps" && s.exercise.sides !== "Sin pesa")
+    .reduce((t, s) => t + (s.reps ?? s.exercise.amount) * (s.sets ?? 1) * (s.exercise.perSide ? 2 : 1) * bell, 0);
+  const save = () => onSave(session.flatMap((s, n) => ratings[n] ? [{ id: s.exercise.id, name: s.exercise.name, rating: ratings[n] }] : []));
   return (
-    <Frame footer={<Button variant="ember" size="hero" onClick={onSave}>Guardar y terminar</Button>}>
+    <Frame footer={<Button variant="ember" size="hero" onClick={save}>Guardar y terminar</Button>}>
       <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check size={26} strokeWidth={3} /></div>
       <h1 className="mt-4 font-display text-[48px] uppercase leading-none">Sesión completa</h1>
       <div className="mt-6 grid grid-cols-3 gap-2">
-        {[[String(Math.max(1, Math.round(seconds / 60))), "minutos"], [kg.toLocaleString("es-MX"), "kg movidos"], [String(streak), streak === 1 ? "día seguido" : "días seguidos"]].map(([v, l]) => (
+        {[[String(Math.max(1, Math.round(seconds / 60))), "minutos"], [kg == null ? "—" : kg.toLocaleString("es-MX"), "kg movidos"], [String(streak), streak === 1 ? "día seguido" : "días seguidos"]].map(([v, l]) => (
           <div key={l} className="rounded-[14px] border border-border bg-card p-3"><p className="font-display text-[28px] leading-none text-primary">{v}</p><p className="mt-1 text-sm text-muted-foreground">{l}</p></div>
         ))}
       </div>

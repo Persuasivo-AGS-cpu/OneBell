@@ -10,7 +10,7 @@ import type { Exercise, Profile, Section, SessionItem } from "@/lib/types";
 import { plural } from "@/lib/utils";
 
 const SECTIONS: Section[] = ["Calentamiento", "Programa", "Bloque principal", "Cierre"];
-const dose = (it: SessionItem) => (it.sets && it.reps ? `${it.sets} × ${it.reps} swings` : doseLabel(it.exercise));
+const dose = (it: SessionItem) => (it.sets && it.reps ? `${it.sets} × ${it.reps}${it.exercise.name.toLowerCase().includes("swing") ? " swings" : ""}` : doseLabel(it.exercise));
 
 export function Preview({ profile, minutes, title, session, setSession, regenerate, onBack, onStart }: {
   profile: Profile; minutes: number; title: string; session: SessionItem[]; setSession: (s: SessionItem[]) => void; regenerate: () => void; onBack: () => void; onStart: () => void;

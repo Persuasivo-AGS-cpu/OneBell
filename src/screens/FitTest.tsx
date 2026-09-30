@@ -6,15 +6,15 @@ import { ExerciseDetail, Thumb } from "@/components/Exercise";
 import { Sheet } from "@/components/Sheet";
 import { Stepper } from "@/components/Stepper";
 import { TestSheet } from "@/components/TestSheet";
-import { REST_SECONDS, TEST_MOVES, exerciseFor, type TestResult } from "@/lib/fittest";
+import { REST_SECONDS, plannedTest, slotSides, type PlannedMove, type TestResult } from "@/lib/fittest";
+import type { Exercise, Profile } from "@/lib/types";
 import { beep, keepAwake } from "@/lib/sound";
 import { todayKey } from "@/lib/storage";
-import type { Profile } from "@/lib/types";
 import { cn, formatClock } from "@/lib/utils";
 
 // Cada ejercicio se hace una vez; los de un brazo, dos veces (izquierdo y derecho).
-type Slot = { move: (typeof TEST_MOVES)[number]; side: "izq" | "der" | null };
-const SLOTS: Slot[] = TEST_MOVES.flatMap((move): Slot[] => (move.perSide ? [{ move, side: "izq" }, { move, side: "der" }] : [{ move, side: null }]));
+type Slot = { move: PlannedMove["move"]; exercise: Exercise; side: "izq" | "der" | null };
+const slotsFor = (rows: PlannedMove[]): Slot[] => rows.flatMap((row) => slotSides(row.move, row.exercise).map((side) => ({ ...row, side })));
 const keyOf = (s: Slot) => (s.side ? `${s.move.key}-${s.side}` : s.move.key);
 type Phase = "intro" | "ready" | "countdown" | "running" | "record" | "rest" | "done";
 
@@ -31,11 +31,15 @@ export function FitTest({ profile, tests, onSave, onLater, onChangeWeight }: {
   const [entry, setEntry] = useState(0);
   const [detail, setDetail] = useState(false);
   const [quit, setQuit] = useState(false);
+  const [frozen, setFrozen] = useState<PlannedMove[] | null>(null);
   const release = useRef<() => void>(() => {});
+  const anchor = tests.find((t) => t.moves) ?? tests[0];
+  const rows = frozen ?? plannedTest(profile, anchor);
+  const SLOTS = slotsFor(rows);
   const s = SLOTS[slot];
-  const ex = exerciseFor(s.move, profile);
+  const ex = s?.exercise;
   const last = tests[tests.length - 1];
-  const hold = s.move.measure === "hold";
+  const hold = s?.move.measure === "hold";
 
   useEffect(() => { if (phase !== "intro" && phase !== "done") keepAwake().then((r) => (release.current = r)); return () => release.current(); }, [phase === "intro" || phase === "done"]);
 
@@ -46,6 +50,7 @@ export function FitTest({ profile, tests, onSave, onLater, onChangeWeight }: {
     return () => window.clearInterval(t);
   }, [phase, hold]);
   useEffect(() => {
+    if (!s) return;
     if (phase === "countdown") { if (time > 0) beep(); else { beep(true); setTime(hold ? 0 : s.move.seconds); setPhase("running"); } }
     if (phase === "running") {
       if (!hold && time > 0 && time <= 3) beep();
@@ -56,35 +61,38 @@ export function FitTest({ profile, tests, onSave, onLater, onChangeWeight }: {
 
   const start = () => { setTime(3); setPhase("countdown"); };
   const stopRunning = () => {
+    if (!s) return;
     beep(true);
     if (hold) { save(Math.min(time, s.move.seconds)); return; }
     setEntry(values[keyOf(s)] ?? 0); setPhase("record");
   };
   const save = (n: number) => {
+    if (!s) return;
     const next = { ...values, [keyOf(s)]: n }; setValues(next);
     if (slot === SLOTS.length - 1) { setPhase("done"); return; }
     setSlot(slot + 1);
     // Entre brazos del mismo ejercicio no hay descanso largo.
     if (SLOTS[slot + 1].move.key === s.move.key) setPhase("ready"); else { setTime(REST_SECONDS); setPhase("rest"); }
   };
-  const result: TestResult = { date: todayKey(), weight: weight ?? 0, values };
+  const result: TestResult = { date: todayKey(), weight: weight ?? 0, values, moves: Object.fromEntries(rows.map((r) => [r.move.key, r.exercise.id])) };
 
   if (phase === "intro") return (
     <Frame header={<div className="grid grid-cols-[48px_1fr_48px] items-center"><Button variant="text" size="icon" aria-label="Salir" onClick={onLater}><ArrowLeft /></Button><span className="text-center text-sm font-semibold text-muted-foreground">Prueba OneBell {tests.length + 1}</span><span /></div>}
       footer={<>
-        <Button variant="ember" size="hero" disabled={!weight} onClick={() => { onChangeWeight(weight!); setPhase("ready"); }}>Empezar la prueba</Button>
+        <Button variant="ember" size="hero" disabled={!weight || rows.length === 0} onClick={() => { onChangeWeight(weight!); setFrozen(rows); setPhase("ready"); }}>Empezar la prueba</Button>
         {first && <Button variant="text" className="mt-1 w-full" onClick={onLater}>Hacerla después</Button>}
       </>}>
       <h1 className="mt-2 font-display text-[42px] uppercase leading-none">{first ? "Tu punto de partida" : "Mide tu avance"}</h1>
-      <p className="mt-3 text-[16px] leading-snug text-muted-foreground">Cinco ejercicios con tiempo fijo. Haz todas las repeticiones que puedas con buena técnica y al final anota cuántas hiciste. Se repite cada dos semanas para ver tu avance.</p>
+      <p className="mt-3 text-[16px] leading-snug text-muted-foreground">Ejercicios con tiempo fijo, los que tu perfil puede hacer con seguridad. Haz todas las repeticiones que puedas con buena técnica y al final anota cuántas hiciste. Se repite cada dos semanas para ver tu avance.</p>
       <ul className="mt-5 divide-y divide-border rounded-[16px] border border-border bg-card">
-        {TEST_MOVES.map((m) => (
-          <li key={m.key} className="flex items-center gap-3 p-3">
-            <Thumb exercise={exerciseFor(m, profile)} className="h-12 w-12" />
-            <span className="flex-1 font-semibold">{exerciseFor(m, profile).name}</span>
-            <span className="text-sm text-muted-foreground">{m.measure === "hold" ? "máx. 2 min" : m.perSide ? `${m.seconds} s por brazo` : `${m.seconds} s`}</span>
+        {rows.map((row) => (
+          <li key={row.move.key} className="flex items-center gap-3 p-3">
+            <Thumb exercise={row.exercise} className="h-12 w-12" />
+            <span className="flex-1 font-semibold">{row.exercise.name}</span>
+            <span className="text-sm text-muted-foreground">{row.move.measure === "hold" ? "máx. 2 min" : row.exercise.perSide ? `${row.move.seconds} s por brazo` : `${row.move.seconds} s`}</span>
           </li>
         ))}
+        {rows.length === 0 && <li className="p-4 text-[15px] leading-snug text-muted-foreground">Con las zonas que marcas, esta prueba no tiene un ejercicio seguro. Ajusta tu perfil si quieres medir el avance.</li>}
       </ul>
       <h2 className="mt-6 font-display text-[22px] uppercase">¿Con qué pesa?</h2>
       {locked != null ? (
@@ -109,6 +117,7 @@ export function FitTest({ profile, tests, onSave, onLater, onChangeWeight }: {
     </Frame>
   );
 
+  if (!s || !ex) return null;
   const label = `${ex.name}${s.side ? ` · brazo ${s.side === "izq" ? "izquierdo" : "derecho"}` : ""}`;
   return (
     <div className="flex h-full flex-col px-6 pt-5 pb-5">

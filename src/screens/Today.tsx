@@ -1,11 +1,12 @@
 import { Flame } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Brand, Frame } from "@/components/Chrome";
-import { byId, imageFor } from "@/lib/catalog";
-import { fmtDate, nextTestDate, type TestResult } from "@/lib/fittest";
+import { byId } from "@/lib/catalog";
+import { imageFor } from "@/lib/images";
+import { fmtDate, isTestDue, nextTestDate, type TestResult } from "@/lib/fittest";
 import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, programById, programDose, type PlanDay, type ProgramState } from "@/lib/program";
 import type { Profile } from "@/lib/types";
-import type { Stats } from "@/lib/storage";
+import { todayKey, type Stats } from "@/lib/storage";
 import { Achievements, GoalProgress, TipOfDay, UpNext, WeekStrip, achievements } from "@/components/TodayBlocks";
 
 const raw = new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
@@ -24,7 +25,8 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
   const finished = state != null && index > plan.length;
   const trainable = plan.filter((d) => d.type !== "Descanso");
   const done = state ? trainable.filter((d) => state.done.includes(d.index)).length : 0;
-  const doneToday = !!(state && day && state.done.includes(day.index));
+  const testedToday = tests.some((t) => t.date === todayKey());
+  const doneToday = !!(state && day && (state.done.includes(day.index) || (day.type === "Prueba" && testedToday)));
   const training = day && !["Descanso", "Prueba"].includes(day.type);
   const next = nextTestDate(tests);
 
@@ -42,7 +44,7 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
       header={<div className="flex items-center justify-between"><Brand />{streak > 0 ? <span className="flex items-center gap-1.5 text-primary"><Flame size={20} fill="currentColor" /><span className="font-display text-xl">{streak}</span><span className="text-sm text-muted-foreground">{streak === 1 ? "día seguido" : "días seguidos"}</span></span> : <span className="text-sm text-muted-foreground">Hoy empieza tu racha</span>}</div>}
       footer={footer}>
       <p className="mt-2 text-sm font-semibold text-muted-foreground">{todayLabel}</p>
-      <h1 className="mt-1 font-display text-[44px] uppercase leading-none">Vamos, {profile.name}</h1>
+      <h1 className="mt-1 font-display text-[44px] uppercase leading-none">Vamos{profile.name ? `, ${profile.name}` : ""}</h1>
       {state && program && !notStarted && !finished && <WeekStrip state={state} plan={plan} today={index} onOpen={onCalendar} />}
       <div className="mt-5 overflow-hidden rounded-[18px] border border-border bg-card">
         <div className="relative h-[110px] bg-photo">
@@ -72,8 +74,8 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
             </>
           )}
           {!state && <button type="button" onClick={onTest} className="mt-3 flex w-full items-center justify-between rounded-[12px] bg-background px-4 py-3 text-left text-[15px]">
-            <span>{tests.length === 0 ? "Haz tu prueba inicial" : next && next <= new Date() ? "Te toca tu Prueba OneBell" : `Próxima Prueba OneBell: ${fmtDate(next!)}`}</span>
-            <span className="font-semibold text-primary">{tests.length === 0 || (next && next <= new Date()) ? "Empezar" : "Ver"}</span>
+            <span>{tests.length === 0 ? "Haz tu prueba inicial" : isTestDue(tests) ? "Te toca tu Prueba OneBell" : `Próxima Prueba OneBell: ${fmtDate(next!)}`}</span>
+            <span className="font-semibold text-primary">{tests.length === 0 || isTestDue(tests) ? "Empezar" : "Ver"}</span>
           </button>}
         </div>
       </div>
@@ -90,7 +92,7 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
         </>
       )}
       {state && program && !notStarted && !finished && <UpNext state={state} plan={plan} today={index} tests={tests} onTest={onTest} />}
-      {program && <GoalProgress program={program} tests={tests} week={day?.week ?? 1} />}
+      {program && <GoalProgress program={program} tests={tests} week={finished ? program.weeks : (day?.week ?? 1)} />}
       <TipOfDay profile={profile} />
       <Achievements badges={achievements(stats, tests, state, plan)} />
     </Frame>

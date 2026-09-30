@@ -1,5 +1,5 @@
 import { Activity, ArrowDownUp, Dumbbell, Footprints, MoveHorizontal, RotateCw, StretchHorizontal, Waves } from "lucide-react";
-import { imageFor } from "@/lib/catalog";
+import { imageFor } from "@/lib/images";
 import type { Exercise } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

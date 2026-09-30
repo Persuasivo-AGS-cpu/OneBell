@@ -27,7 +27,10 @@ export function WeightGrid({ profile, update, cols = 3 }: { profile: Profile; up
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState(32);
   const all = [...new Set([...WEIGHTS, ...profile.weights])].sort((a, b) => a - b);
-  const toggle = (w: number) => update({ weights: profile.weights.includes(w) ? profile.weights.filter((x) => x !== w) : [...profile.weights, w].sort((a, b) => a - b) });
+  const toggle = (w: number) => {
+    if (profile.weights.includes(w) && profile.weights.length === 1) return;
+    update({ weights: profile.weights.includes(w) ? profile.weights.filter((x) => x !== w) : [...profile.weights, w].sort((a, b) => a - b) });
+  };
   return (
     <>
       <div className="grid gap-2.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
@@ -70,7 +73,15 @@ export function Setup({ profile, update, onDone }: { profile: Profile; update: (
       <h1 className="mt-3 font-display text-[40px] uppercase leading-[1.02]">{s.title}</h1>
       <p className="mt-2 text-[16px] text-muted-foreground">{s.sub}</p>
       <div className="mt-6">
-        {step === 0 && <WeightGrid profile={profile} update={update} />}
+        {step === 0 && (
+          <>
+            <label htmlFor="nombre" className="mb-5 block">
+              <span className="text-sm font-semibold text-muted-foreground">¿Cómo te llamas?</span>
+              <input id="nombre" value={profile.name} maxLength={40} onChange={(e) => update({ name: e.target.value })} className="mt-2 h-14 w-full rounded-[14px] border border-border bg-background px-4 text-xl outline-none focus:border-primary" />
+            </label>
+            <WeightGrid profile={profile} update={update} />
+          </>
+        )}
         {step === 1 && <div role="radiogroup" className="space-y-3">{LEVELS.map((l) => <Choice key={l.value} label={l.value} hint={l.hint} selected={profile.level === l.value} onClick={() => update({ level: l.value })} />)}</div>}
         {step === 2 && (
           <div className="space-y-2.5">
