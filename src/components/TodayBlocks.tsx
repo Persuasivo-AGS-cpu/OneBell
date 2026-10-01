@@ -4,7 +4,7 @@ import { ExerciseDetail, Thumb } from "./Exercise";
 import { Sheet } from "./Sheet";
 import { allowed } from "@/lib/catalog";
 import { TEST_MOVES, fmtDate, isTestDue, nextTestDate, totalFor, type TestResult } from "@/lib/fittest";
-import { TYPE_INFO, dateForIndex, programDose, type PlanDay, type Program, type ProgramState } from "@/lib/program";
+import { TYPE_INFO, dateForIndex, doseLine, keyRx, programById, type PlanDay, type Program, type ProgramState } from "@/lib/program";
 import type { Stats } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,7 @@ export function UpNext({ state, plan, today, tests, onTest }: { state: ProgramSt
         {next && (
           <div className="flex items-center gap-3 p-4">
             <CalendarClock className="shrink-0 text-primary" size={22} aria-hidden />
-            <p className="text-[15px]"><b>{longDay(dateForIndex(state.start, next.index))}:</b> {next.type}{next.type === "Acondicionamiento" ? ` · ${programDose(next.week)[0]} min × ${programDose(next.week)[1]} swings` : ""}</p>
+            <p className="text-[15px]"><b>{longDay(dateForIndex(state.start, next.index))}:</b> {next.type}{(() => { const pr = programById(state.id); const line = pr ? doseLine(pr, next.week, next.type) : null; return line ? ` · ${line}` : ""; })()}</p>
           </div>
         )}
         <button type="button" onClick={onTest} className="flex w-full items-center gap-3 p-4 text-left">
@@ -70,28 +70,31 @@ export function UpNext({ state, plan, today, tests, onTest }: { state: ProgramSt
   );
 }
 
-/** Camino a la meta del programa, con la prueba y el volumen de la semana. */
+/** Camino a la meta del programa, con la prueba (si aplica) y el volumen de la semana. */
 export function GoalProgress({ program, tests, week }: { program: Program; tests: TestResult[]; week: number }) {
   const swing = TEST_MOVES[0];
   const last = tests[tests.length - 1];
   const best = Math.max(0, ...tests.map((t) => totalFor(swing, t) ?? 0));
-  const pace = 20; // 100 swings en 5 minutos = 20 por minuto sostenidos
-  const [sets, reps] = programDose(week);
-  const volume = sets * reps;
+  const pace = program.pace;
+  const rx = keyRx(program, week);
+  const value = rx ? program.metric.of(rx) : 0;
+  const { goal } = program.metric;
   return (
     <section className="mt-7">
       <h2 className="font-display text-[20px] uppercase">Camino a tu meta</h2>
       <div className="mt-2 rounded-[16px] border border-border bg-card p-4">
-        <p className="text-[15px] leading-snug">Meta: <b>{program.goal}</b>. Equivale a {pace} swings por minuto durante 5 minutos seguidos.</p>
+        <p className="text-[15px] leading-snug">Meta: <b>{program.goal}</b>.{program.goalNote ? ` ${program.goalNote}` : ""}</p>
+        {pace && program.id === "cero-a-100-swings" && (
+          <div className="mt-4">
+            <div className="flex items-baseline justify-between text-[15px]"><span>Tu mejor minuto en la prueba</span><span className="font-display text-[22px] text-primary">{last ? best : "—"}</span></div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (best / pace) * 100)}%` }} /></div>
+            <p className="mt-1.5 text-sm text-muted-foreground">{!last ? "Haz tu prueba inicial para medir tu ritmo." : best >= pace ? "Ya tienes el ritmo en un minuto. Ahora el reto es sostenerlo." : `Te faltan ${pace - best} por minuto para el ritmo de la meta.`}</p>
+          </div>
+        )}
         <div className="mt-4">
-          <div className="flex items-baseline justify-between text-[15px]"><span>Tu mejor minuto en la prueba</span><span className="font-display text-[22px] text-primary">{last ? best : "—"}</span></div>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (best / pace) * 100)}%` }} /></div>
-          <p className="mt-1.5 text-sm text-muted-foreground">{!last ? "Haz tu prueba inicial para medir tu ritmo." : best >= pace ? "Ya tienes el ritmo en un minuto. Ahora el reto es sostenerlo." : `Te faltan ${pace - best} por minuto para el ritmo de la meta.`}</p>
-        </div>
-        <div className="mt-4">
-          <div className="flex items-baseline justify-between text-[15px]"><span>Swings por sesión esta semana</span><span className="font-display text-[22px] text-primary">{volume} / 100</span></div>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, volume)}%` }} /></div>
-          <p className="mt-1.5 text-sm text-muted-foreground">El volumen sube cada semana hasta llegar a 100 en la semana 7.</p>
+          <div className="flex items-baseline justify-between text-[15px]"><span>{program.metric.label}</span><span className="font-display text-[22px] text-primary">{value} / {goal}</span></div>
+          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (value / goal) * 100)}%` }} /></div>
+          <p className="mt-1.5 text-sm text-muted-foreground">{program.metric.hint}</p>
         </div>
       </div>
     </section>

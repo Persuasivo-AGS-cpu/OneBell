@@ -50,4 +50,11 @@ Para cada cambio: edita, corre `npx tsc -p .` y `npm run build` sin errores, haz
 
 1. ~~Generador fino~~ Hecho: minutos, energía y anti-repetición (`recent` en el estado, últimas 3 sesiones).
 2. ~~Modo entrenamiento completo~~ Hecho: EMOM con descanso automático (`emom` en `SessionItem`), pitidos, voz `es-MX` (opción en Perfil) y wake lock. Falta probarlo en el celular.
-3. Programas restantes, hoy marcados "Próximamente" (`ready: false` en `program.ts`): Primer turkish get-up, Motor de acondicionamiento, Sube de pesa y Prueba de snatch.
+3. ~~Programas restantes~~ Hecho: los 5 programas están listos (`ready: true`). Cada uno define en `program.ts` su prescripción semanal (`rx`), su métrica de meta y sus textos. Límites conocidos: la prueba final es siempre la Prueba OneBell (5 movimientos), así que el EMOM de 20 minutos del Motor y los 100 snatches en 5 minutos no se miden con una prueba propia; el avance se sigue con el volumen prescrito. Idea para después: pruebas finales específicas por programa.
+
+## Programas (`src/lib/program.ts`)
+
+- `PROGRAMS[].rx(semana, tipoDeDía)` devuelve el bloque clave (`Rx`) o `null`. `prescribe` agrega swings de acondicionamiento general en días de Acondicionamiento que el programa no usa.
+- Las semanas 4, 8 y 12 son de descarga. Las pruebas caen el día 1, cada 14 días y el último día (`testDays`). Los programas deben durar semanas pares.
+- El ejercicio clave ignora el nivel del perfil (el programa es la progresión) pero respeta zonas, techo bajo y ruido. Si no hay ninguno permitido, se usa uno lento del mismo patrón. `blockPossible` deshabilita el programa si ni eso existe.
+- Solo los bloques `emom: true` avanzan solos en el modo entrenamiento.

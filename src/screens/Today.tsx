@@ -4,7 +4,7 @@ import { Brand, Frame } from "@/components/Chrome";
 import { byId } from "@/lib/catalog";
 import { imageFor } from "@/lib/images";
 import { fmtDate, isTestDue, nextTestDate, type TestResult } from "@/lib/fittest";
-import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, programById, programDose, type PlanDay, type ProgramState } from "@/lib/program";
+import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, doseLine, programById, typeDesc, type PlanDay, type ProgramState } from "@/lib/program";
 import type { Profile } from "@/lib/types";
 import { todayKey, type Stats } from "@/lib/storage";
 import { Achievements, GoalProgress, TipOfDay, UpNext, WeekStrip, achievements } from "@/components/TodayBlocks";
@@ -55,7 +55,7 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
           {!program || !state ? (
             <>
               <h2 className="font-display text-[28px] uppercase leading-tight">Elige tu programa</h2>
-              <p className="mt-1 text-[15px] text-muted-foreground">Se arma tu calendario de 8 semanas con lo que toca cada día.</p>
+              <p className="mt-1 text-[15px] text-muted-foreground">Se arma tu calendario completo con lo que toca cada día.</p>
             </>
           ) : (
             <>
@@ -67,7 +67,7 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
                 <div className="mt-4 rounded-[12px] bg-background px-4 py-3">
                   <p className="text-sm font-semibold text-primary">Hoy · día {day.index}</p>
                   <p className="font-display text-[24px] uppercase leading-tight">{day.type}</p>
-                  <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{day.type === "Acondicionamiento" ? `Swings: ${programDose(day.week)[0]} minutos × ${programDose(day.week)[1]}. ` : ""}{TYPE_INFO[day.type].desc}</p>
+                  <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{doseLine(program, day.week, day.type) ? `${doseLine(program, day.week, day.type)}. ` : ""}{typeDesc(program, day.type)}</p>
                 </div>
               )}
               {finished && <p className="mt-4 text-[15px]">Terminaste las {program.weeks} semanas. Haz tu prueba final y elige tu siguiente programa.</p>}

@@ -2,17 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/Button";
 import { Brand, Frame } from "@/components/Chrome";
 import { Sheet } from "@/components/Sheet";
-import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, programById, programDose, type PlanDay, type ProgramState } from "@/lib/program";
+import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, doseLine, programById, typeDesc, weekBlocks, type PlanDay, type ProgramState } from "@/lib/program";
 import { cn } from "@/lib/utils";
 
 const fmt = (d: Date) => new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(d);
-const blocks = (weeks: number) => [
-  { title: "Semanas 1 a 3", from: 1, to: 21 },
-  { title: "Semana 4 · Descarga", from: 22, to: 28 },
-  { title: "Semanas 5 a 7", from: 29, to: 49 },
-  { title: "Semana 8 · Descarga", from: 50, to: 56 },
-  { title: "Prueba final", from: 57, to: weeks * 7 + 1 },
-];
 
 export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: ProgramState | null; onPrograms: () => void; onToggle: (i: number) => void; onStartDay: (d: PlanDay) => void }) {
   const program = programById(state?.id);
@@ -20,7 +13,7 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: P
   if (!state || !program) return (
     <Frame header={<Brand />}>
       <h1 className="mt-2 font-display text-[44px] uppercase leading-none">Calendario</h1>
-      <p className="mt-3 text-[16px] text-muted-foreground">Elige un programa y se arma tu calendario de 8 semanas: qué toca cada día, tus pruebas y tus semanas de descarga.</p>
+      <p className="mt-3 text-[16px] text-muted-foreground">Elige un programa y se arma tu calendario completo: qué toca cada día, tus pruebas y tus semanas de descarga.</p>
       <Button variant="ember" size="hero" className="mt-6" onClick={onPrograms}>Elegir programa</Button>
     </Frame>
   );
@@ -32,7 +25,7 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: P
     <Frame header={<div className="flex items-center justify-between"><Brand /><button type="button" onClick={onPrograms} className="text-sm font-semibold text-primary">Cambiar programa</button></div>}>
       <h1 className="mt-2 font-display text-[34px] uppercase leading-none">{program.name}</h1>
       <p className="mt-2 text-[15px] text-muted-foreground">{done} de {trainable.length} días completados. Toca un día para ver qué incluye.</p>
-      {blocks(program.weeks).map((b) => (
+      {weekBlocks(program.weeks).map((b) => (
         <section key={b.title} className="mt-5">
           <h2 className="rounded-t-[10px] bg-foreground py-1.5 text-center font-display text-[17px] uppercase text-background">{b.title}</h2>
           <div className="grid grid-cols-7 border-l border-t border-border">
@@ -57,8 +50,8 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: P
       {open && (
         <Sheet title={`Día ${open.index} · ${open.type}`} onClose={() => setOpen(null)}>
           <p className="text-sm font-semibold text-muted-foreground first-letter:uppercase">{fmt(dateForIndex(state.start, open.index))} · Semana {open.week}</p>
-          <p className="mt-3 text-[16px] leading-snug">{TYPE_INFO[open.type].desc}</p>
-          {open.type === "Acondicionamiento" && <p className="mt-2 text-[16px]">Swings de esta semana: <b>{programDose(open.week)[0]} minutos × {programDose(open.week)[1]} swings</b>.</p>}
+          <p className="mt-3 text-[16px] leading-snug">{typeDesc(program, open.type)}</p>
+          {doseLine(program, open.week, open.type) && <p className="mt-2 text-[16px]">Esta semana: <b>{doseLine(program, open.week, open.type)}</b>.</p>}
           {open.type !== "Descanso" && (
             <div className="mt-5 space-y-2">
               {open.index === today && !state.done.includes(open.index) && <Button variant="ember" size="hero" onClick={() => { setOpen(null); onStartDay(open); }}>{open.type === "Prueba" ? "Hacer la prueba" : "Ver sesión de hoy"}</Button>}

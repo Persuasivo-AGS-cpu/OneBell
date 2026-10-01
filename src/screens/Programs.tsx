@@ -4,7 +4,7 @@ import { Button } from "@/components/Button";
 import { Frame } from "@/components/Chrome";
 import { Sheet } from "@/components/Sheet";
 import { levelNumber } from "@/lib/catalog";
-import { PROGRAMS, buildPlan, type Program, type ProgramState } from "@/lib/program";
+import { PROGRAMS, blockPossible, buildPlan, deloadText, type Program, type ProgramState } from "@/lib/program";
 import { todayKey } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -24,12 +24,13 @@ export function Programs({ profile, current, onBack, onStart }: { profile: Profi
         {PROGRAMS.map((p) => {
           const tooHard = levelNumber[p.level] > levelNumber[profile.level];
           const active = current?.id === p.id;
+          const blocked = !blockPossible(p, profile);
           return (
-            <button key={p.id} type="button" disabled={!p.ready} onClick={() => setChosen(p)}
+            <button key={p.id} type="button" disabled={!p.ready || blocked} onClick={() => setChosen(p)}
               className={cn("w-full rounded-[16px] border bg-card p-4 text-left disabled:opacity-50", active ? "border-2 border-primary" : "border-border")}>
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span className="text-primary">{p.level} · {p.weeks} semanas</span>
-                {active ? <span className="flex items-center gap-1 text-primary"><Check size={16} /> Activo</span> : !p.ready ? <span className="text-muted-foreground">Próximamente</span> : tooHard ? <span className="text-muted-foreground">Arriba de tu nivel</span> : null}
+                {active ? <span className="flex items-center gap-1 text-primary"><Check size={16} /> Activo</span> : !p.ready ? <span className="text-muted-foreground">Próximamente</span> : blocked ? <span className="text-muted-foreground">No va con tus zonas a cuidar</span> : tooHard ? <span className="text-muted-foreground">Arriba de tu nivel</span> : null}
               </div>
               <p className="mt-1 font-display text-[26px] uppercase leading-tight">{p.name}</p>
               <p className="mt-1 text-[15px] text-muted-foreground">Meta: {p.goal}.</p>
@@ -45,7 +46,7 @@ export function Programs({ profile, current, onBack, onStart }: { profile: Profi
               <div key={t} className="rounded-[12px] bg-background p-3"><p className="font-display text-[24px] leading-none text-primary">{count(t)}</p><p className="mt-1 text-muted-foreground">{({ Fuerza: "días de fuerza", Acondicionamiento: "días de acondicionamiento", Movilidad: "días de movilidad", Descarga: "días ligeros", Prueba: "pruebas" } as Record<string, string>)[t]}</p></div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Semanas 4 y 8 son de descarga. La prueba final es el día {plan.length}.</p>
+          <p className="mt-4 text-sm text-muted-foreground">{deloadText(chosen.weeks)} La prueba final es el día {plan.length}.</p>
           <h3 className="mt-5 font-display text-[20px] uppercase">¿Cuándo empiezas?</h3>
           <div role="radiogroup" className="mt-2 grid grid-cols-2 gap-2">
             <Button role="radio" aria-checked={when === "hoy"} variant={when === "hoy" ? "selected" : "tile"} className="h-14" onClick={() => setWhen("hoy")}>Hoy</Button>
