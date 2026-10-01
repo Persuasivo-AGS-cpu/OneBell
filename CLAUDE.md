@@ -48,6 +48,6 @@ Para cada cambio: edita, corre `npx tsc -p .` y `npm run build` sin errores, haz
 
 ## Pendientes del plan (no empezar sin que se pidan)
 
-1. Generador fino: evitar repetir ejercicios entre sesiones y ajustar la sesión a los minutos y la energía elegidos en Hoy. Ya hay base: `session-config.ts` y `buildSession` reciben minutos y energía.
-2. Modo entrenamiento completo: EMOM con descanso automático, voz y pantalla siempre encendida. Ya hay base: `workout.ts` y pasos por serie en `Workout.tsx`.
+1. ~~Generador fino~~ Hecho: minutos, energía y anti-repetición (`recent` en el estado, últimas 3 sesiones).
+2. ~~Modo entrenamiento completo~~ Hecho: EMOM con descanso automático (`emom` en `SessionItem`), pitidos, voz `es-MX` (opción en Perfil) y wake lock. Falta probarlo en el celular.
 3. Programas restantes, hoy marcados "Próximamente" (`ready: false` en `program.ts`): Primer turkish get-up, Motor de acondicionamiento, Sube de pesa y Prueba de snatch.

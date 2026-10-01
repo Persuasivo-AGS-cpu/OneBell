@@ -53,3 +53,12 @@ test("al regenerar evita los ejercicios del borrador actual", () => {
     assert.deepEqual(again.filter((i) => draft.includes(i.exercise.id)), []);
   }
 });
+
+test("solo el EMOM de swings se marca como EMOM", () => {
+  const cond = buildSession(profile, "Acondicionamiento", 2, 20, "Normal").find((i) => i.section === "Programa");
+  assert.equal(cond?.emom, true);
+  const light = buildSession(profile, "Descarga", 2, 20, "Normal").find((i) => i.section === "Programa");
+  assert.equal(light?.emom, undefined);
+  const back = buildSession({ ...profile, concerns: ["Espalda baja"] }, "Acondicionamiento", 2, 20, "Normal").find((i) => i.section === "Programa");
+  assert.equal(back?.emom, undefined);
+});

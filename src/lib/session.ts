@@ -23,10 +23,10 @@ export function buildSession(profile: Profile, type: DayType = "Acondicionamient
   const [prescribed, reps] = programDose(week);
   const sets = emomMinutes(prescribed, minutes);
   const hinge = swingOk ?? pick(slow("Bisagra"), used, tiers);
-  const programBlock = (move: Exercise | undefined, count: number, rep: number, note: string): SessionItem | null => {
+  const programBlock = (move: Exercise | undefined, count: number, rep: number, note: string, emom = false): SessionItem | null => {
     if (!move) return null;
     if (!used.includes(move)) used.push(move);
-    return { section: "Programa", exercise: move, sets: count, reps: rep, note };
+    return { section: "Programa", exercise: move, sets: count, reps: rep, note, ...(emom ? { emom } : {}) };
   };
   const main: (SessionItem | null)[] = [];
   let pin = false;
@@ -34,7 +34,7 @@ export function buildSession(profile: Profile, type: DayType = "Acondicionamient
   if (type === "Acondicionamiento" || type === "Descarga") {
     const block = type === "Descarga"
       ? programBlock(hinge, 3, 10, swingOk ? "Técnica: 3 series de 10 swings sin prisa, descansa lo que necesites" : "Técnica: 3 series de 10, sin prisa. Descansa lo que necesites")
-      : programBlock(hinge, sets, reps, swingOk ? `EMOM: ${reps} swings al inicio de cada minuto, ${sets} minutos` : `${sets} series de ${reps}. Descansa lo que necesites`);
+      : programBlock(hinge, sets, reps, swingOk ? `EMOM: ${reps} swings al inicio de cada minuto, ${sets} minutos` : `${sets} series de ${reps}. Descansa lo que necesites`, !!swingOk);
     pin = !!block;
     main.push(block, ...(type === "Descarga"
       ? [add("Bloque principal", of("Movilidad")), add("Bloque principal", of("Core y rotación"))]

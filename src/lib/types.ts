@@ -10,5 +10,5 @@ export type Profile = {
   voice: boolean; setupDone: boolean; testWeight: number | null;
 };
 export type Section = "Calentamiento" | "Programa" | "Bloque principal" | "Cierre";
-export type SessionItem = { section: Section; exercise: Exercise; sets?: number; reps?: number; note?: string };
+export type SessionItem = { section: Section; exercise: Exercise; sets?: number; reps?: number; note?: string; emom?: boolean };
 export type Screen = "setup" | "fittest" | "today" | "preview" | "workout" | "summary" | "calendar" | "programs" | "progress" | "library" | "profile";

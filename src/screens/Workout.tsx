@@ -5,7 +5,9 @@ import { ExerciseDetail } from "@/components/Exercise";
 import { Sheet } from "@/components/Sheet";
 import { sessionBell } from "@/lib/catalog";
 import { alternativesFor } from "@/lib/session";
-import { expandWorkoutSteps } from "@/lib/workout";
+import { beep, keepAwake } from "@/lib/sound";
+import { speak, stopSpeaking } from "@/lib/voice";
+import { advancesAlone, expandWorkoutSteps, stepSeconds, voiceLine } from "@/lib/workout";
 import type { Profile, SessionItem } from "@/lib/types";
 import { cn, formatClock } from "@/lib/utils";
 
@@ -21,27 +23,45 @@ export function Workout({ profile, session, setSession, onFinish, onQuit }: { pr
   const step = steps[i] ?? steps[steps.length - 1];
   const it = step.item;
   const ex = it.exercise;
-  const duration = ex.mode === "time" ? ex.amount : 60;
-  const [left, setLeft] = useState(duration);
-  useEffect(() => setLeft(ex.mode === "time" ? ex.amount : 60), [i, ex.id]);
+  const emom = !!it.emom;
+  const auto = advancesAlone(it);
+  const last = i === steps.length - 1;
+  const [left, setLeft] = useState(() => stepSeconds(steps[0].item));
+  const [worked, setWorked] = useState(false);
+  const go = (n: number) => { setI(n); setWorked(false); setLeft(stepSeconds(steps[n].item)); };
   useEffect(() => { if (steps.length > 0 && i > steps.length - 1) setI(steps.length - 1); }, [i, steps.length]);
   useEffect(() => {
     if (paused || menu) return;
     const t = window.setInterval(() => { setLeft((v) => Math.max(0, v - 1)); setElapsed((v) => v + 1); }, 1000);
     return () => window.clearInterval(t);
   }, [paused, menu]);
+  // Pantalla siempre encendida mientras dura el entrenamiento; se vuelve a pedir al regresar a la app.
+  useEffect(() => {
+    let live = true; let release = () => {};
+    const take = () => keepAwake().then((r) => { if (!live) r(); else { release(); release = r; } });
+    const visible = () => { if (document.visibilityState === "visible") take(); };
+    take(); document.addEventListener("visibilitychange", visible);
+    return () => { live = false; document.removeEventListener("visibilitychange", visible); release(); stopSpeaking(); };
+  }, []);
+  // Pitidos en los últimos 3 segundos; en EMOM y ejercicios por tiempo el paso avanza solo.
+  useEffect(() => {
+    if (paused || menu || !auto) return;
+    if (left > 0 && left <= 3) beep();
+    if (left === 0) { beep(true); if (!last) next(); }
+  }, [left]);
+  useEffect(() => { if (profile.voice) speak(voiceLine(step)); }, [i]);
+  useEffect(() => { if (profile.voice && worked) speak("Descansa"); }, [worked]);
   const sectionItems = steps.filter((s) => s.item.section === it.section);
   const pos = sectionItems.indexOf(step) + 1;
-  const next = () => (i < steps.length - 1 ? setI(i + 1) : onFinish(elapsed));
+  const next = () => (i < steps.length - 1 ? go(i + 1) : onFinish(elapsed));
+  const press = () => (emom && !worked && !last ? setWorked(true) : next());
   const swap = () => {
     const alt = alternativesFor(profile, ex, session.map((s) => s.exercise))[0];
     const sourceIndex = session.indexOf(it);
     if (!alt || sourceIndex < 0) return;
-    setSession(session.map((item, n) => {
-      if (n !== sourceIndex) return item;
-      if (item.section === "Programa" || item.sets) return { section: "Bloque principal", exercise: alt };
-      return { ...item, exercise: alt };
-    }));
+    const swapped: SessionItem = it.section === "Programa" || it.sets ? { section: "Bloque principal", exercise: alt } : { ...it, exercise: alt };
+    setSession(session.map((item, n) => (n === sourceIndex ? swapped : item)));
+    setI(steps.findIndex((s) => s.item === it)); setWorked(false); setLeft(stepSeconds(swapped));
   };
   const long = ex.name.length > 16;
   return (
@@ -63,7 +83,7 @@ export function Workout({ profile, session, setSession, onFinish, onQuit }: { pr
           <div className="rounded-[16px] border border-border bg-card px-4 py-3"><p className="font-display text-[40px] leading-none">{ex.sides === "Sin pesa" || bell == null ? "—" : bell}</p><p className="mt-1 text-sm text-muted-foreground">{ex.sides === "Sin pesa" ? "sin pesa" : bell == null ? "elige una pesa" : "kg"}</p></div>
         </div>
         <div className="my-auto text-center">
-          <p className="text-sm font-semibold text-muted-foreground">{left === 0 ? "Tiempo cumplido" : ex.mode === "time" ? "Sostén" : "Tiempo restante"}</p>
+          <p className="text-sm font-semibold text-muted-foreground">{emom ? (worked ? "Descansa · sigue la siguiente serie" : "Haz tus repeticiones") : left === 0 ? "Tiempo cumplido" : ex.mode === "time" ? "Sostén" : "Tiempo restante"}</p>
           <p className="font-display text-[118px] leading-none tabular-nums text-primary">{formatClock(left)}</p>
         </div>
         <div className="border-t border-border pt-3">
@@ -76,7 +96,7 @@ export function Workout({ profile, session, setSession, onFinish, onQuit }: { pr
         </div>
       </div>
       <div className="shrink-0 pt-4">
-        <Button variant="ember" size="hero" className="h-[68px] text-[24px]" onClick={next}>{i === steps.length - 1 ? "Terminar sesión" : ex.mode === "time" ? "Siguiente" : "Serie hecha"}</Button>
+        <Button variant="ember" size="hero" className="h-[68px] text-[24px]" onClick={press}>{last ? "Terminar sesión" : emom ? (worked ? "Saltar descanso" : "Serie hecha") : ex.mode === "time" ? "Siguiente" : "Serie hecha"}</Button>
         <Button variant="text" className="mt-1 w-full" onClick={swap}>No puedo hacer este hoy</Button>
       </div>
       {menu && (
