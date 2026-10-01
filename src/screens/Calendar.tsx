@@ -7,9 +7,17 @@ import { cn } from "@/lib/utils";
 
 const fmt = (d: Date) => new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(d);
 
-export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: ProgramState | null; onPrograms: () => void; onToggle: (i: number) => void; onStartDay: (d: PlanDay) => void }) {
+export function Calendar({ state, onPrograms, onToggle, onStartDay, tvMode }: { state: ProgramState | null; onPrograms: () => void; onToggle: (i: number) => void; onStartDay: (d: PlanDay) => void; tvMode?: boolean }) {
   const program = programById(state?.id);
+  const plan = program && state ? buildPlan(program, state.days) : [];
+  const today = state ? dayIndexFor(state.start) : 0;
+  const currentDay = plan[today - 1] || plan[0];
+  const currentWeek = currentDay?.week ?? 1;
+
   const [open, setOpen] = useState<PlanDay | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState<number>(currentWeek);
+  const [selectedTvDay, setSelectedTvDay] = useState<PlanDay | null>(() => currentDay || null);
+
   if (!state || !program) return (
     <Frame header={<Brand />}>
       <h1 className="mt-2 font-display text-[44px] uppercase leading-none">Calendario</h1>
@@ -17,10 +25,161 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: P
       <Button variant="ember" size="hero" className="mt-6" onClick={onPrograms}>Elegir programa</Button>
     </Frame>
   );
-  const plan = buildPlan(program, state.days);
-  const today = dayIndexFor(state.start);
+
   const trainable = plan.filter((d) => d.type !== "Descanso");
   const done = trainable.filter((d) => state.done.includes(d.index)).length;
+
+  // Renderizado especial en MODO TV (1 semana a la vez, fuentes de 24px a 32px, sin scroll)
+  if (tvMode) {
+    const weekDays = plan.filter((d) => d.week === selectedWeek);
+    const activeDetail = selectedTvDay || weekDays[0] || plan[0];
+
+    return (
+      <div className="flex h-full w-full flex-col bg-background screen-in">
+        <header className="flex items-center justify-between border-b border-border pb-4">
+          <div className="flex items-center gap-4">
+            <Brand className="text-3xl" />
+            <h1 className="font-display text-3xl uppercase">{program.name}</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-base text-muted-foreground font-semibold">{done} de {trainable.length} días completados</span>
+            <Button variant="tile" onClick={onPrograms} className="h-12 px-4 text-base">Cambiar programa</Button>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-[1.1fr_1fr] gap-8 flex-1 min-h-0 pt-4">
+          {/* Panel Izquierdo: 1 Semana a la vez con tarjetas de 24px */}
+          <div className="flex flex-col gap-3 min-h-0">
+            <div className="flex items-center justify-between rounded-xl bg-card border border-border px-4 py-2">
+              <Button
+                variant="text"
+                className="h-12 text-lg"
+                disabled={selectedWeek <= 1}
+                onClick={() => {
+                  const nextW = Math.max(1, selectedWeek - 1);
+                  setSelectedWeek(nextW);
+                  const first = plan.find((d) => d.week === nextW);
+                  if (first) setSelectedTvDay(first);
+                }}
+              >
+                &larr; Semana anterior
+              </Button>
+              <span className="font-display text-2xl uppercase text-primary">
+                Semana {selectedWeek} de {program.weeks}
+              </span>
+              <Button
+                variant="text"
+                className="h-12 text-lg"
+                disabled={selectedWeek >= program.weeks}
+                onClick={() => {
+                  const nextW = Math.min(program.weeks, selectedWeek + 1);
+                  setSelectedWeek(nextW);
+                  const first = plan.find((d) => d.week === nextW);
+                  if (first) setSelectedTvDay(first);
+                }}
+              >
+                Semana siguiente &rarr;
+              </Button>
+            </div>
+
+            <div className="flex flex-col gap-2 flex-1 overflow-y-auto no-scrollbar">
+              {weekDays.map((d) => {
+                const isDone = state.done.includes(d.index);
+                const isToday = d.index === today;
+                const isSelected = activeDetail?.index === d.index;
+                const rest = d.type === "Descanso";
+
+                return (
+                  <button
+                    key={d.index}
+                    type="button"
+                    onClick={() => setSelectedTvDay(d)}
+                    onFocus={() => setSelectedTvDay(d)}
+                    className={cn(
+                      "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all",
+                      isSelected ? "border-primary bg-primary/10 scale-[1.01]" : "border-border bg-card hover:border-border/80",
+                      isToday && "ring-2 ring-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={cn("font-display text-2xl w-8", isToday ? "text-primary font-bold" : "text-muted-foreground")}>
+                        {d.index}
+                      </span>
+                      <div>
+                        <p className={cn("font-display text-2xl uppercase leading-none", rest ? "text-muted-foreground" : "text-foreground")}>
+                          {d.type}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          {fmt(dateForIndex(state.start, d.index))}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isToday && <span className="text-xs uppercase font-bold text-primary bg-primary/20 px-2.5 py-1 rounded-full">Hoy</span>}
+                      {isDone && <span className="font-display text-xl text-primary font-bold">✓ HECHO</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Panel Derecho: Detalle del día seleccionado (texto a 32px y acciones) */}
+          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
+            {activeDetail ? (
+              <div className="space-y-4">
+                <div>
+                  <span className="text-sm font-semibold uppercase text-primary tracking-wider">
+                    {fmt(dateForIndex(state.start, activeDetail.index))} · Semana {activeDetail.week}
+                  </span>
+                  <h2 className="font-display text-4xl uppercase mt-1 leading-tight">
+                    {activeDetail.type} (Día {activeDetail.index})
+                  </h2>
+                </div>
+
+                <p className="text-[28px] leading-snug text-foreground/90 font-medium pt-2">
+                  {typeDesc(program, activeDetail.type)}
+                </p>
+
+                {doseLine(program, activeDetail.week, activeDetail.type) && (
+                  <p className="text-[24px] text-muted-foreground bg-background rounded-xl p-4 border border-border">
+                    Esta semana: <b className="text-foreground">{doseLine(program, activeDetail.week, activeDetail.type)}</b>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-2xl text-muted-foreground">Selecciona un día para ver el detalle</p>
+            )}
+
+            {activeDetail && activeDetail.type !== "Descanso" && (
+              <div className="space-y-3 pt-6 border-t border-border">
+                {activeDetail.index === today && !state.done.includes(activeDetail.index) && (
+                  <Button
+                    variant="ember"
+                    size="hero"
+                    className="h-18 text-2xl uppercase tracking-wider font-display w-full"
+                    onClick={() => onStartDay(activeDetail)}
+                  >
+                    {activeDetail.type === "Prueba" ? "Hacer la prueba OneBell" : "Ver sesión de hoy"}
+                  </Button>
+                )}
+                <Button
+                  variant="tile"
+                  className="h-14 text-xl w-full"
+                  onClick={() => onToggle(activeDetail.index)}
+                >
+                  {state.done.includes(activeDetail.index) ? "Quitar la marca de completado" : "Marcar día como completado"}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderizado estándar en Celular
   return (
     <Frame header={<div className="flex items-center justify-between"><Brand /><button type="button" onClick={onPrograms} className="text-sm font-semibold text-primary">Cambiar programa</button></div>}>
       <h1 className="mt-2 font-display text-[34px] uppercase leading-none">{program.name}</h1>
@@ -63,3 +222,4 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay }: { state: P
     </Frame>
   );
 }
+

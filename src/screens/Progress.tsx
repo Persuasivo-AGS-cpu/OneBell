@@ -6,10 +6,97 @@ import { catalog } from "@/lib/catalog";
 import { fmtDate, isTestDue, nextTestDate, type TestResult } from "@/lib/fittest";
 import type { SessionNote } from "@/lib/storage";
 
-export function Progress({ tests, notes, onTest, onLibrary }: { tests: TestResult[]; notes: SessionNote[]; onTest: () => void; onLibrary: () => void }) {
+export function Progress({ tests, notes, onTest, onLibrary, tvMode }: { tests: TestResult[]; notes: SessionNote[]; onTest: () => void; onLibrary: () => void; tvMode?: boolean }) {
   const next = nextTestDate(tests);
   const due = tests.length === 0 || isTestDue(tests);
   const last = notes[notes.length - 1];
+  const latestTest = tests[tests.length - 1];
+
+  if (tvMode) {
+    return (
+      <div className="flex h-full w-full flex-col bg-background screen-in">
+        <header className="flex items-center justify-between border-b border-border pb-4">
+          <div className="flex items-center gap-4">
+            <Brand className="text-3xl" />
+            <h1 className="font-display text-3xl uppercase">Progreso</h1>
+          </div>
+          <div className="text-base text-muted-foreground font-semibold">
+            {latestTest ? `Pesa actual: ${latestTest.weight} kg` : "Sin pruebas registradas"}
+          </div>
+        </header>
+
+        <div className="grid grid-cols-[1.2fr_1fr] gap-8 flex-1 min-h-0 pt-4">
+          {/* Columna Izquierda: Prueba OneBell más reciente y acción */}
+          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
+            <div className="space-y-4">
+              <div className="flex items-baseline justify-between border-b border-border pb-3">
+                <h2 className="font-display text-3xl uppercase text-foreground">Prueba OneBell</h2>
+                {latestTest && (
+                  <span className="font-display text-4xl text-primary font-bold">
+                    {latestTest.weight} kg
+                  </span>
+                )}
+              </div>
+
+              <p className="text-xl text-muted-foreground leading-snug">
+                {tests.length === 0
+                  ? "Aún no haces tu prueba inicial. Es tu punto de partida para calibrar el peso de tus ejercicios."
+                  : due
+                  ? "Ya te toca tu siguiente prueba OneBell de control."
+                  : `Próxima prueba programada: ${fmtDate(next!)}.`}
+              </p>
+
+              <div className="pt-2">
+                <TestSheet tests={tests} />
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-border">
+              <Button
+                variant={due ? "ember" : "tile"}
+                size="hero"
+                className="w-full h-16 text-2xl uppercase tracking-wider font-display focus:scale-105"
+                onClick={onTest}
+              >
+                {tests.length === 0 ? "Hacer mi prueba inicial" : due ? "Hacer la prueba OneBell" : "Hacer la prueba antes"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Columna Derecha: Última sesión */}
+          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
+            <div className="space-y-4 min-h-0 flex flex-col">
+              <h2 className="font-display text-3xl uppercase text-foreground border-b border-border pb-3">
+                Última Sesión
+              </h2>
+
+              {last && last.ratings.length > 0 ? (
+                <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pt-1">
+                  <p className="text-base text-muted-foreground font-semibold">
+                    Fecha: {last.date} · Duración: {Math.round(last.seconds / 60)} min
+                  </p>
+                  <ul className="space-y-2.5">
+                    {last.ratings.map((r) => (
+                      <li key={`${r.id}-${r.rating}`} className="flex items-center justify-between rounded-xl bg-background border border-border px-4 py-3">
+                        <span className="font-semibold text-lg text-foreground">{r.name}</span>
+                        <span className="font-display text-lg text-primary uppercase">{r.rating}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-xl text-muted-foreground pt-4">
+                  Aún no has completado sesiones de entrenamiento en este dispositivo.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderizado estándar en Celular
   return (
     <Frame header={<Brand />}>
       <h1 className="mt-2 font-display text-[44px] uppercase leading-none">Progreso</h1>
@@ -36,3 +123,4 @@ export function Progress({ tests, notes, onTest, onLibrary }: { tests: TestResul
     </Frame>
   );
 }
+

@@ -42,16 +42,20 @@ const tabs = [
 export function BottomNav({ screen, go, onOpenSync }: { screen: Screen; go: (s: Screen) => void; onOpenSync?: () => void }) {
   const active = screen === "library" ? "progress" : screen === "programs" ? "calendar" : screen;
   return (
-    <nav aria-label="Navegación principal" className="grid shrink-0 grid-cols-5 border-t border-border bg-background px-3 pt-1.5 pb-2">
+    <nav aria-label="Navegación principal" className="grid shrink-0 grid-cols-5 border-t border-border bg-background px-3 pt-1.5 pb-2 tv-nav">
       {tabs.map(({ key, label, icon: Icon }) => (
         <button key={key} type="button" aria-current={active === key ? "page" : undefined} onClick={() => go(key)}
-          className={cn("flex h-14 flex-col items-center justify-center gap-0.5 rounded-[12px] text-[12px] transition-transform focus:scale-105", active === key ? "text-primary font-semibold" : "text-muted-foreground")}>
-          <Icon size={22} strokeWidth={active === key ? 2.4 : 1.8} /><span>{label}</span>
+          className={cn(
+            "flex h-14 flex-col items-center justify-center gap-0.5 rounded-[12px] text-[12px] transition-transform focus:scale-105",
+            "tv:h-18 tv:text-[18px] tv:gap-1.5",
+            active === key ? "text-primary font-semibold" : "text-muted-foreground"
+          )}>
+          <Icon className="w-[22px] h-[22px] tv:w-[30px] tv:h-[30px]" strokeWidth={active === key ? 2.4 : 1.8} /><span>{label}</span>
         </button>
       ))}
       <button type="button" onClick={onOpenSync} aria-label="Sincronizar TV"
-        className="flex h-14 flex-col items-center justify-center gap-0.5 rounded-[12px] text-[12px] text-muted-foreground hover:text-primary transition-transform focus:scale-105">
-        <Tv size={22} strokeWidth={1.8} /><span>TV Sync</span>
+        className="flex h-14 tv:h-18 flex-col items-center justify-center gap-0.5 tv:gap-1.5 rounded-[12px] text-[12px] tv:text-[18px] text-muted-foreground hover:text-primary transition-transform focus:scale-105">
+        <Tv className="w-[22px] h-[22px] tv:w-[30px] tv:h-[30px]" strokeWidth={1.8} /><span>TV Sync</span>
       </button>
     </nav>
   );

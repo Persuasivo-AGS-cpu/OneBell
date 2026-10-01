@@ -50,6 +50,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, [role="button"]:focu
   transition: transform 150ms cubic-bezier(0.2, 0, 0, 1), box-shadow 150ms cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* En modo TV, Amazon Silk usa :focus. El anillo naranja se aplica a :focus directo */
+.tv-mode button:focus,
+.tv-mode a:focus,
+.tv-mode input:focus,
+.tv-mode [role="button"]:focus,
+.tv-mode [role="radio"]:focus,
+.tv-mode [tabindex]:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--primary), 0 0 32px rgba(255, 90, 31, 0.85) !important;
+  transform: scale(1.04);
+  z-index: 30;
+  transition: transform 120ms cubic-bezier(0.2, 0, 0, 1), box-shadow 120ms cubic-bezier(0.2, 0, 0, 1);
+}
+
 @keyframes screen-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes sheet-in { from { transform: translateY(100%); } to { transform: none; } }
 .screen-in { animation: screen-in 220ms ease-out both; }
@@ -58,9 +72,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, [role="button"]:focu
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
-/* Reglas especiales para MODO TV (Regla de los 3 metros y Layout 16:9 Estático) */
+/* Reglas especiales para MODO TV (Regla de los 3 metros, 100dvh y Margen Overscan 48px) */
 .tv-mode {
-  font-size: 18px;
+  font-size: 20px;
 }
 .tv-mode body {
   overflow: hidden;
@@ -68,10 +82,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [role="button"]:focu
 .tv-mode .app-container {
   max-width: 100% !important;
   width: 100vw !important;
-  height: 100vh !important;
+  height: 100dvh !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 0 !important;
+  padding: 48px !important;
+  box-sizing: border-box !important;
 }
 .tv-stage {
   display: grid;
@@ -95,4 +110,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, [role="button"]:focu
   height: 100%;
   object-fit: contain;
 }
+
+.tv-mode .tv-nav {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+.tv-mode .tv-nav button {
+  height: 72px !important;
+  font-size: 18px !important;
+  gap: 6px !important;
+}
+.tv-mode .tv-nav button svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+
 

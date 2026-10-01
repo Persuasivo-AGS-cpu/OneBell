@@ -64,3 +64,28 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 
 **Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:16 (UTC−6)
 
+### [2026-10-01] Navegación D-Pad en Silk (Fire TV) y Adaptación de Calendario, Progreso, Programas y Perfil
+- **Fecha y Hora**: 2026-10-01T13:25:30-06:00
+- **Identificador de IA**: `Antigravity (Google DeepMind - Advanced Agentic Coding)`
+
+#### Resumen de Cambios:
+1. **Foco en Silk y Control (`src/styles.css`, `src/lib/spatial-nav.ts`, `src/components/Sheet.tsx`)**:
+   - En `.tv-mode`, el anillo naranja `#FF5A1F` se aplica a `:focus` directo para ser visible en Amazon Silk.
+   - Disparo de `click()` con `Enter` confiable en Silk sin doble evento.
+   - Retención de historial (`popstate`) en TV para que la tecla Atrás (código 4) cierre hojas o regrese de pantalla sin salir del navegador Silk.
+   - Las hojas (`Sheet.tsx`) atrapan el foco (`data-sheet="true"`), impidiendo que las flechas salgan de ellas mientras estén abiertas.
+   - `Escape`/`Atrás` dentro de campos de texto (`input`/`textarea`) solo quita el foco sin cambiar de pantalla.
+   - Margen de overscan de 48 px y `100dvh` en `.tv-mode .app-container`.
+   - Barra de navegación (`BottomNav`) con iconos y textos de 18 px legibles a 3 metros.
+2. **Calendario en TV (`src/screens/Calendar.tsx`)**:
+   - Muestra 1 semana a la vez (lunes a domingo con fecha y tipo a 24 px). Panel derecho con detalle a 32 px sustituyendo la hoja, con las mismas acciones ("Ver sesión", "Marcar como hecho").
+3. **Progreso en TV (`src/screens/Progress.tsx`)**:
+   - Columna izquierda con la prueba OneBell más reciente (peso en 64 px) y botón de prueba. Columna derecha con las notas de la última sesión. Se omitió la biblioteca en TV.
+4. **Programas en TV (`src/screens/Programs.tsx`)**:
+   - Columna izquierda con las 5 filas de programas accesibles por foco (incluso si están bloqueadas por zonas, mostrando la razón). Columna derecha con detalle, radios "Hoy"/"El lunes" y botón de inicio.
+5. **Perfil en TV (`src/screens/Profile.tsx`)**:
+   - Menú de grupos a la izquierda (Pesas, Nivel, Espacio, Zonas, Días, Voz, TV, Nombre, Reiniciar) y opciones del grupo a la derecha sin scroll. El nombre no es el primer foco.
+
+**Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:25 (UTC−6)
+
+

@@ -59,17 +59,31 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
   const onBackRef = useRef(onBack);
   onBackRef.current = onBack;
 
+  // Retener historial en modo TV para que Atrás no cierre el navegador Amazon Silk
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") return;
+    window.history.pushState({ onebellTv: true }, "");
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      window.history.pushState({ onebellTv: true }, "");
+      onBackRef.current();
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) return;
 
-    const focusFirst = () => {
-      const first = getFocusables()[0];
-      if (first && document.activeElement === document.body) first.focus();
-    };
-    focusFirst();
-    const ready = window.setTimeout(focusFirst, 0);
+    function getActiveSheet(): HTMLElement | null {
+      const sheets = Array.from(document.querySelectorAll<HTMLElement>('.sheet-in, [data-sheet="true"], [role="dialog"]'));
+      return sheets.filter((s) => s.offsetWidth > 0 && s.offsetHeight > 0).pop() ?? null;
+    }
 
     function getFocusables(): HTMLElement[] {
+      const activeSheet = getActiveSheet();
+      const root = activeSheet || document;
+
       const selectors = [
         'button:not([disabled])',
         'a[href]',
@@ -81,19 +95,36 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
         '[role="radio"]:not([disabled])'
       ].join(', ');
       
-      const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
+      const elements = Array.from(root.querySelectorAll<HTMLElement>(selectors));
       return elements.filter((el) => {
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetWidth > 0 && el.offsetHeight > 0;
       });
     }
 
+    const focusPrimaryOrFirst = () => {
+      const focusables = getFocusables();
+      if (focusables.length === 0) return;
+      // Buscar botón principal o con data-primary, o el primero que no sea input
+      const primary = focusables.find((el) => el.getAttribute("data-primary") === "true" || el.classList.contains("bg-primary")) || focusables.find((el) => el.tagName !== "INPUT") || focusables[0];
+      if (primary && (document.activeElement === document.body || !document.activeElement)) {
+        primary.focus();
+      }
+    };
+
+    focusPrimaryOrFirst();
+    const readyTimer = window.setTimeout(focusPrimaryOrFirst, 50);
+
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement | null;
       const typing = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
 
       if (isBackKey(e.key, e.keyCode)) {
-        if (typing && e.key === "Backspace") return;
+        if (typing) {
+          e.preventDefault();
+          target?.blur();
+          return;
+        }
         e.preventDefault();
         onBackRef.current();
         return;
@@ -128,13 +159,9 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
         case "Enter":
         case " ": {
           if (!activeEl || activeEl === document.body) return;
-          const tag = activeEl.tagName;
-          if (tag === "BUTTON" || tag === "A" || tag === "INPUT") return;
-          const role = activeEl.getAttribute("role");
-          if (role === "button" || role === "radio") {
-            e.preventDefault();
-            activeEl.click();
-          }
+          // En Silk, el D-Pad a veces no dispara el click nativo
+          e.preventDefault();
+          activeEl.click();
           return;
         }
         default:
@@ -160,7 +187,6 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
 
         const candRect = candidate.getBoundingClientRect();
 
-        // Validar que esté verdaderamente en la dirección del movimiento
         let isCandidateInDirection = false;
         let dist = 0;
 
@@ -172,16 +198,16 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
 
         if (direction === 'up' && dy < -5) {
           isCandidateInDirection = true;
-          dist = Math.abs(dy) + Math.abs(dx) * 1.8;
+          dist = Math.abs(dy) + Math.abs(dx) * 1.5;
         } else if (direction === 'down' && dy > 5) {
           isCandidateInDirection = true;
-          dist = Math.abs(dy) + Math.abs(dx) * 1.8;
+          dist = Math.abs(dy) + Math.abs(dx) * 1.5;
         } else if (direction === 'left' && dx < -5) {
           isCandidateInDirection = true;
-          dist = Math.abs(dx) + Math.abs(dy) * 1.8;
+          dist = Math.abs(dx) + Math.abs(dy) * 1.5;
         } else if (direction === 'right' && dx > 5) {
           isCandidateInDirection = true;
-          dist = Math.abs(dx) + Math.abs(dy) * 1.8;
+          dist = Math.abs(dx) + Math.abs(dy) * 1.5;
         }
 
         if (isCandidateInDirection && dist < minDistance) {
@@ -198,7 +224,7 @@ export function useSpatialNav(enabled: boolean, onBack: () => void) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.clearTimeout(ready);
+      window.clearTimeout(readyTimer);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [enabled]);
