@@ -28,10 +28,9 @@ export function Profile({ profile, update, onReset, tvMode, onToggleTv }: { prof
     ] as const;
 
     return (
-      <div className="flex h-full w-full flex-col bg-background screen-in">
-        <div className="grid grid-cols-[1fr_1.3fr] gap-6 flex-1 min-h-0 pt-3">
-          {/* Menú de Grupos a la Izquierda */}
-          <div className="flex flex-col gap-2 min-h-0 overflow-y-auto no-scrollbar">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background pt-2 screen-in">
+        <div className="grid min-h-0 flex-1 grid-cols-[0.9fr_1.2fr] gap-3">
+          <div className="grid min-h-0 min-w-0 gap-1" style={{ gridTemplateRows: `repeat(${groups.length}, minmax(0, 1fr))` }}>
             {groups.map((g) => {
               const isSelected = activeGroup === g.id;
               return (
@@ -41,29 +40,28 @@ export function Profile({ profile, update, onReset, tvMode, onToggleTv }: { prof
                   onClick={() => setActiveGroup(g.id)}
                   onFocus={() => setActiveGroup(g.id)}
                   className={cn(
-                    "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all",
-                    isSelected ? "border-primary bg-primary/10 scale-[1.01]" : "border-border bg-card",
-                    g.id === "reiniciar" && "text-amber-500 border-amber-500/20"
+                    "flex min-h-0 items-center justify-between gap-2 rounded-lg border px-3 text-left",
+                    isSelected ? "border-primary bg-primary/15" : "border-border bg-card",
+                    g.id === "reiniciar" && "text-amber-500"
                   )}
                 >
-                  <span className="font-display text-2xl uppercase">{g.label}</span>
-                  <span className="text-sm text-muted-foreground truncate max-w-[160px]">{g.summary}</span>
+                  <span className="truncate font-display text-lg uppercase">{g.label}</span>
+                  <span className="max-w-[46%] truncate text-sm text-muted-foreground">{g.summary}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Opciones del Grupo Activo a la Derecha */}
-          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
-            <div className="space-y-4">
-              <h2 className="font-display text-3xl uppercase text-primary border-b border-border pb-2">
+          <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4">
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <h2 className="border-b border-border pb-2 font-display text-2xl uppercase text-primary">
                 {groups.find((g) => g.id === activeGroup)?.label}
               </h2>
 
               {activeGroup === "pesas" && (
-                <div>
-                  <p className="text-lg text-muted-foreground mb-4">Selecciona las kettlebells con las que cuentas:</p>
-                  <WeightGrid profile={profile} update={update} cols={4} />
+                <div className="pt-3">
+                  <p className="mb-3 text-base text-muted-foreground">Marca las kettlebells que tienes.</p>
+                  <WeightGrid profile={profile} update={update} cols={4} dense />
                 </div>
               )}
 
@@ -118,19 +116,15 @@ export function Profile({ profile, update, onReset, tvMode, onToggleTv }: { prof
               )}
 
               {activeGroup === "reiniciar" && (
-                <div className="space-y-4">
-                  <p className="text-xl text-muted-foreground leading-snug">
-                    Borra todos tus datos: perfil, programa activo, historial de pruebas, racha y notas.
+                <div className="space-y-3 pt-3">
+                  <p className="text-base leading-snug text-muted-foreground">
+                    Borra perfil, programa, pruebas, racha y notas. No se puede deshacer.
                   </p>
-                  <Button variant="tile" className="h-16 text-xl text-amber-500 border-amber-500/40 w-full" onClick={() => setConfirm(true)}>
+                  <Button variant="tile" className="h-12 w-full border-amber-500/40 text-base text-amber-500" onClick={() => setConfirm(true)}>
                     <RotateCcw className="mr-2" /> Borrar todo y empezar de cero
                   </Button>
                 </div>
               )}
-            </div>
-
-            <div className="text-sm text-muted-foreground border-t border-border pt-4">
-              Los cambios se guardan de inmediato.
             </div>
           </div>
         </div>

@@ -71,7 +71,7 @@ export function UpNext({ state, plan, today, tests, onTest }: { state: ProgramSt
 }
 
 /** Camino a la meta del programa, con la prueba (si aplica) y el volumen de la semana. */
-export function GoalProgress({ program, tests, week }: { program: Program; tests: TestResult[]; week: number }) {
+export function GoalProgress({ program, tests, week, plain = false }: { program: Program; tests: TestResult[]; week: number; plain?: boolean }) {
   const swing = TEST_MOVES[0];
   const last = tests[tests.length - 1];
   const best = Math.max(0, ...tests.map((t) => totalFor(swing, t) ?? 0));
@@ -79,10 +79,10 @@ export function GoalProgress({ program, tests, week }: { program: Program; tests
   const rx = keyRx(program, week);
   const value = rx ? program.metric.of(rx) : 0;
   const { goal } = program.metric;
-  return (
-    <section className="mt-7">
-      <h2 className="font-display text-[20px] uppercase">Camino a tu meta</h2>
-      <div className="mt-2 rounded-[16px] border border-border bg-card p-4">
+  const body = (
+    <>
+      <h2 className={plain ? "font-display text-2xl uppercase" : "font-display text-[20px] uppercase"}>Camino a tu meta</h2>
+      <div className={plain ? "mt-2" : "mt-2 rounded-[16px] border border-border bg-card p-4"}>
         <p className="text-[15px] leading-snug">Meta: <b>{program.goal}</b>.{program.goalNote ? ` ${program.goalNote}` : ""}</p>
         {pace && program.id === "cero-a-100-swings" && (
           <div className="mt-4">
@@ -97,8 +97,10 @@ export function GoalProgress({ program, tests, week }: { program: Program; tests
           <p className="mt-1.5 text-sm text-muted-foreground">{program.metric.hint}</p>
         </div>
       </div>
-    </section>
+    </>
   );
+  if (plain) return <div className="min-h-0 overflow-hidden">{body}</div>;
+  return <section className="mt-7">{body}</section>;
 }
 
 /** Técnica del día: cambia cada día, dentro de tu nivel y espacio. */

@@ -14,72 +14,46 @@ export function Progress({ tests, notes, onTest, onLibrary, tvMode }: { tests: T
 
   if (tvMode) {
     return (
-      <div className="flex h-full w-full flex-col bg-background screen-in">
-        <div className="grid grid-cols-[1.2fr_1fr] gap-6 flex-1 min-h-0 pt-3">
-          {/* Columna Izquierda: Prueba OneBell más reciente y acción */}
-          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
-            <div className="space-y-4">
-              <div className="flex items-baseline justify-between border-b border-border pb-3">
-                <h2 className="font-display text-3xl uppercase text-foreground">Prueba OneBell</h2>
-                {latestTest && (
-                  <span className="font-display text-4xl text-primary font-bold">
-                    {latestTest.weight} kg
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xl text-muted-foreground leading-snug">
-                {tests.length === 0
-                  ? "Aún no haces tu prueba inicial. Es tu punto de partida para calibrar el peso de tus ejercicios."
-                  : due
-                  ? "Ya te toca tu siguiente prueba OneBell de control."
-                  : `Próxima prueba programada: ${fmtDate(next!)}.`}
-              </p>
-
-              <div className="pt-2">
-                <TestSheet tests={tests} />
-              </div>
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background pt-2 screen-in">
+        <div className="grid min-h-0 flex-1 grid-cols-[1.35fr_0.75fr] gap-3">
+          <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4">
+            <div className="flex shrink-0 items-baseline justify-between gap-3">
+              <h2 className="font-display text-2xl uppercase text-foreground">Prueba OneBell</h2>
+              {latestTest && <span className="font-display text-3xl text-primary">{latestTest.weight} kg</span>}
             </div>
-
-            <div className="pt-6 border-t border-border">
-              <Button
-                variant={due ? "ember" : "tile"}
-                size="hero"
-                className="w-full h-16 text-2xl uppercase tracking-wider font-display focus:scale-105"
-                onClick={onTest}
-              >
-                {tests.length === 0 ? "Hacer mi prueba inicial" : due ? "Hacer la prueba OneBell" : "Hacer la prueba antes"}
-              </Button>
+            <p className="mt-1 shrink-0 text-base leading-snug text-muted-foreground">
+              {tests.length === 0
+                ? "Aún no haces tu prueba inicial. Sirve para calibrar el peso."
+                : due
+                ? "Ya te toca tu siguiente prueba de control."
+                : `Próxima prueba: ${fmtDate(next!)}.`}
+            </p>
+            <div className="mt-2 min-h-0 flex-1 overflow-hidden">
+              <TestSheet tests={tests} compact />
             </div>
+            <Button variant={due ? "ember" : "tile"} className="mt-2 h-12 w-full shrink-0 text-lg" onClick={onTest}>
+              {tests.length === 0 ? "Hacer mi prueba inicial" : due ? "Hacer la prueba" : "Hacer la prueba antes"}
+            </Button>
           </div>
 
-          {/* Columna Derecha: Última sesión */}
-          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
-            <div className="space-y-4 min-h-0 flex flex-col">
-              <h2 className="font-display text-3xl uppercase text-foreground border-b border-border pb-3">
-                Última Sesión
-              </h2>
-
-              {last && last.ratings.length > 0 ? (
-                <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pt-1">
-                  <p className="text-base text-muted-foreground font-semibold">
-                    Fecha: {last.date} · Duración: {Math.round(last.seconds / 60)} min
-                  </p>
-                  <ul className="space-y-2.5">
-                    {last.ratings.map((r) => (
-                      <li key={`${r.id}-${r.rating}`} className="flex items-center justify-between rounded-xl bg-background border border-border px-4 py-3">
-                        <span className="font-semibold text-lg text-foreground">{r.name}</span>
-                        <span className="font-display text-lg text-primary uppercase">{r.rating}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-xl text-muted-foreground pt-4">
-                  Aún no has completado sesiones de entrenamiento en este dispositivo.
-                </p>
-              )}
-            </div>
+          <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4">
+            <h2 className="shrink-0 font-display text-2xl uppercase">Última sesión</h2>
+            {last && last.ratings.length > 0 ? (
+              <div className="mt-2 min-h-0 flex-1 overflow-hidden">
+                <p className="text-sm text-muted-foreground">{last.date} · {Math.round(last.seconds / 60)} min</p>
+                <ul className="mt-2 space-y-1.5">
+                  {last.ratings.map((r) => (
+                    <li key={`${r.id}-${r.rating}`} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2">
+                      <span className="truncate text-base font-semibold">{r.name}</span>
+                      <span className="shrink-0 font-display text-base uppercase text-primary">{r.rating}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="mt-3 text-lg leading-snug text-muted-foreground">Aún no completas una sesión en esta tele.</p>
+            )}
+            <Button variant="tile" className="mt-auto h-12 w-full shrink-0 text-base" onClick={onLibrary}>Biblioteca</Button>
           </div>
         </div>
       </div>

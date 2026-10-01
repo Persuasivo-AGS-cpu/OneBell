@@ -6,6 +6,9 @@ import { TYPE_INFO, buildPlan, dateForIndex, dayIndexFor, doseLine, programById,
 import { cn } from "@/lib/utils";
 
 const fmt = (d: Date) => new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(d);
+const shortWeekday = new Intl.DateTimeFormat("es-MX", { weekday: "short" });
+const shortMonth = new Intl.DateTimeFormat("es-MX", { month: "short" });
+const shortFmt = (d: Date) => `${shortWeekday.format(d).replace(".", "")} ${d.getDate()} ${shortMonth.format(d).replace(".", "")}`;
 
 export function Calendar({ state, onPrograms, onToggle, onStartDay, tvMode }: { state: ProgramState | null; onPrograms: () => void; onToggle: (i: number) => void; onStartDay: (d: PlanDay) => void; tvMode?: boolean }) {
   const program = programById(state?.id);
@@ -29,63 +32,40 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay, tvMode }: { 
   const trainable = plan.filter((d) => d.type !== "Descanso");
   const done = trainable.filter((d) => state.done.includes(d.index)).length;
 
-  // Renderizado especial en MODO TV (1 semana a la vez, fuentes de 24px a 32px, sin scroll)
+  // TV: los 7 días de la semana caben a la vez. Abajo pasa al día siguiente; no hay scroll.
   if (tvMode) {
     const weekDays = plan.filter((d) => d.week === selectedWeek);
     const activeDetail = selectedTvDay || weekDays[0] || plan[0];
+    const goWeek = (nextW: number) => {
+      setSelectedWeek(nextW);
+      const first = plan.find((d) => d.week === nextW);
+      if (first) setSelectedTvDay(first);
+    };
 
     return (
-      <div className="flex h-full w-full flex-col bg-background screen-in">
-        <div className="flex items-center justify-between border-b border-border pb-2 pt-2">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-2xl uppercase text-foreground">{program.name}</span>
-            <span className="text-sm text-muted-foreground font-semibold">({done} de {trainable.length} completados)</span>
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background screen-in">
+        <div className="flex shrink-0 items-center justify-between gap-3 py-1">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <span className="truncate font-display text-xl uppercase text-foreground">{program.name}</span>
+            <span className="shrink-0 text-sm text-muted-foreground">{done} de {trainable.length}</span>
           </div>
-          <Button variant="tile" onClick={onPrograms} className="h-10 px-3 text-sm">Cambiar programa</Button>
+          <Button variant="tile" onClick={onPrograms} className="h-10 shrink-0 px-3 text-sm">Cambiar programa</Button>
         </div>
 
-        <div className="grid grid-cols-[1.1fr_1fr] gap-6 flex-1 min-h-0 pt-3">
-          {/* Panel Izquierdo: 1 Semana a la vez con tarjetas de 24px */}
-          <div className="flex flex-col gap-3 min-h-0">
-            <div className="flex items-center justify-between rounded-xl bg-card border border-border px-4 py-2">
-              <Button
-                variant="text"
-                className="h-12 text-lg"
-                disabled={selectedWeek <= 1}
-                onClick={() => {
-                  const nextW = Math.max(1, selectedWeek - 1);
-                  setSelectedWeek(nextW);
-                  const first = plan.find((d) => d.week === nextW);
-                  if (first) setSelectedTvDay(first);
-                }}
-              >
-                &larr; Semana anterior
-              </Button>
-              <span className="font-display text-2xl uppercase text-primary">
-                Semana {selectedWeek} de {program.weeks}
-              </span>
-              <Button
-                variant="text"
-                className="h-12 text-lg"
-                disabled={selectedWeek >= program.weeks}
-                onClick={() => {
-                  const nextW = Math.min(program.weeks, selectedWeek + 1);
-                  setSelectedWeek(nextW);
-                  const first = plan.find((d) => d.week === nextW);
-                  if (first) setSelectedTvDay(first);
-                }}
-              >
-                Semana siguiente &rarr;
-              </Button>
+        <div className="grid min-h-0 flex-1 grid-cols-[1.15fr_0.85fr] gap-3 pt-1">
+          <div className="flex min-h-0 min-w-0 flex-col gap-1.5">
+            <div className="flex shrink-0 items-center justify-between rounded-xl border border-border bg-card px-2">
+              <Button variant="text" className="h-10 px-2 text-base" disabled={selectedWeek <= 1} onClick={() => goWeek(Math.max(1, selectedWeek - 1))}>← Anterior</Button>
+              <span className="font-display text-lg uppercase text-primary">Semana {selectedWeek} de {program.weeks}</span>
+              <Button variant="text" className="h-10 px-2 text-base" disabled={selectedWeek >= program.weeks} onClick={() => goWeek(Math.min(program.weeks, selectedWeek + 1))}>Siguiente →</Button>
             </div>
 
-            <div className="flex flex-col gap-2 flex-1 overflow-y-auto no-scrollbar">
+            <div className="grid min-h-0 flex-1 gap-1" style={{ gridTemplateRows: `repeat(${Math.max(weekDays.length, 1)}, minmax(0, 1fr))` }}>
               {weekDays.map((d) => {
                 const isDone = state.done.includes(d.index);
                 const isToday = d.index === today;
                 const isSelected = activeDetail?.index === d.index;
                 const rest = d.type === "Descanso";
-
                 return (
                   <button
                     key={d.index}
@@ -93,80 +73,46 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay, tvMode }: { 
                     onClick={() => setSelectedTvDay(d)}
                     onFocus={() => setSelectedTvDay(d)}
                     className={cn(
-                      "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all",
-                      isSelected ? "border-primary bg-primary/10 scale-[1.01]" : "border-border bg-card hover:border-border/80",
-                      isToday && "ring-2 ring-primary"
+                      "flex min-h-0 items-center gap-3 rounded-lg border px-3 text-left",
+                      isSelected ? "border-primary bg-primary/15" : "border-border bg-card",
+                      isToday && !isSelected && "border-primary/60"
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className={cn("font-display text-2xl w-8", isToday ? "text-primary font-bold" : "text-muted-foreground")}>
-                        {d.index}
-                      </span>
-                      <div>
-                        <p className={cn("font-display text-2xl uppercase leading-none", rest ? "text-muted-foreground" : "text-foreground")}>
-                          {d.type}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {fmt(dateForIndex(state.start, d.index))}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {isToday && <span className="text-xs uppercase font-bold text-primary bg-primary/20 px-2.5 py-1 rounded-full">Hoy</span>}
-                      {isDone && <span className="font-display text-xl text-primary font-bold">✓ HECHO</span>}
-                    </div>
+                    <span className={cn("w-7 shrink-0 font-display text-xl", isToday || isSelected ? "text-primary" : "text-muted-foreground")}>{d.index}</span>
+                    <span className={cn("min-w-0 flex-1 truncate font-display text-xl uppercase", rest ? "text-muted-foreground" : "text-foreground")}>{d.type}</span>
+                    <span className="shrink-0 text-sm text-muted-foreground">{shortFmt(dateForIndex(state.start, d.index))}</span>
+                    {isToday && <span className="shrink-0 text-xs font-bold uppercase text-primary">Hoy</span>}
+                    {isDone && <span className="shrink-0 font-display text-lg text-primary">✓</span>}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Panel Derecho: Detalle del día seleccionado (texto a 32px y acciones) */}
-          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
+          <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4">
             {activeDetail ? (
-              <div className="space-y-4">
-                <div>
-                  <span className="text-sm font-semibold uppercase text-primary tracking-wider">
-                    {fmt(dateForIndex(state.start, activeDetail.index))} · Semana {activeDetail.week}
-                  </span>
-                  <h2 className="font-display text-4xl uppercase mt-1 leading-tight">
-                    {activeDetail.type} (Día {activeDetail.index})
-                  </h2>
-                </div>
-
-                <p className="text-[28px] leading-snug text-foreground/90 font-medium pt-2">
-                  {typeDesc(program, activeDetail.type)}
-                </p>
-
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <p className="text-sm font-semibold uppercase text-primary">{fmt(dateForIndex(state.start, activeDetail.index))}</p>
+                <p className="text-sm text-muted-foreground">Semana {activeDetail.week}</p>
+                <h2 className="mt-1 font-display text-3xl uppercase leading-none">{activeDetail.type}</h2>
+                <p className="mt-2 line-clamp-4 text-lg leading-snug text-foreground/90">{typeDesc(program, activeDetail.type)}</p>
                 {doseLine(program, activeDetail.week, activeDetail.type) && (
-                  <p className="text-[24px] text-muted-foreground bg-background rounded-xl p-4 border border-border">
-                    Esta semana: <b className="text-foreground">{doseLine(program, activeDetail.week, activeDetail.type)}</b>
-                  </p>
+                  <p className="mt-2 text-base text-muted-foreground">Esta semana: <b className="text-foreground">{doseLine(program, activeDetail.week, activeDetail.type)}</b></p>
                 )}
               </div>
             ) : (
-              <p className="text-2xl text-muted-foreground">Selecciona un día para ver el detalle</p>
+              <p className="text-lg text-muted-foreground">Elige un día</p>
             )}
 
             {activeDetail && activeDetail.type !== "Descanso" && (
-              <div className="space-y-3 pt-6 border-t border-border">
+              <div className="mt-3 shrink-0 space-y-2 border-t border-border pt-3">
                 {activeDetail.index === today && !state.done.includes(activeDetail.index) && (
-                  <Button
-                    variant="ember"
-                    size="hero"
-                    className="h-18 text-2xl uppercase tracking-wider font-display w-full"
-                    onClick={() => onStartDay(activeDetail)}
-                  >
-                    {activeDetail.type === "Prueba" ? "Hacer la prueba OneBell" : "Ver sesión de hoy"}
+                  <Button variant="ember" className="h-12 w-full text-lg" onClick={() => onStartDay(activeDetail)}>
+                    {activeDetail.type === "Prueba" ? "Hacer la prueba" : "Ver sesión de hoy"}
                   </Button>
                 )}
-                <Button
-                  variant="tile"
-                  className="h-14 text-xl w-full"
-                  onClick={() => onToggle(activeDetail.index)}
-                >
-                  {state.done.includes(activeDetail.index) ? "Quitar la marca de completado" : "Marcar día como completado"}
+                <Button variant="tile" className="h-12 w-full text-base" onClick={() => onToggle(activeDetail.index)}>
+                  {state.done.includes(activeDetail.index) ? "Quitar la marca" : "Marcar como hecho"}
                 </Button>
               </div>
             )}

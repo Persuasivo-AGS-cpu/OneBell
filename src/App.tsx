@@ -177,7 +177,7 @@ export default function App() {
   return (
     <div className="app-container mx-auto flex h-full max-w-[430px] flex-col bg-background">
       {tvMode && tabs.includes(screen) && (
-        <TvTopNav screen={screen} go={setScreen} onOpenSync={openSync} streak={streak} athleteName={profile.name} />
+        <TvTopNav screen={screen} go={setScreen} onOpenSync={openSync} />
       )}
       <div className="min-h-0 flex-1 flex flex-col">
         {screen === "setup" && <Setup profile={profile} update={update} onUseTv={openSync} onDone={() => { update({ setupDone: true }); setScreen("fittest"); }} />}

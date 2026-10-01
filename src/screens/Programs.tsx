@@ -26,22 +26,19 @@ export function Programs({ profile, current, onBack, onStart, tvMode }: { profil
     const canSelect = activeProgram.ready && !blocked;
 
     return (
-      <div className="flex h-full w-full flex-col bg-background screen-in">
-        <div className="flex items-center justify-between border-b border-border pb-2 pt-2">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background pt-2 screen-in">
+        <div className="flex shrink-0 items-center justify-between gap-3 py-1">
           <div className="flex items-center gap-3">
-            <Button variant="tile" onClick={onBack} data-action="back" className="h-10 px-3 text-sm flex items-center gap-2">
+            <Button variant="tile" onClick={onBack} data-action="back" className="flex h-10 items-center gap-2 px-3 text-sm">
               <ArrowLeft size={16} /> Volver
             </Button>
-            <h1 className="font-display text-2xl uppercase">Programas</h1>
+            <h1 className="font-display text-xl uppercase">Programas</h1>
           </div>
-          <span className="text-sm text-muted-foreground font-semibold">
-            {profile.days} días por semana
-          </span>
+          <span className="text-sm text-muted-foreground">{profile.days} días por semana</span>
         </div>
 
-        <div className="grid grid-cols-[1.1fr_1.1fr] gap-6 flex-1 min-h-0 pt-3">
-          {/* Columna Izquierda: 5 Programas en lista vertical enfocable */}
-          <div className="flex flex-col gap-3 min-h-0 overflow-y-auto no-scrollbar">
+        <div className="grid min-h-0 flex-1 grid-cols-2 gap-3 pt-1">
+          <div className="grid min-h-0 min-w-0 gap-1.5" style={{ gridTemplateRows: `repeat(${PROGRAMS.length}, minmax(0, 1fr))` }}>
             {PROGRAMS.map((p) => {
               const pTooHard = levelNumber[p.level] > levelNumber[profile.level];
               const pActive = current?.id === p.id;
@@ -55,13 +52,13 @@ export function Programs({ profile, current, onBack, onStart, tvMode }: { profil
                   onClick={() => setChosen(p)}
                   onFocus={() => setChosen(p)}
                   className={cn(
-                    "flex flex-col rounded-xl border p-4 text-left transition-all",
-                    isSelected ? "border-primary bg-primary/10 scale-[1.01]" : "border-border bg-card",
-                    pActive && "ring-2 ring-primary"
+                    "flex min-h-0 flex-col justify-center rounded-lg border px-3 text-left",
+                    isSelected ? "border-primary bg-primary/15" : "border-border bg-card",
+                    pActive && !isSelected && "border-primary/60"
                   )}
                 >
-                  <div className="flex items-center justify-between text-sm font-semibold">
-                    <span className="text-primary font-bold text-base">{p.level} · {p.weeks} semanas</span>
+                  <div className="flex items-center justify-between gap-2 text-sm font-semibold">
+                    <span className="truncate text-primary">{p.level} · {p.weeks} sem</span>
                     {pActive ? (
                       <span className="flex items-center gap-1 text-primary text-sm font-bold"><Check size={16} /> Activo</span>
                     ) : !p.ready ? (
@@ -72,33 +69,33 @@ export function Programs({ profile, current, onBack, onStart, tvMode }: { profil
                       <span className="text-muted-foreground text-xs uppercase bg-secondary px-2 py-0.5 rounded">Nivel avanzado</span>
                     ) : null}
                   </div>
-                  <p className="mt-1 font-display text-3xl uppercase leading-tight text-foreground">{p.name}</p>
-                  <p className="mt-1 text-base text-muted-foreground">Meta: {p.goal}</p>
+                  <p className="truncate font-display text-xl uppercase leading-tight text-foreground">{p.name}</p>
+                  <p className="truncate text-sm text-muted-foreground">Meta: {p.goal}</p>
                 </button>
               );
             })}
           </div>
 
           {/* Columna Derecha: Detalle del programa y arranque */}
-          <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
-            <div className="space-y-4">
+          <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4">
+            <div className="min-h-0 flex-1 overflow-hidden">
               <div>
-                <span className="text-sm font-semibold uppercase text-primary tracking-wider">
-                  {activeProgram.level} · {activeProgram.weeks} Semanas
+                <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+                  {activeProgram.level} · {activeProgram.weeks} semanas
                 </span>
-                <h2 className="font-display text-4xl uppercase mt-1 leading-tight text-foreground">
+                <h2 className="mt-1 font-display text-3xl uppercase leading-none text-foreground">
                   {activeProgram.name}
                 </h2>
-                <p className="text-xl text-foreground font-semibold mt-2">
+                <p className="mt-2 text-base font-semibold">
                   Meta: <span className="text-primary">{activeProgram.goal}</span>
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
+              <div className="grid grid-cols-5 gap-1.5 pt-3">
                 {(["Fuerza", "Acondicionamiento", "Movilidad", "Descarga", "Prueba"] as const).map((t) => (
-                  <div key={t} className="rounded-xl bg-background border border-border p-3">
-                    <p className="font-display text-2xl leading-none text-primary">{count(t)}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                  <div key={t} className="rounded-lg border border-border bg-background px-1.5 py-2 text-center">
+                    <p className="font-display text-xl leading-none text-primary">{count(t)}</p>
+                    <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
                       {({ Fuerza: "días fuerza", Acondicionamiento: "días cardio", Movilidad: "movilidad", Descarga: "descarga", Prueba: "pruebas" } as Record<string, string>)[t]}
                     </p>
                   </div>
@@ -120,12 +117,11 @@ export function Programs({ profile, current, onBack, onStart, tvMode }: { profil
               )}
             </div>
 
-            <div className="pt-4 border-t border-border">
+            <div className="mt-3 shrink-0 border-t border-border pt-3">
               {canSelect ? (
                 <Button
                   variant="ember"
-                  size="hero"
-                  className="w-full h-16 text-2xl uppercase tracking-wider font-display focus:scale-105"
+                  className="h-12 w-full text-lg"
                   onClick={() => onStart({ id: activeProgram.id, start: when === "hoy" ? todayKey() : key(nextMonday()), days: profile.days, done: [] })}
                 >
                   {activeCurrent ? "Reiniciar mi calendario" : "Armar mi calendario"}

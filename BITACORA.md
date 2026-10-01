@@ -105,4 +105,15 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 
 **Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:34 (UTC−6)
 
+### [2026-10-01] El modo TV cabe en la pantalla, sin scroll
+- **Fecha y Hora**: 2026-10-01T13:55:37-06:00
+- **Identificador de IA**: `Grok 4.7 (xAI)`
+
+#### Resumen de Cambios:
+1. **Menú (`Chrome.tsx`, `styles.css`)**: la barra de arriba queda en una sola línea de 40 px. Se quitó el brillo y el aumento al enfocar, que hacían el botón activo enorme. El tamaño de letra de la tele vuelve a 16 px para que el resto no se infle.
+2. **Calendario**: los 7 días de la semana se ven juntos. Abajo pasa al día siguiente y el detalle queda a la derecha. No hay que bajar la página.
+3. **Hoy, Progreso, Perfil y Programas**: cada pantalla usa el alto de la tele. En Perfil se ven los 9 grupos y las pesas. En Progreso se ven los 5 ejercicios, el botón de la prueba y la biblioteca. El celular no cambia.
+
+**Firma**: Grok 4.7 (xAI) — 1 de octubre de 2026, 13:55 (UTC−6)
+
 

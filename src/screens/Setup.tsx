@@ -23,7 +23,7 @@ export const CONCERNS = ["Espalda baja", "Rodillas", "Hombros", "Muñecas"];
 export const toggleExclusive = (list: string[], value: string, none: string) =>
   value === none ? [none] : list.includes(value) ? (list.filter((v) => v !== value).length ? list.filter((v) => v !== value) : [none]) : [...list.filter((v) => v !== none), value];
 
-export function WeightGrid({ profile, update, cols = 3 }: { profile: Profile; update: (p: Partial<Profile>) => void; cols?: number }) {
+export function WeightGrid({ profile, update, cols = 3, dense = false }: { profile: Profile; update: (p: Partial<Profile>) => void; cols?: number; dense?: boolean }) {
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState(32);
   const all = [...new Set([...WEIGHTS, ...profile.weights])].sort((a, b) => a - b);
@@ -33,13 +33,13 @@ export function WeightGrid({ profile, update, cols = 3 }: { profile: Profile; up
   };
   return (
     <>
-      <div className="grid gap-2.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      <div className={dense ? "grid gap-2" : "grid gap-2.5"} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {all.map((w) => (
-          <Button key={w} role="checkbox" aria-checked={profile.weights.includes(w)} variant={profile.weights.includes(w) ? "selected" : "tile"} className="h-[60px] gap-1 rounded-[16px]" onClick={() => toggle(w)}>
-            <span className="font-display text-[26px] leading-none">{w}</span><span className="text-sm text-muted-foreground">kg</span>
+          <Button key={w} role="checkbox" aria-checked={profile.weights.includes(w)} variant={profile.weights.includes(w) ? "selected" : "tile"} className={dense ? "h-12 gap-1 rounded-xl" : "h-[60px] gap-1 rounded-[16px]"} onClick={() => toggle(w)}>
+            <span className={dense ? "font-display text-xl leading-none" : "font-display text-[26px] leading-none"}>{w}</span><span className="text-sm text-muted-foreground">kg</span>
           </Button>
         ))}
-        <Button className="h-[60px] rounded-[16px] text-sm" onClick={() => setAdding(true)}><Plus /> Otro</Button>
+        <Button className={dense ? "h-12 rounded-xl text-sm" : "h-[60px] rounded-[16px] text-sm"} onClick={() => setAdding(true)}><Plus /> Otro</Button>
       </div>
       {adding && (
         <Sheet title="Agregar peso" onClose={() => setAdding(false)}>
