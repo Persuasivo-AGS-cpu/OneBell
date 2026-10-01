@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Brand, BottomNav } from "@/components/Chrome";
+import { TVSyncModal } from "@/components/TVSyncModal";
 import { buildSession } from "@/lib/session";
 import { rememberSession } from "@/lib/session-config";
 import { isTestDue } from "@/lib/fittest";
 import { buildPlan, dayIndexFor, programById, type PlanDay, type ProgramState } from "@/lib/program";
 import { afterSession, clearLocal, cloudDoc, currentStreak, defaultProfile, defaultStats, doneIncludingTests, loadLocal, normalizeSaved, saveLocal, streakContext, todayKey, type Saved } from "@/lib/storage";
+import { useSpatialNav, useTVMode } from "@/lib/spatial-nav";
+import { syncEngine } from "@/lib/sync";
 import type { Profile as ProfileT, Screen, SessionItem } from "@/lib/types";
 import { FitTest } from "@/screens/FitTest";
 import { Progress } from "@/screens/Progress";
@@ -22,18 +25,25 @@ const local = loadLocal();
 
 export default function App() {
   const [saved, setSaved] = useState<Saved>(local ?? normalizeSaved(null));
-  // Si ya hay copia local se abre directo; si no, se espera a la copia en la nube antes de decidir.
   const [screen, setScreen] = useState<Screen | "loading">(local ? (local.profile.setupDone ? "today" : "setup") : "loading");
   const [minutes, setMinutes] = useState(20);
   const [energy, setEnergy] = useState("Normal");
   const [session, setSession] = useState<SessionItem[]>([]);
   const [seconds, setSeconds] = useState(0);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+
   const cloud = useRef<Awaited<ReturnType<typeof cloudDoc>>>(null);
   const synced = useRef(false);
   const edited = useRef(false);
   const cloudSettled = useRef(false);
+
+  // Activar Motor de Navegación Espacial (D-Pad) y Detección de Modo TV
+  useSpatialNav(true);
+  useTVMode();
+
   const { profile, stats, tests, program, recent } = saved;
   const [dayCtx, setDayCtx] = useState<PlanDay | null>(null);
+
   const planDayToday = () => { const pr = programById(program?.id); if (!pr || !program) return null; const i = dayIndexFor(program.start); return buildPlan(pr, program.days)[i - 1] ?? null; };
   const markDone = (index: number, on = true) => commit((s) => s.program ? ({ ...s, program: { ...s.program, done: on ? [...new Set([...s.program.done, index])] : s.program.done.filter((x) => x !== index) } }) : s);
   const startDay = (d: PlanDay) => { setDayCtx(d); setSession(buildSession(profile, d.type, d.week, minutes, energy, recent, [], programById(program?.id) ?? undefined)); setScreen("preview"); };
@@ -57,7 +67,6 @@ export default function App() {
         const snap = await ref.get();
         if (cancelled) return;
         const remote = snap.exists ? normalizeSaved(snap.data() as Partial<Saved>) : null;
-        // La cuenta gana si es más nueva, o si en este dispositivo todavía no hay nada editado.
         const remoteWins = !!remote && ((remote.updatedAt ?? 0) > baseline || (!local && !edited.current));
         if (remote && remoteWins) {
           edited.current = false;
@@ -81,10 +90,11 @@ export default function App() {
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, []);
 
-  // Cada cambio se guarda en el celular al momento y en tu cuenta poco después.
+  // Guardado local y push a la nube / sync engine
   useEffect(() => {
     if (!synced.current || saved.updatedAt === 0) return;
     saveLocal(saved);
+    syncEngine.pushState(saved);
     if (!cloudSettled.current) return;
     const t = window.setTimeout(() => { cloud.current?.set(saved as unknown as Record<string, unknown>).catch(() => {}); }, 700);
     return () => window.clearTimeout(t);
@@ -92,19 +102,26 @@ export default function App() {
 
   const commit = (fn: (s: Saved) => Saved, touch = true) => {
     if (touch) edited.current = true;
-    setSaved((cur) => ({ ...fn(cur), updatedAt: Date.now() }));
+    setSaved((cur) => {
+      const next = { ...fn(cur), updatedAt: Date.now() };
+      syncEngine.pushState(next);
+      return next;
+    });
   };
+
   const update = (p: Partial<ProfileT>) => commit((s) => ({
     ...s,
     profile: { ...s.profile, ...p },
     program: s.program && typeof p.days === "number" && p.days !== s.program.days ? { ...s.program, days: p.days } : s.program,
   }));
+
   useEffect(() => {
     if (!program) return;
     const done = doneIncludingTests(program, tests);
     if (done.length === program.done.length && done.every((id) => program.done.includes(id))) return;
     commit((s) => s.program ? { ...s, program: { ...s.program, done: doneIncludingTests(s.program, s.tests) } } : s, false);
   }, [program, tests]);
+
   const finish = (s: number) => {
     setSeconds(s);
     commit((cur) => ({ ...cur, stats: afterSession(cur.stats, streakContext(cur.program)), recent: rememberSession(cur.recent, session.map((i) => i.exercise.id)) }));
@@ -112,6 +129,7 @@ export default function App() {
     if (dayCtx && real && dayCtx.index === real.index && real.type !== "Descanso") markDone(real.index);
     setScreen("summary");
   };
+
   const abandon = () => setScreen("today");
   const streak = currentStreak(stats, streakContext(program));
   const tabs: string[] = ["today", "calendar", "programs", "progress", "library", "profile"];
@@ -119,8 +137,9 @@ export default function App() {
   if (screen === "loading") return (
     <div className="flex h-full flex-col items-center justify-center gap-3"><Brand className="text-[40px]" /><p className="text-muted-foreground">Cargando tu perfil</p></div>
   );
+
   return (
-    <div className="mx-auto flex h-full max-w-[430px] flex-col bg-background">
+    <div className="app-container mx-auto flex h-full max-w-[430px] flex-col bg-background">
       <div className="min-h-0 flex-1">
         {screen === "setup" && <Setup profile={profile} update={update} onDone={() => { update({ setupDone: true }); setScreen("fittest"); }} />}
         {screen === "fittest" && <FitTest profile={profile} tests={tests} onChangeWeight={(w) => update({ testWeight: w })} onLater={() => setScreen(program ? "today" : "programs")}
@@ -135,7 +154,20 @@ export default function App() {
         {screen === "library" && <Library onBack={() => setScreen("progress")} />}
         {screen === "profile" && <Profile profile={profile} update={update} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], recent: [], updatedAt: 0 })); setScreen("setup"); }} />}
       </div>
-      {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} />}
+      {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} onOpenSync={() => setSyncModalOpen(true)} />}
+
+      <TVSyncModal
+        isOpen={syncModalOpen}
+        onClose={() => setSyncModalOpen(false)}
+        saved={saved}
+        onSaveRemote={(remote) => {
+          setSaved(remote);
+          saveLocal(remote);
+          if (remote.profile.setupDone && screen === "setup") {
+            setScreen("today");
+          }
+        }}
+      />
     </div>
   );
 }

@@ -25,6 +25,20 @@ export function Profile({ profile, update, onReset }: { profile: P; update: (p: 
       <Group title="Zonas a cuidar"><div className="grid grid-cols-2 gap-2">{[...CONCERNS, "Ninguna"].map((c) => <Choice key={c} multi label={c} selected={profile.concerns.includes(c)} onClick={() => update({ concerns: toggleExclusive(profile.concerns, c, "Ninguna") })} />)}</div></Group>
       <Group title="Días por semana"><div className="grid grid-cols-4 gap-2">{[2, 3, 4, 5].map((d) => <Button key={d} role="radio" aria-checked={profile.days === d} variant={profile.days === d ? "selected" : "tile"} className="h-14 font-display text-2xl" onClick={() => update({ days: d })}>{d}</Button>)}</div></Group>
       <Group title="Voz en el entrenamiento"><Choice multi label="Anunciar los ejercicios en voz alta" hint="Dice el ejercicio, la serie y cuándo descansar." selected={profile.voice} onClick={() => update({ voice: !profile.voice })} /></Group>
+      <Group title="Modo Pantalla Grande / TV">
+        <Choice
+          multi
+          label="Forzar Modo TV (16:9 y Control Remoto D-Pad)"
+          hint="Ajusta el diseño a pantallas horizontales de 3 metros y activa la navegación por teclado."
+          selected={document.documentElement.classList.contains("tv-mode")}
+          onClick={() => {
+            document.documentElement.classList.toggle("tv-mode");
+            try {
+              localStorage.setItem("onebell:tv_mode", JSON.stringify(document.documentElement.classList.contains("tv-mode")));
+            } catch { /* ignorar */ }
+          }}
+        />
+      </Group>
       <section className="mt-10 rounded-[16px] border border-border bg-card p-5">
         <h2 className="font-display text-[22px] uppercase">Reiniciar la app</h2>
         <p className="mt-1 text-[15px] leading-snug text-muted-foreground">Borra todo y vuelve a la configuración inicial: tus pesas, nivel, programa, calendario, pruebas y racha.</p>
