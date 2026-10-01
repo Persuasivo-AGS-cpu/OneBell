@@ -15,17 +15,7 @@ export function Progress({ tests, notes, onTest, onLibrary, tvMode }: { tests: T
   if (tvMode) {
     return (
       <div className="flex h-full w-full flex-col bg-background screen-in">
-        <header className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-4">
-            <Brand className="text-3xl" />
-            <h1 className="font-display text-3xl uppercase">Progreso</h1>
-          </div>
-          <div className="text-base text-muted-foreground font-semibold">
-            {latestTest ? `Pesa actual: ${latestTest.weight} kg` : "Sin pruebas registradas"}
-          </div>
-        </header>
-
-        <div className="grid grid-cols-[1.2fr_1fr] gap-8 flex-1 min-h-0 pt-4">
+        <div className="grid grid-cols-[1.2fr_1fr] gap-6 flex-1 min-h-0 pt-3">
           {/* Columna Izquierda: Prueba OneBell más reciente y acción */}
           <div className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-xl min-h-0">
             <div className="space-y-4">

@@ -88,4 +88,21 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 
 **Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:25 (UTC−6)
 
+### [2026-10-01] Corrección Crítica de UX/UI en Modo TV: Barra Superior Unificada (TvTopNav) y Cero Superposiciones
+- **Fecha y Hora**: 2026-10-01T13:34:00-06:00
+- **Identificador de IA**: `Antigravity (Google DeepMind - Advanced Agentic Coding)`
+
+#### Resumen del Diagnóstico y Corrección:
+1. **Problema identificado en televisor real (Amazon Silk Fire TV)**:
+   - La barra del navegador Silk toma ~120 px superiores. Al sumar un padding contenedor de 48 px y una barra de navegación fija inferior (`BottomNav`), el espacio vertical se reducía a menos de 450 px.
+   - La barra inferior flotaba y se superponía directamente sobre los botones de pesas en Perfil, las tarjetas de Hoy, la tabla de Progreso y los días del Calendario, bloqueando la interacción y arruinando la vista.
+   - Existían encabezados duplicados (`Brand` + títulos repetidos) dentro de cada pantalla que desperdiciaban espacio vertical.
+
+2. **Solución Implementada**:
+   - **Navegación Superior Unificada para TV (`TvTopNav` en `src/components/Chrome.tsx` y `src/App.tsx`)**: Se reemplazó la barra inferior en modo TV por una barra superior horizontal moderna (estilo Netflix / Android TV) que integra el logotipo `OneBell`, las 5 pestañas enfocables con D-Pad (`[Hoy]`, `[Calendario]`, `[Progreso]`, `[Perfil]`, `[TV Sync]`), el contador de racha con flama y el nombre del atleta. En modo TV se suprime por completo `BottomNav`.
+   - **Eliminación de Encabezados Duplicados**: Se retiraron los bloques `<header>` internos de `Profile.tsx`, `Calendar.tsx`, `Progress.tsx` y `Programs.tsx`, recuperando más de 80 px de altura útil por pantalla.
+   - **Ajuste de Padding y Viewport (`src/styles.css`)**: Se optimizó `.tv-mode .app-container` a `padding: 16px 32px` y `height: 100dvh; max-height: 100dvh; overflow: hidden`, permitiendo que las dos columnas y sus controles quepan holgadamente sin cortes ni desplazamientos indeseados.
+
+**Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:34 (UTC−6)
+
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Brand, BottomNav } from "@/components/Chrome";
+import { Brand, BottomNav, TvTopNav } from "@/components/Chrome";
 import { TVSyncModal } from "@/components/TVSyncModal";
 import { buildSession } from "@/lib/session";
 import { rememberSession } from "@/lib/session-config";
@@ -176,7 +176,10 @@ export default function App() {
 
   return (
     <div className="app-container mx-auto flex h-full max-w-[430px] flex-col bg-background">
-      <div className="min-h-0 flex-1">
+      {tvMode && tabs.includes(screen) && (
+        <TvTopNav screen={screen} go={setScreen} onOpenSync={openSync} streak={streak} athleteName={profile.name} />
+      )}
+      <div className="min-h-0 flex-1 flex flex-col">
         {screen === "setup" && <Setup profile={profile} update={update} onUseTv={openSync} onDone={() => { update({ setupDone: true }); setScreen("fittest"); }} />}
         {screen === "fittest" && <FitTest profile={profile} tests={tests} onChangeWeight={(w) => update({ testWeight: w })} onLater={() => setScreen(program ? "today" : "programs")}
           onSave={(r) => { commit((s) => ({ ...s, tests: [...s.tests, r] })); const d = planDayToday(); if (d?.type === "Prueba") markDone(d.index); setScreen(program ? "progress" : "programs"); }} />}
@@ -190,7 +193,7 @@ export default function App() {
         {screen === "library" && <Library onBack={() => setScreen("progress")} />}
         {screen === "profile" && <Profile profile={profile} update={update} tvMode={tvMode} onToggleTv={toggleTVMode} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], recent: [], updatedAt: 0 })); setScreen("setup"); }} />}
       </div>
-      {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} onOpenSync={openSync} />}
+      {!tvMode && tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} onOpenSync={openSync} />}
       {mirror?.active && <div className="fixed inset-0 z-40"><TvMirror mirror={mirror} /></div>}
 
       <TVSyncModal

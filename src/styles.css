@@ -83,10 +83,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [role="button"]:focu
   max-width: 100% !important;
   width: 100vw !important;
   height: 100dvh !important;
+  max-height: 100dvh !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 48px !important;
+  padding: 16px 32px !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 .tv-stage {
   display: grid;

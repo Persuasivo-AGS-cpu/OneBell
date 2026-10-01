@@ -39,25 +39,81 @@ const tabs = [
   { key: "profile", label: "Perfil", icon: Settings2 },
 ] as const;
 
+export function TvTopNav({ screen, go, onOpenSync, streak, athleteName }: { screen: Screen; go: (s: Screen) => void; onOpenSync: () => void; streak: number; athleteName?: string }) {
+  const active = screen === "library" ? "progress" : screen === "programs" ? "calendar" : screen;
+  return (
+    <header className="flex shrink-0 items-center justify-between border-b border-border bg-background pb-3">
+      <div className="flex items-center gap-6">
+        <Brand className="text-3xl tracking-wide" />
+        <nav aria-label="Navegación TV" className="flex items-center gap-2">
+          {tabs.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              aria-current={active === key ? "page" : undefined}
+              onClick={() => go(key)}
+              className={cn(
+                "flex items-center gap-2.5 px-4 py-2 rounded-xl font-display text-xl uppercase transition-all",
+                active === key
+                  ? "bg-primary text-primary-foreground font-bold shadow-lg scale-105"
+                  : "text-muted-foreground hover:text-foreground hover:bg-card border border-transparent hover:border-border"
+              )}
+            >
+              <Icon size={20} strokeWidth={2.2} />
+              <span>{label}</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onOpenSync}
+            aria-label="Sincronizar TV"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-xl font-display text-xl uppercase text-muted-foreground hover:text-primary hover:bg-card border border-transparent hover:border-border transition-all"
+          >
+            <Tv size={20} strokeWidth={2.2} />
+            <span>TV Sync</span>
+          </button>
+        </nav>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 bg-card border border-border px-3.5 py-1.5 rounded-xl">
+          <Flame size={20} className="text-primary animate-pulse" fill="currentColor" />
+          <span className="font-display text-2xl text-primary">{streak}</span>
+          <span className="text-[11px] uppercase text-muted-foreground font-semibold">
+            {streak === 1 ? "día" : "días"}
+          </span>
+        </div>
+
+        {athleteName && (
+          <div className="rounded-xl bg-card border border-border px-3.5 py-1.5 text-right">
+            <span className="text-[10px] uppercase text-muted-foreground block leading-none">Atleta</span>
+            <span className="font-display text-lg uppercase leading-none text-foreground">{athleteName}</span>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
+
 export function BottomNav({ screen, go, onOpenSync }: { screen: Screen; go: (s: Screen) => void; onOpenSync?: () => void }) {
   const active = screen === "library" ? "progress" : screen === "programs" ? "calendar" : screen;
   return (
-    <nav aria-label="Navegación principal" className="grid shrink-0 grid-cols-5 border-t border-border bg-background px-3 pt-1.5 pb-2 tv-nav">
+    <nav aria-label="Navegación principal" className="grid shrink-0 grid-cols-5 border-t border-border bg-background px-3 pt-1.5 pb-2">
       {tabs.map(({ key, label, icon: Icon }) => (
         <button key={key} type="button" aria-current={active === key ? "page" : undefined} onClick={() => go(key)}
           className={cn(
             "flex h-14 flex-col items-center justify-center gap-0.5 rounded-[12px] text-[12px] transition-transform focus:scale-105",
-            "tv:h-18 tv:text-[18px] tv:gap-1.5",
             active === key ? "text-primary font-semibold" : "text-muted-foreground"
           )}>
-          <Icon className="w-[22px] h-[22px] tv:w-[30px] tv:h-[30px]" strokeWidth={active === key ? 2.4 : 1.8} /><span>{label}</span>
+          <Icon size={22} strokeWidth={active === key ? 2.4 : 1.8} /><span>{label}</span>
         </button>
       ))}
       <button type="button" onClick={onOpenSync} aria-label="Sincronizar TV"
-        className="flex h-14 tv:h-18 flex-col items-center justify-center gap-0.5 tv:gap-1.5 rounded-[12px] text-[12px] tv:text-[18px] text-muted-foreground hover:text-primary transition-transform focus:scale-105">
-        <Tv className="w-[22px] h-[22px] tv:w-[30px] tv:h-[30px]" strokeWidth={1.8} /><span>TV Sync</span>
+        className="flex h-14 flex-col items-center justify-center gap-0.5 rounded-[12px] text-[12px] text-muted-foreground hover:text-primary transition-transform focus:scale-105">
+        <Tv size={22} strokeWidth={1.8} /><span>TV Sync</span>
       </button>
     </nav>
   );
 }
+
 

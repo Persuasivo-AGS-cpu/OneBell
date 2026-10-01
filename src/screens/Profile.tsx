@@ -29,17 +29,7 @@ export function Profile({ profile, update, onReset, tvMode, onToggleTv }: { prof
 
     return (
       <div className="flex h-full w-full flex-col bg-background screen-in">
-        <header className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-4">
-            <Brand className="text-3xl" />
-            <h1 className="font-display text-3xl uppercase">Tu Perfil</h1>
-          </div>
-          <div className="text-base text-muted-foreground font-semibold">
-            Atleta: <span className="text-foreground">{profile.name || "OneBell"}</span>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-[1fr_1.3fr] gap-8 flex-1 min-h-0 pt-4">
+        <div className="grid grid-cols-[1fr_1.3fr] gap-6 flex-1 min-h-0 pt-3">
           {/* Menú de Grupos a la Izquierda */}
           <div className="flex flex-col gap-2 min-h-0 overflow-y-auto no-scrollbar">
             {groups.map((g) => {

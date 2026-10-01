@@ -27,20 +27,19 @@ export function Programs({ profile, current, onBack, onStart, tvMode }: { profil
 
     return (
       <div className="flex h-full w-full flex-col bg-background screen-in">
-        <header className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-4">
-            <Button variant="text" size="icon" aria-label="Volver" data-action="back" onClick={onBack}>
-              <ArrowLeft />
+        <div className="flex items-center justify-between border-b border-border pb-2 pt-2">
+          <div className="flex items-center gap-3">
+            <Button variant="tile" onClick={onBack} data-action="back" className="h-10 px-3 text-sm flex items-center gap-2">
+              <ArrowLeft size={16} /> Volver
             </Button>
-            <Brand className="text-3xl" />
-            <h1 className="font-display text-3xl uppercase">Programas</h1>
+            <h1 className="font-display text-2xl uppercase">Programas</h1>
           </div>
-          <span className="text-base text-muted-foreground font-semibold">
-            {profile.days} días de entrenamiento por semana
+          <span className="text-sm text-muted-foreground font-semibold">
+            {profile.days} días por semana
           </span>
-        </header>
+        </div>
 
-        <div className="grid grid-cols-[1.1fr_1.1fr] gap-8 flex-1 min-h-0 pt-4">
+        <div className="grid grid-cols-[1.1fr_1.1fr] gap-6 flex-1 min-h-0 pt-3">
           {/* Columna Izquierda: 5 Programas en lista vertical enfocable */}
           <div className="flex flex-col gap-3 min-h-0 overflow-y-auto no-scrollbar">
             {PROGRAMS.map((p) => {

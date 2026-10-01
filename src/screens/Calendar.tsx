@@ -36,18 +36,15 @@ export function Calendar({ state, onPrograms, onToggle, onStartDay, tvMode }: { 
 
     return (
       <div className="flex h-full w-full flex-col bg-background screen-in">
-        <header className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-4">
-            <Brand className="text-3xl" />
-            <h1 className="font-display text-3xl uppercase">{program.name}</h1>
+        <div className="flex items-center justify-between border-b border-border pb-2 pt-2">
+          <div className="flex items-center gap-3">
+            <span className="font-display text-2xl uppercase text-foreground">{program.name}</span>
+            <span className="text-sm text-muted-foreground font-semibold">({done} de {trainable.length} completados)</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-base text-muted-foreground font-semibold">{done} de {trainable.length} días completados</span>
-            <Button variant="tile" onClick={onPrograms} className="h-12 px-4 text-base">Cambiar programa</Button>
-          </div>
-        </header>
+          <Button variant="tile" onClick={onPrograms} className="h-10 px-3 text-sm">Cambiar programa</Button>
+        </div>
 
-        <div className="grid grid-cols-[1.1fr_1fr] gap-8 flex-1 min-h-0 pt-4">
+        <div className="grid grid-cols-[1.1fr_1fr] gap-6 flex-1 min-h-0 pt-3">
           {/* Panel Izquierdo: 1 Semana a la vez con tarjetas de 24px */}
           <div className="flex flex-col gap-3 min-h-0">
             <div className="flex items-center justify-between rounded-xl bg-card border border-border px-4 py-2">

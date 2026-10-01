@@ -84,34 +84,7 @@ export function TvDashboard({
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-background p-6 space-y-4 overflow-hidden screen-in">
-      {/* Encabezado Dashboard TV */}
-      <header className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex items-center gap-4">
-          <Brand className="text-3xl" />
-          <span className="text-sm font-semibold text-muted-foreground border-l border-border pl-4">
-            {todayLabel}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Flame size={26} className="text-primary animate-pulse" fill="currentColor" />
-            <span className="font-display text-3xl text-primary">{streak}</span>
-            <span className="text-xs uppercase text-muted-foreground font-semibold">
-              {streak === 1 ? "día seguido" : "días seguidos"}
-            </span>
-          </div>
-
-          {profile.name && (
-            <div className="rounded-xl bg-card border border-border px-4 py-2 text-right">
-              <span className="text-xs text-muted-foreground block leading-none">Atleta</span>
-              <span className="font-display text-xl uppercase leading-none">{profile.name}</span>
-            </div>
-          )}
-        </div>
-      </header>
-
+    <div className="flex h-full w-full flex-col bg-background pt-3 pb-2 overflow-hidden screen-in">
       {/* Grid de 2 Columnas Estilo Centro de Control */}
       <div className="grid grid-cols-[1.2fr_1fr] gap-6 flex-1 min-h-0 overflow-y-auto no-scrollbar">
         {/* COLUMNA IZQUIERDA: Tarjeta Principal & Ajustes */}
