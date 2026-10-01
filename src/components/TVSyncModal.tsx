@@ -28,6 +28,8 @@ export function TVSyncModal({
   const [localNotice, setLocalNotice] = useState<string | null>(null);
   const savedRef = useRef(saved);
   savedRef.current = saved;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const joined = useRef<string | null>(null);
 
   useEffect(() => {
@@ -37,6 +39,20 @@ export function TVSyncModal({
     setMode("enter_code");
     syncEngine.joinRoom(autoCode, savedRef.current, setStatus);
   }, [isOpen, autoCode, notice]);
+
+  // En la TV el control remoto no alcanza la tachita. Al llegar el perfil, el QR se quita solo.
+  useEffect(() => {
+    if (!isOpen || mode !== "show_code" || status !== "paired") return;
+    const id = window.setTimeout(() => onCloseRef.current(), 700);
+    return () => window.clearTimeout(id);
+  }, [isOpen, mode, status]);
+
+  useEffect(() => {
+    if (isOpen) return;
+    setMode("choose");
+    setStatus("disconnected");
+    setLocalNotice(null);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -66,8 +82,8 @@ export function TVSyncModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-lg rounded-[24px] border border-border bg-card p-6 shadow-2xl">
-        <button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label="Cerrar">
+      <div className="relative max-h-[calc(100dvh-3rem)] w-full max-w-lg overflow-y-auto rounded-[24px] border border-border bg-card p-6 shadow-2xl">
+        <button type="button" onClick={onClose} className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-foreground hover:bg-secondary" aria-label="Cerrar">
           <X size={24} />
         </button>
 
@@ -115,12 +131,13 @@ export function TVSyncModal({
             </div>
             <div className="flex flex-col items-center justify-center gap-3">
               <div className="rounded-xl bg-white p-3 shadow-lg">
-                <img src={getQRUrl(pairCode)} alt="Código QR para abrir el enlace en el celular" className="h-44 w-44" />
+                <img src={getQRUrl(pairCode)} alt="Código QR para abrir el enlace en el celular" className="h-36 w-36" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Escanea el QR o entra a <strong className="text-foreground">one-bell.vercel.app</strong> y elige "Estoy en celular".
+              <p className="text-[32px] font-semibold leading-snug text-foreground">
+                Esta pantalla se cierra sola cuando el celular queda vinculado.
               </p>
             </div>
+            <Button variant="tile" className="h-12 w-full" onClick={onClose}>Cerrar</Button>
             {paired && (
               <div className="flex items-center justify-center gap-2 rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-sm font-semibold text-green-400">
                 <Check size={20} /> Perfil recibido desde el celular.

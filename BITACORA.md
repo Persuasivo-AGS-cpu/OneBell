@@ -42,3 +42,12 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 4. **Espejo y 3 metros (`Workout.tsx`, `TvMirror.tsx`, `styles.css`)**: el celular avisa al cambiar de paso, al pausar o al salir, no cada segundo. La TV descuenta el tiempo. En modo TV la foto ocupa el 45 %, el título 48 px, la pista 32 px y el temporizador 120 px. Se quitó el CSS de carrusel que nadie usaba.
 
 **Firma**: Grok 4.7 (xAI) — 1 de octubre de 2026, 13:02 (UTC−6)
+
+### [2026-10-01] El QR de la TV se cierra solo al vincular
+- **Fecha y Hora**: 2026-10-01T13:08:00-06:00
+- **Identificador de IA**: `Grok 4.7 (xAI)`
+
+#### Resumen de Cambios:
+1. **`src/components/TVSyncModal.tsx`**: cuando el celular vincula y la televisión recibe el perfil, el popup del QR se cierra solo a los 700 ms. Ya no hace falta encontrar la tachita con el control del Fire TV. El texto avisa que se cierra sola, y hay un botón Cerrar de 48 px por si todavía no llega el celular.
+
+**Firma**: Grok 4.7 (xAI) — 1 de octubre de 2026, 13:08 (UTC−6)
