@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Tv, Smartphone, Check, X, Wifi } from "lucide-react";
 import { Button } from "./Button";
-import { canPublishProfile, formatPairCode, getQRUrl, parsePairCode, syncEngine, type SyncStatus } from "@/lib/sync";
+import { canPublishProfile, formatPairCode, getQRUrl, parsePairCode, syncEngine, type SyncStatus, type WorkoutMirror } from "@/lib/sync";
 import type { Saved } from "@/lib/storage";
 
 export function TVSyncModal({
@@ -11,6 +11,7 @@ export function TVSyncModal({
   onSaveRemote,
   autoCode,
   notice,
+  onMirror,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -18,6 +19,7 @@ export function TVSyncModal({
   onSaveRemote: (s: Saved) => void;
   autoCode?: string | null;
   notice?: string | null;
+  onMirror?: (m: WorkoutMirror) => void;
 }) {
   const [mode, setMode] = useState<"choose" | "show_code" | "enter_code">("choose");
   const [code, setCode] = useState("");
@@ -44,7 +46,7 @@ export function TVSyncModal({
   const handleStartHostTV = () => {
     const newCode = syncEngine.startHost(
       (remoteSaved) => onSaveRemote(remoteSaved),
-      undefined,
+      onMirror,
       setStatus,
     );
     setPairCode(newCode);
