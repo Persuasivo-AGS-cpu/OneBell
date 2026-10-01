@@ -21,3 +21,17 @@ test("reparte los bloques y conserva el ejercicio clave", () => {
   assert.deepEqual(selectMain(["bisagra", "sentadilla", "empuje", "jalon"], 2, 1, false), ["bisagra", "jalon"]);
   assert.deepEqual(selectMain(["swing", "sentadilla", "carga"], 2, 2, true), ["swing", "carga"]);
 });
+
+import { avoidTiers, rememberSession } from "../src/lib/session-config.ts";
+
+test("recuerda solo las últimas 3 sesiones", () => {
+  let recent: string[][] = [];
+  for (const id of ["a", "b", "c", "d"]) recent = rememberSession(recent, [id, id]);
+  assert.deepEqual(recent, [["d"], ["c"], ["b"]]);
+  assert.deepEqual(rememberSession(recent, []), recent);
+});
+
+test("los niveles a evitar van de más a menos estrictos", () => {
+  const tiers = avoidTiers([["a"], ["b"], ["c"]], ["x"]);
+  assert.deepEqual(tiers.map((t) => [...t].sort()), [["a", "b", "c", "x"], ["a", "b", "x"], ["a", "x"], ["x"]]);
+});

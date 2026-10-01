@@ -4,7 +4,7 @@ import { buildPlan, dateForIndex, dayIndexFor, programById, type ProgramState } 
 
 export type Stats = { streak: number; lastDay: string | null; sessions: number; bestStreak: number };
 export type SessionNote = { date: string; seconds: number; ratings: { id: string; name: string; rating: string }[] };
-export type Saved = { profile: Profile; stats: Stats; tests: TestResult[]; program: ProgramState | null; notes: SessionNote[]; updatedAt: number };
+export type Saved = { profile: Profile; stats: Stats; tests: TestResult[]; program: ProgramState | null; notes: SessionNote[]; recent: string[][]; updatedAt: number };
 export type StreakCtx = { start: string; plan: { index: number; type: string }[] };
 
 export const defaultProfile: Profile = { name: "", weights: [], level: "Principiante", space: [], concerns: ["Ninguna"], days: 3, voice: false, setupDone: false, testWeight: null };
@@ -15,7 +15,7 @@ const OLD_KEY = "onebell:profile:v2";
 export function normalizeSaved(raw?: Partial<Saved> | null): Saved {
   const stats = { ...defaultStats, ...raw?.stats };
   stats.bestStreak = Math.max(stats.bestStreak || 0, stats.streak || 0);
-  return { profile: { ...defaultProfile, ...raw?.profile }, stats, tests: raw?.tests ?? [], program: raw?.program ?? null, notes: raw?.notes ?? [], updatedAt: raw?.updatedAt ?? 0 };
+  return { profile: { ...defaultProfile, ...raw?.profile }, stats, tests: raw?.tests ?? [], program: raw?.program ?? null, notes: raw?.notes ?? [], recent: Array.isArray(raw?.recent) ? raw.recent : [], updatedAt: raw?.updatedAt ?? 0 };
 }
 
 /** Copia local: abre al instante y funciona sin conexión. */

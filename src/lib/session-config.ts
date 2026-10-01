@@ -39,3 +39,18 @@ export function selectMain<T>(items: T[], limit: number, week: number, pinFirst:
   if (pinFirst) return [items[0], ...spread(rotate(items.slice(1), week), limit - 1)];
   return spread(rotate(items, week), limit);
 }
+
+export const RECENT_SESSIONS = 3;
+
+/** Guarda los ejercicios de la sesión terminada y conserva solo las últimas sesiones. */
+export function rememberSession(recent: string[][], ids: string[]) {
+  const unique = [...new Set(ids)];
+  return unique.length ? [unique, ...recent].slice(0, RECENT_SESSIONS) : recent;
+}
+
+/** Listas de ids a evitar, de más a menos estricta: últimas 3 sesiones, últimas 2, última, ninguna. */
+export function avoidTiers(recent: string[][], extra: string[] = []) {
+  const tiers: Set<string>[] = [];
+  for (let n = Math.min(recent.length, RECENT_SESSIONS); n >= 0; n--) tiers.push(new Set([...recent.slice(0, n).flat(), ...extra]));
+  return tiers;
+}

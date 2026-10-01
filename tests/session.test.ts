@@ -31,3 +31,25 @@ test("la pesa de la sesión es la de la prueba y no inventa 10 kg", () => {
   assert.equal(sessionBell({ ...profile, weights: [], testWeight: null }), null);
   assert.equal(sessionBell({ ...profile, testWeight: null }), 8);
 });
+
+test("no repite ejercicios de las últimas sesiones cuando hay opciones", () => {
+  const ids = (s: ReturnType<typeof buildSession>) => s.filter((i) => i.section !== "Programa").map((i) => i.exercise.id);
+  const recent: string[][] = [];
+  for (let n = 0; n < 12; n++) {
+    const session = buildSession(profile, "Fuerza", 2, 30, "Normal", recent);
+    const prev = recent.slice(0, 1).flat();
+    const repeated = ids(session).filter((id) => prev.includes(id));
+    assert.deepEqual(repeated, [], `sesión ${n} repitió ${repeated}`);
+    recent.unshift(ids(session));
+    recent.length = Math.min(recent.length, 3);
+  }
+});
+
+test("al regenerar evita los ejercicios del borrador actual", () => {
+  const first = buildSession(profile, "Fuerza", 2, 30, "Normal");
+  const draft = first.map((i) => i.exercise.id);
+  for (let n = 0; n < 12; n++) {
+    const again = buildSession(profile, "Fuerza", 2, 30, "Normal", [], draft);
+    assert.deepEqual(again.filter((i) => draft.includes(i.exercise.id)), []);
+  }
+});

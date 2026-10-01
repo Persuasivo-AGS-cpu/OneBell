@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Brand, BottomNav } from "@/components/Chrome";
 import { buildSession } from "@/lib/session";
+import { rememberSession } from "@/lib/session-config";
 import { isTestDue } from "@/lib/fittest";
 import { buildPlan, dayIndexFor, programById, type PlanDay, type ProgramState } from "@/lib/program";
 import { afterSession, clearLocal, cloudDoc, currentStreak, defaultProfile, defaultStats, doneIncludingTests, loadLocal, normalizeSaved, saveLocal, streakContext, todayKey, type Saved } from "@/lib/storage";
@@ -31,11 +32,11 @@ export default function App() {
   const synced = useRef(false);
   const edited = useRef(false);
   const cloudSettled = useRef(false);
-  const { profile, stats, tests, program } = saved;
+  const { profile, stats, tests, program, recent } = saved;
   const [dayCtx, setDayCtx] = useState<PlanDay | null>(null);
   const planDayToday = () => { const pr = programById(program?.id); if (!pr || !program) return null; const i = dayIndexFor(program.start); return buildPlan(pr, program.days)[i - 1] ?? null; };
   const markDone = (index: number, on = true) => commit((s) => s.program ? ({ ...s, program: { ...s.program, done: on ? [...new Set([...s.program.done, index])] : s.program.done.filter((x) => x !== index) } }) : s);
-  const startDay = (d: PlanDay) => { setDayCtx(d); setSession(buildSession(profile, d.type, d.week, minutes, energy)); setScreen("preview"); };
+  const startDay = (d: PlanDay) => { setDayCtx(d); setSession(buildSession(profile, d.type, d.week, minutes, energy, recent)); setScreen("preview"); };
 
   useEffect(() => {
     let cancelled = false;
@@ -106,7 +107,7 @@ export default function App() {
   }, [program, tests]);
   const finish = (s: number) => {
     setSeconds(s);
-    commit((cur) => ({ ...cur, stats: afterSession(cur.stats, streakContext(cur.program)) }));
+    commit((cur) => ({ ...cur, stats: afterSession(cur.stats, streakContext(cur.program)), recent: rememberSession(cur.recent, session.map((i) => i.exercise.id)) }));
     const real = planDayToday();
     if (dayCtx && real && dayCtx.index === real.index && real.type !== "Descanso") markDone(real.index);
     setScreen("summary");
@@ -125,14 +126,14 @@ export default function App() {
         {screen === "fittest" && <FitTest profile={profile} tests={tests} onChangeWeight={(w) => update({ testWeight: w })} onLater={() => setScreen(program ? "today" : "programs")}
           onSave={(r) => { commit((s) => ({ ...s, tests: [...s.tests, r] })); const d = planDayToday(); if (d?.type === "Prueba") markDone(d.index); setScreen(program ? "progress" : "programs"); }} />}
         {screen === "today" && <Today profile={profile} minutes={minutes} setMinutes={setMinutes} energy={energy} setEnergy={setEnergy} streak={streak} stats={stats} tests={tests} program={program} onPrograms={() => setScreen("programs")} onCalendar={() => setScreen("calendar")} onStartDay={startDay} onTest={() => setScreen(tests.length && !isTestDue(tests) && planDayToday()?.type !== "Prueba" ? "progress" : "fittest")} />}
-        {screen === "preview" && <Preview profile={profile} minutes={minutes} title={dayCtx && dayCtx.index > 0 ? `Día ${dayCtx.index} · ${dayCtx.type}` : `Sesión extra · ${dayCtx?.type ?? "Movilidad"}`} session={session} setSession={setSession} regenerate={() => setSession(buildSession(profile, dayCtx?.type, dayCtx?.week, minutes, energy))} onBack={() => setScreen("today")} onStart={() => setScreen("workout")} />}
+        {screen === "preview" && <Preview profile={profile} minutes={minutes} title={dayCtx && dayCtx.index > 0 ? `Día ${dayCtx.index} · ${dayCtx.type}` : `Sesión extra · ${dayCtx?.type ?? "Movilidad"}`} session={session} setSession={setSession} regenerate={() => setSession(buildSession(profile, dayCtx?.type, dayCtx?.week, minutes, energy, recent, session.map((i) => i.exercise.id)))} onBack={() => setScreen("today")} onStart={() => setScreen("workout")} />}
         {screen === "workout" && <Workout profile={profile} session={session} setSession={setSession} onFinish={finish} onQuit={abandon} />}
         {screen === "summary" && <Summary profile={profile} session={session} seconds={seconds} streak={streak} onSave={(ratings) => { commit((s) => ({ ...s, notes: [...s.notes, { date: todayKey(), seconds, ratings }].slice(-40) })); setScreen("today"); }} />}
         {screen === "calendar" && <Calendar state={program} onPrograms={() => setScreen("programs")} onToggle={(i) => markDone(i, !program?.done.includes(i))} onStartDay={(d) => (d.type === "Prueba" ? setScreen("fittest") : startDay(d))} />}
         {screen === "programs" && <Programs profile={profile} current={program} onBack={() => setScreen(program ? "calendar" : "today")} onStart={(p: ProgramState) => { commit((s) => ({ ...s, program: { ...p, done: doneIncludingTests(p, s.tests) } })); setScreen("calendar"); }} />}
         {screen === "progress" && <Progress tests={tests} notes={saved.notes} onTest={() => setScreen("fittest")} onLibrary={() => setScreen("library")} />}
         {screen === "library" && <Library onBack={() => setScreen("progress")} />}
-        {screen === "profile" && <Profile profile={profile} update={update} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], updatedAt: 0 })); setScreen("setup"); }} />}
+        {screen === "profile" && <Profile profile={profile} update={update} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], recent: [], updatedAt: 0 })); setScreen("setup"); }} />}
       </div>
       {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} />}
     </div>
