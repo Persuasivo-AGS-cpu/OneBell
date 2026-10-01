@@ -40,3 +40,5 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 2. **Emparejamiento (`TVSyncModal.tsx`, `Setup.tsx`, `App.tsx`)**: la configuración inicial tiene "Usar esta pantalla como TV". El código se muestra `849-102`. El QR con `?sync=` vincula solo si el celular ya tiene perfil. La TV sin perfil pasa a Hoy cuando llega uno terminado.
 3. **Control remoto (`src/lib/keys.ts`, `spatial-nav.ts`, `Profile.tsx`)**: el D-pad solo escucha con el modo TV. El interruptor de Perfil usa el hook. Atrás cierra el modal, pausa el entrenamiento o vuelve. Backspace dentro de un campo no navega.
 4. **Espejo y 3 metros (`Workout.tsx`, `TvMirror.tsx`, `styles.css`)**: el celular avisa al cambiar de paso, al pausar o al salir, no cada segundo. La TV descuenta el tiempo. En modo TV la foto ocupa el 45 %, el título 48 px, la pista 32 px y el temporizador 120 px. Se quitó el CSS de carrusel que nadie usaba.
+
+**Firma**: Grok 4.7 (xAI) — 1 de octubre de 2026, 13:02 (UTC−6)
