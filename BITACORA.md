@@ -29,3 +29,14 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 
 4. **Documentación (`PLAN_TV_Y_SINCRONIZACION.md`, `BITACORA.md`)**:
    - Creación y firma del documento de arquitectura y bitácora de cambios para la continuidad de futuras asistencias de IA.
+
+### [2026-10-01] Corrección del modo TV y de la sincronización
+- **Fecha y Hora**: 2026-10-01T13:00:25-06:00
+- **Identificador de IA**: `Grok 4.7 (xAI)`
+- **Commits**: `0efae6b`, `a4de43e`, `eeb1c6a`
+
+#### Resumen de Cambios:
+1. **Protocolo (`src/lib/sync.ts`, `tests/sync.test.ts`)**: solo el celular publica. La TV ignora su propio mensaje, aplica el perfil y manda un acuse. El verde aparece con ese acuse, no al abrir el canal. Un perfil enorme se recorta (notas viejas, luego sesiones, luego pruebas viejas) para caber en 3800 bytes. Sin perfil terminado no se publica.
+2. **Emparejamiento (`TVSyncModal.tsx`, `Setup.tsx`, `App.tsx`)**: la configuración inicial tiene "Usar esta pantalla como TV". El código se muestra `849-102`. El QR con `?sync=` vincula solo si el celular ya tiene perfil. La TV sin perfil pasa a Hoy cuando llega uno terminado.
+3. **Control remoto (`src/lib/keys.ts`, `spatial-nav.ts`, `Profile.tsx`)**: el D-pad solo escucha con el modo TV. El interruptor de Perfil usa el hook. Atrás cierra el modal, pausa el entrenamiento o vuelve. Backspace dentro de un campo no navega.
+4. **Espejo y 3 metros (`Workout.tsx`, `TvMirror.tsx`, `styles.css`)**: el celular avisa al cambiar de paso, al pausar o al salir, no cada segundo. La TV descuenta el tiempo. En modo TV la foto ocupa el 45 %, el título 48 px, la pista 32 px y el temporizador 120 px. Se quitó el CSS de carrusel que nadie usaba.
