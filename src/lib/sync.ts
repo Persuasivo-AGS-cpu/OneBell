@@ -173,7 +173,9 @@ export class SyncEngine {
     if (!this.pairCode || !this.role) return;
     const action = shouldApply(data, this.clientId, this.role, this.pairCode);
     if (action === "state" && data.saved) {
+      this.paired = true;
       this.onStateReceived?.(data.saved);
+      this.onStatusChange?.("paired");
       this.acknowledge();
     } else if (action === "ack") {
       this.paired = true;

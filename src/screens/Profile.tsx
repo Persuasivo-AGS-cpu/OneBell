@@ -9,7 +9,7 @@ import { CONCERNS, LEVELS, SPACES, WeightGrid, toggleExclusive } from "./Setup";
 
 const Group = ({ title, children }: { title: string; children: ReactNode }) => <section className="mt-7"><h2 className="mb-3 font-display text-[22px] uppercase">{title}</h2>{children}</section>;
 
-export function Profile({ profile, update, onReset }: { profile: P; update: (p: Partial<P>) => void; onReset: () => void }) {
+export function Profile({ profile, update, onReset, tvMode, onToggleTv }: { profile: P; update: (p: Partial<P>) => void; onReset: () => void; tvMode: boolean; onToggleTv: () => void }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <Frame header={<Brand />}>
@@ -28,15 +28,10 @@ export function Profile({ profile, update, onReset }: { profile: P; update: (p: 
       <Group title="Modo Pantalla Grande / TV">
         <Choice
           multi
-          label="Forzar Modo TV (16:9 y Control Remoto D-Pad)"
-          hint="Ajusta el diseño a pantallas horizontales de 3 metros y activa la navegación por teclado."
-          selected={document.documentElement.classList.contains("tv-mode")}
-          onClick={() => {
-            document.documentElement.classList.toggle("tv-mode");
-            try {
-              localStorage.setItem("onebell:tv_mode", JSON.stringify(document.documentElement.classList.contains("tv-mode")));
-            } catch { /* ignorar */ }
-          }}
+          label="Forzar modo TV (16:9 y control remoto)"
+          hint="Ajusta el entrenamiento a una pantalla grande y activa el control con flechas."
+          selected={tvMode}
+          onClick={onToggleTv}
         />
       </Group>
       <section className="mt-10 rounded-[16px] border border-border bg-card p-5">

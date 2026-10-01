@@ -7,7 +7,7 @@ import { isTestDue } from "@/lib/fittest";
 import { buildPlan, dayIndexFor, programById, type PlanDay, type ProgramState } from "@/lib/program";
 import { afterSession, clearLocal, cloudDoc, currentStreak, defaultProfile, defaultStats, doneIncludingTests, loadLocal, normalizeSaved, saveLocal, streakContext, todayKey, type Saved } from "@/lib/storage";
 import { useSpatialNav, useTVMode } from "@/lib/spatial-nav";
-import { syncEngine } from "@/lib/sync";
+import { canPublishProfile, syncCodeFromLocation, syncEngine } from "@/lib/sync";
 import type { Profile as ProfileT, Screen, SessionItem } from "@/lib/types";
 import { FitTest } from "@/screens/FitTest";
 import { Progress } from "@/screens/Progress";
@@ -31,15 +31,16 @@ export default function App() {
   const [session, setSession] = useState<SessionItem[]>([]);
   const [seconds, setSeconds] = useState(0);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [syncAutoCode, setSyncAutoCode] = useState<string | null>(null);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
+  const [booted, setBooted] = useState(false);
 
   const cloud = useRef<Awaited<ReturnType<typeof cloudDoc>>>(null);
   const synced = useRef(false);
   const edited = useRef(false);
   const cloudSettled = useRef(false);
 
-  // Activar Motor de Navegación Espacial (D-Pad) y Detección de Modo TV
-  useSpatialNav(true);
-  useTVMode();
+  const { tvMode, toggleTVMode } = useTVMode();
 
   const { profile, stats, tests, program, recent } = saved;
   const [dayCtx, setDayCtx] = useState<PlanDay | null>(null);
@@ -55,6 +56,7 @@ export default function App() {
     const timer = window.setTimeout(() => {
       if (cancelled || cloudSettled.current) return;
       synced.current = true;
+      setBooted(true);
       open();
     }, 6000);
     cloudDoc().then(async (ref) => {
@@ -62,7 +64,7 @@ export default function App() {
       cloud.current = ref;
       window.clearTimeout(timer);
       cloudSettled.current = true;
-      if (!ref) { synced.current = true; open(); return; }
+      if (!ref) { synced.current = true; setBooted(true); open(); return; }
       try {
         const snap = await ref.get();
         if (cancelled) return;
@@ -71,12 +73,14 @@ export default function App() {
         if (remote && remoteWins) {
           edited.current = false;
           synced.current = true;
+          setBooted(true);
           setSaved(remote);
           saveLocal(remote);
           open(remote);
           return;
         }
         synced.current = true;
+        setBooted(true);
         setSaved((cur) => {
           if ((edited.current || local) && cur.updatedAt !== 0) ref.set(cur as unknown as Record<string, unknown>).catch(() => {});
           return cur;
@@ -84,6 +88,7 @@ export default function App() {
         open();
       } catch {
         synced.current = true;
+        setBooted(true);
         open();
       }
     });
@@ -94,7 +99,7 @@ export default function App() {
   useEffect(() => {
     if (!synced.current || saved.updatedAt === 0) return;
     saveLocal(saved);
-    syncEngine.pushState(saved);
+    if (syncEngine.role === "mobile") syncEngine.pushState(saved);
     if (!cloudSettled.current) return;
     const t = window.setTimeout(() => { cloud.current?.set(saved as unknown as Record<string, unknown>).catch(() => {}); }, 700);
     return () => window.clearTimeout(t);
@@ -104,7 +109,6 @@ export default function App() {
     if (touch) edited.current = true;
     setSaved((cur) => {
       const next = { ...fn(cur), updatedAt: Date.now() };
-      syncEngine.pushState(next);
       return next;
     });
   };
@@ -130,6 +134,36 @@ export default function App() {
     setScreen("summary");
   };
 
+  useSpatialNav(tvMode, () => {
+    if (syncModalOpen) { setSyncModalOpen(false); return; }
+    const back = document.querySelector<HTMLElement>("[data-action='back']");
+    if (back && back.getClientRects().length > 0) { back.click(); return; }
+    if (screen === "workout") { window.dispatchEvent(new CustomEvent("onebell:pause")); return; }
+    if (screen === "preview" || screen === "summary") { setScreen("today"); return; }
+    if (screen === "library") { setScreen("progress"); return; }
+    if (screen === "programs") { setScreen(program ? "calendar" : "today"); return; }
+    if (screen === "fittest") setScreen(program ? "today" : "programs");
+  });
+
+  const urlHandled = useRef(false);
+  useEffect(() => {
+    if (!booted || urlHandled.current) return;
+    const code = syncCodeFromLocation(window.location.search);
+    if (!code) return;
+    urlHandled.current = true;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("sync");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    if (!canPublishProfile(saved.profile.setupDone)) {
+      setSyncNotice("Termina tu perfil en este celular antes de vincularlo.");
+      setSyncModalOpen(true);
+      return;
+    }
+    setSyncAutoCode(code);
+    setSyncModalOpen(true);
+  }, [booted, saved]);
+
+  const openSync = () => { setSyncNotice(null); setSyncAutoCode(null); setSyncModalOpen(true); };
   const abandon = () => setScreen("today");
   const streak = currentStreak(stats, streakContext(program));
   const tabs: string[] = ["today", "calendar", "programs", "progress", "library", "profile"];
@@ -141,7 +175,7 @@ export default function App() {
   return (
     <div className="app-container mx-auto flex h-full max-w-[430px] flex-col bg-background">
       <div className="min-h-0 flex-1">
-        {screen === "setup" && <Setup profile={profile} update={update} onDone={() => { update({ setupDone: true }); setScreen("fittest"); }} />}
+        {screen === "setup" && <Setup profile={profile} update={update} onUseTv={openSync} onDone={() => { update({ setupDone: true }); setScreen("fittest"); }} />}
         {screen === "fittest" && <FitTest profile={profile} tests={tests} onChangeWeight={(w) => update({ testWeight: w })} onLater={() => setScreen(program ? "today" : "programs")}
           onSave={(r) => { commit((s) => ({ ...s, tests: [...s.tests, r] })); const d = planDayToday(); if (d?.type === "Prueba") markDone(d.index); setScreen(program ? "progress" : "programs"); }} />}
         {screen === "today" && <Today profile={profile} minutes={minutes} setMinutes={setMinutes} energy={energy} setEnergy={setEnergy} streak={streak} stats={stats} tests={tests} program={program} onPrograms={() => setScreen("programs")} onCalendar={() => setScreen("calendar")} onStartDay={startDay} onTest={() => setScreen(tests.length && !isTestDue(tests) && planDayToday()?.type !== "Prueba" ? "progress" : "fittest")} />}
@@ -152,20 +186,20 @@ export default function App() {
         {screen === "programs" && <Programs profile={profile} current={program} onBack={() => setScreen(program ? "calendar" : "today")} onStart={(p: ProgramState) => { commit((s) => ({ ...s, program: { ...p, done: doneIncludingTests(p, s.tests) } })); setScreen("calendar"); }} />}
         {screen === "progress" && <Progress tests={tests} notes={saved.notes} onTest={() => setScreen("fittest")} onLibrary={() => setScreen("library")} />}
         {screen === "library" && <Library onBack={() => setScreen("progress")} />}
-        {screen === "profile" && <Profile profile={profile} update={update} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], recent: [], updatedAt: 0 })); setScreen("setup"); }} />}
+        {screen === "profile" && <Profile profile={profile} update={update} tvMode={tvMode} onToggleTv={toggleTVMode} onReset={() => { clearLocal(); commit(() => ({ profile: defaultProfile, stats: defaultStats, tests: [], program: null, notes: [], recent: [], updatedAt: 0 })); setScreen("setup"); }} />}
       </div>
-      {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} onOpenSync={() => setSyncModalOpen(true)} />}
+      {tabs.includes(screen) && <BottomNav screen={screen} go={setScreen} onOpenSync={openSync} />}
 
       <TVSyncModal
         isOpen={syncModalOpen}
         onClose={() => setSyncModalOpen(false)}
         saved={saved}
+        autoCode={syncAutoCode}
+        notice={syncNotice}
         onSaveRemote={(remote) => {
           setSaved(remote);
           saveLocal(remote);
-          if (remote.profile.setupDone && screen === "setup") {
-            setScreen("today");
-          }
+          if (remote.profile.setupDone) setScreen((cur) => (cur === "setup" || cur === "loading" ? "today" : cur));
         }}
       />
     </div>

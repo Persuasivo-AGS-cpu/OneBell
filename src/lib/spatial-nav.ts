@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { isBackKey } from "./keys";
 
 /** Detección de dispositivos TV por User Agent */
 export function isTVUserAgent(): boolean {
@@ -54,9 +55,19 @@ export function useTVMode() {
  * Motor de Navegación Espacial (D-Pad Control)
  * Maneja eventos keydown (ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Enter, Backspace/Escape)
  */
-export function useSpatialNav(enabled: boolean = true) {
+export function useSpatialNav(enabled: boolean, onBack: () => void) {
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
+
   useEffect(() => {
     if (!enabled) return;
+
+    const focusFirst = () => {
+      const first = getFocusables()[0];
+      if (first && document.activeElement === document.body) first.focus();
+    };
+    focusFirst();
+    const ready = window.setTimeout(focusFirst, 0);
 
     function getFocusables(): HTMLElement[] {
       const selectors = [
@@ -78,10 +89,18 @@ export function useSpatialNav(enabled: boolean = true) {
     }
 
     function handleKeyDown(e: KeyboardEvent) {
-      // Ignorar si el usuario está escribiendo en un input o textarea
       const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-        if (e.key === 'Enter') target.blur();
+      const typing = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+
+      if (isBackKey(e.key, e.keyCode)) {
+        if (typing && e.key === "Backspace") return;
+        e.preventDefault();
+        onBackRef.current();
+        return;
+      }
+
+      if (typing) {
+        if (e.key === "Enter" && target) target.blur();
         return;
       }
 
@@ -106,23 +125,18 @@ export function useSpatialNav(enabled: boolean = true) {
         case 'ArrowRight':
           direction = 'right';
           break;
-        case 'Enter':
-        case ' ':
-          if (activeEl && activeEl !== document.body) {
+        case "Enter":
+        case " ": {
+          if (!activeEl || activeEl === document.body) return;
+          const tag = activeEl.tagName;
+          if (tag === "BUTTON" || tag === "A" || tag === "INPUT") return;
+          const role = activeEl.getAttribute("role");
+          if (role === "button" || role === "radio") {
             e.preventDefault();
             activeEl.click();
           }
           return;
-        case 'Escape':
-        case 'Backspace':
-        case 'GoBack':
-          // Disparar evento personalizado de regresar
-          const backButton = document.querySelector<HTMLElement>('[aria-label="Atrás"], [data-action="back"]');
-          if (backButton) {
-            e.preventDefault();
-            backButton.click();
-          }
-          return;
+        }
         default:
           return;
       }
@@ -182,7 +196,10 @@ export function useSpatialNav(enabled: boolean = true) {
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.clearTimeout(ready);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [enabled]);
 }

@@ -61,14 +61,14 @@ const STEPS = [
   { title: "¿Cuántos días por semana?", sub: "Elige un ritmo que sí puedas mantener." },
 ];
 
-export function Setup({ profile, update, onDone }: { profile: Profile; update: (p: Partial<Profile>) => void; onDone: () => void }) {
+export function Setup({ profile, update, onDone, onUseTv }: { profile: Profile; update: (p: Partial<Profile>) => void; onDone: () => void; onUseTv?: () => void }) {
   const [step, setStep] = useState(0);
   const s = STEPS[step];
   const spaceNone = profile.space.length === 0;
   return (
     <Frame scrollKey={String(step)}
       header={<StepHeader label="Paso" current={step + 1} total={5} onBack={step > 0 ? () => setStep(step - 1) : undefined} />}
-      footer={<Button variant="ember" size="hero" disabled={step === 0 && profile.weights.length === 0} onClick={() => (step < 4 ? setStep(step + 1) : onDone())}>{step < 4 ? "Continuar" : "Guardar y continuar"}</Button>}>
+      footer={<div className="space-y-2"><Button variant="ember" size="hero" disabled={step === 0 && profile.weights.length === 0} onClick={() => (step < 4 ? setStep(step + 1) : onDone())}>{step < 4 ? "Continuar" : "Guardar y continuar"}</Button>{onUseTv && <Button variant="text" className="h-12 w-full" onClick={onUseTv}>Usar esta pantalla como TV</Button>}</div>}>
       {step === 0 && <p className="mt-4 font-semibold text-primary">Hazlo tuyo</p>}
       <h1 className="mt-3 font-display text-[40px] uppercase leading-[1.02]">{s.title}</h1>
       <p className="mt-2 text-[16px] text-muted-foreground">{s.sub}</p>
