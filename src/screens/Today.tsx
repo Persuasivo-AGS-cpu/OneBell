@@ -1,6 +1,7 @@
 import { Flame } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Brand, Frame } from "@/components/Chrome";
+import { TvDashboard } from "@/components/TvDashboard";
 import { byId } from "@/lib/catalog";
 import { imageFor } from "@/lib/images";
 import { fmtDate, isTestDue, nextTestDate, type TestResult } from "@/lib/fittest";
@@ -17,6 +18,28 @@ export function Today({ profile, minutes, setMinutes, energy, setEnergy, streak,
   profile: Profile; minutes: number; setMinutes: (n: number) => void; energy: string; setEnergy: (e: string) => void; streak: number; stats: Stats; onCalendar: () => void;
   tests: TestResult[]; program: ProgramState | null; onPrograms: () => void; onStartDay: (d: PlanDay) => void; onTest: () => void;
 }) {
+  const isTv = typeof document !== "undefined" && document.documentElement.classList.contains("tv-mode");
+
+  if (isTv) {
+    return (
+      <TvDashboard
+        profile={profile}
+        minutes={minutes}
+        setMinutes={setMinutes}
+        energy={energy}
+        setEnergy={setEnergy}
+        streak={streak}
+        stats={stats}
+        tests={tests}
+        program={state}
+        onPrograms={onPrograms}
+        onCalendar={onCalendar}
+        onStartDay={onStartDay}
+        onTest={onTest}
+      />
+    );
+  }
+
   const program = programById(state?.id);
   const plan = program && state ? buildPlan(program, state.days) : [];
   const index = state ? dayIndexFor(state.start) : 0;

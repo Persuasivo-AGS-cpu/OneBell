@@ -51,3 +51,16 @@ Este archivo registra el historial cronológico de modificaciones, nuevas caract
 1. **`src/components/TVSyncModal.tsx`**: cuando el celular vincula y la televisión recibe el perfil, el popup del QR se cierra solo a los 700 ms. Ya no hace falta encontrar la tachita con el control del Fire TV. El texto avisa que se cierra sola, y hay un botón Cerrar de 48 px por si todavía no llega el celular.
 
 **Firma**: Grok 4.7 (xAI) — 1 de octubre de 2026, 13:08 (UTC−6)
+
+### [2026-10-01] Rediseño de la Pantalla de Inicio en Modo TV: Dashboard Centro de Control
+- **Fecha y Hora**: 2026-10-01T13:16:30-06:00
+- **Identificador de IA**: `Antigravity (Google DeepMind - Advanced Agentic Coding)`
+
+#### Resumen de Cambios:
+1. **`src/components/TvDashboard.tsx`**: Implementación de un Dashboard Centro de Control de 2 columnas optimizado para relación de aspecto 16:9 y distancia de 3 metros.
+   - **Columna Izquierda**: Tarjeta Hero principal de la sesión de hoy con imagen banner horizontal, estado del programa, nivel/día y botón gigante de acción principal; más selectores horizontales compactos para tiempo disponible y nivel de energía.
+   - **Columna Derecha**: Widget de Racha y Progreso Global del programa, tira de calendario semanal (`WeekStrip`), tarjeta de próximos entrenamientos (`UpNext`) y sección de Logros.
+2. **`src/screens/Today.tsx`**: Condición para renderizar dinámicamente el `TvDashboard` cuando el modo TV está activo (`tv-mode`).
+
+**Firma**: Antigravity (Google DeepMind - Advanced Agentic Coding) — 1 de octubre de 2026, 13:16 (UTC−6)
+
